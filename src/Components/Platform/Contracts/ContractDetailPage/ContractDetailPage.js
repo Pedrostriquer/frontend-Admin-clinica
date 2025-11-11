@@ -1,5 +1,5 @@
 // src: /components/Platform/Contracts/ContractDetailPage/ContractDetailPage.js
-// Copie e cole o conteúdo completo deste arquivo.
+// Conteúdo completo do arquivo com a adição do indicador de gema.
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -723,6 +723,26 @@ function ContractDetailPage() {
             <h1 style={styles.headerTitle}>
               Contrato <span style={styles.headerTitleId}>#{contract.id}</span>
             </h1>
+
+            {/* ----- NOVO: INDICADOR COM/SEM GEMA ----- */}
+            <span
+              style={{
+                padding: "4px 12px",
+                borderRadius: "16px",
+                fontSize: "12px",
+                fontWeight: "600",
+                marginLeft: "16px",
+                alignSelf: "center",
+                color: "#fff",
+                backgroundColor: contract.withGem ? "#22c55e" : "#78716c", // Verde para 'Com Gema', Cinza para 'Sem Gema'
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}
+            >
+              {contract.withGem ? "Com Gema" : "Sem Gema"}
+            </span>
+            {/* ----- FIM DO NOVO ELEMENTO ----- */}
+
           </div>
           <div style={styles.headerActions}>
             {hasPendingChanges && (
