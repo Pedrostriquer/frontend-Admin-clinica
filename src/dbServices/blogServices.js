@@ -1,12 +1,11 @@
-// src/services/blogServices.js
+// src/dbServices/blogServices.js
 
-import api from "./api/api"; // <-- 1. IMPORTA A INSTÂNCIA CENTRAL
+import api from "./api/api"; 
 
 const blogServices = {
   // --- Post Endpoints ---
   searchPosts: async ({ status, searchTerm, pageNumber, pageSize }) => {
     try {
-      // Usa 'api' em vez de 'axios' e não precisa da BASE_ROUTE
       const response = await api.get("posts/search", {
         params: { status, searchTerm, pageNumber, pageSize },
       });
@@ -88,6 +87,7 @@ const blogServices = {
     }
   },
 
+  // --- Upload Endpoints ---
   uploadPostImage: async (file) => {
     try {
       const formData = new FormData();
@@ -111,6 +111,24 @@ const blogServices = {
       throw error;
     }
   },
+
+  // --- Product Integration (NOVO) ---
+  searchProducts: async (searchTerm) => {
+    try {
+      // Busca produtos ativos para inserir no blog
+      const response = await api.get("Product/search", {
+        params: { 
+          Name: searchTerm, 
+          Status: "Active", /* Apenas ativos */
+          PageSize: 20 
+        }
+      });
+      return response.data; // Retorna o objeto paginado { items: [], ... }
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error.response?.data || error.message);
+      return { items: [] }; // Retorno seguro em caso de erro
+    }
+  }
 };
 
 export default blogServices;
