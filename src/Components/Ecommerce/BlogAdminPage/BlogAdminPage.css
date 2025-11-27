@@ -338,3 +338,46 @@
 /* Cor específica para o ícone de coração e olho */
 .metrics-cell span i.fa-heart { color: #ef4444; }
 .metrics-cell span i.fa-eye { color: #3b82f6; }
+
+/* PAGINATION */
+.pagination-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 25px;
+    gap: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.page-btn {
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 500;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f8fafc;
+    color: #122C4F;
+    border-color: #122C4F;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+
+.page-info {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
