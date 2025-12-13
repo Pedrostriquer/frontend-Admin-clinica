@@ -5,6 +5,7 @@ import contractServices from "../../../dbServices/contractServices";
 import { useAuth } from "../../../Context/AuthContext";
 import formatServices from "../../../formatServices/formatServices";
 import { useLoad } from "../../../Context/LoadContext";
+import CreateContractModal from "./CreateContractModal/CreateContractModal";
 
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -54,10 +55,8 @@ function ContractsPage() {
   const [hoveredRow, setHoveredRow] = useState(null);
   const debouncedFilters = useDebounce(filters, 500);
   const { startLoading, stopLoading } = useLoad();
+  const [modalCreateContract, setModalCreateContract] = useState(false);
 
-  // ***** CORREÇÃO APLICADA AQUI *****
-  // A dependência foi restaurada para a versão original e correta,
-  // contendo apenas o 'token' para evitar o loop.
   const fetchContracts = useCallback(
     async (page, currentFilters) => {
       if (!token) return;
@@ -135,10 +134,7 @@ function ContractsPage() {
 
     try {
       startLoading();
-      await contractServices.updateContractStatus(
-        idsToUpdate,
-        newStatus
-      );
+      await contractServices.updateContractStatus(idsToUpdate, newStatus);
       setSelectedIds((prev) => {
         const newSet = new Set(prev);
         idsToUpdate.forEach((id) => newSet.delete(id));
@@ -152,252 +148,277 @@ function ContractsPage() {
     }
   };
 
+  const handleCloseModal = () => {
+    setModalCreateContract(false);
+    // Opcional: Recarrega a lista de contratos após fechar,
+    // caso um novo contrato tenha sido criado
+    fetchContracts(currentPage, filters);
+  };
+
   const isAllSelectedOnPage =
     contracts.length > 0 &&
     contracts.filter((c) => c.status === 1).length > 0 &&
     contracts.filter((c) => c.status === 1).every((c) => selectedIds.has(c.id));
 
   return (
-    <div style={styles.contractsPageContainer}>
-      <header style={styles.contractsPageHeader}>
-        <h1 style={styles.contractsPageHeaderH1}>Contratos</h1>
-      </header>
-      <div style={styles.tableControlsHeader}>
-        <div style={styles.searchBox}>
-          <i
-            className="fa-solid fa-magnifying-glass"
-            style={styles.searchBoxIcon}
-          ></i>
-          <input
-            type="text"
-            name="searchTerm"
-            placeholder="Buscar por Cliente, CPF ou ID..."
-            value={filters.searchTerm}
-            onChange={handleFilterChange}
-            style={styles.searchInput}
-          />
-        </div>
-        <div style={styles.filters}>
-          <select
-            name="status"
-            value={filters.status}
-            onChange={handleFilterChange}
-            style={styles.filterSelect}
+    <>
+      <div style={styles.contractsPageContainer}>
+        <header style={styles.contractsPageHeader}>
+          <h1 style={styles.contractsPageHeaderH1}>Contratos</h1>
+          <button
+            style={styles.createContractButton}
+            onClick={() => setModalCreateContract(true)}
           >
-            {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            Criar Contrato
+          </button>
+        </header>
+        <div style={styles.tableControlsHeader}>
+          <div style={styles.searchBox}>
+            <i
+              className="fa-solid fa-magnifying-glass"
+              style={styles.searchBoxIcon}
+            ></i>
+            <input
+              type="text"
+              name="searchTerm"
+              placeholder="Buscar por Cliente, CPF ou ID..."
+              value={filters.searchTerm}
+              onChange={handleFilterChange}
+              style={styles.searchInput}
+            />
+          </div>
+          <div style={styles.filters}>
+            <select
+              name="status"
+              value={filters.status}
+              onChange={handleFilterChange}
+              style={styles.filterSelect}
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
-      {selectedIds.size > 0 && (
-        <div style={styles.bulkActionsBar}>
-          <span>{selectedIds.size} selecionado(s)</span>
-          <div>
+        {selectedIds.size > 0 && (
+          <div style={styles.bulkActionsBar}>
+            <span>{selectedIds.size} selecionado(s)</span>
+            <div>
+              <button
+                onClick={() => handleUpdateStatus(Array.from(selectedIds), 2)}
+                style={{ ...styles.bulkActionButton, ...styles.approveBtn }}
+              >
+                {" "}
+                Ativar Selecionados{" "}
+              </button>
+              <button
+                onClick={() => handleUpdateStatus(Array.from(selectedIds), 3)}
+                style={{ ...styles.bulkActionButton, ...styles.denyBtn }}
+              >
+                {" "}
+                Cancelar Selecionados{" "}
+              </button>
+            </div>
+          </div>
+        )}
+        <div style={styles.contractsTableCard}>
+          <table style={styles.contractsTable}>
+            <thead>
+              <tr>
+                <th style={{ ...styles.tableCell, width: "40px" }}>
+                  <input
+                    type="checkbox"
+                    onChange={handleSelectAllOnPage}
+                    checked={isAllSelectedOnPage}
+                  />
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  ID
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  Data de Criação
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  Cliente
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  CPF/CNPJ
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  Valor Investido
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  Finaliza em
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  Status
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan="9"
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
+                    Buscando contratos...
+                  </td>
+                </tr>
+              ) : contracts.length > 0 ? (
+                contracts.map((contract) => (
+                  <tr
+                    key={contract.id}
+                    onMouseEnter={() => setHoveredRow(contract.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    style={{
+                      ...styles.tableRow,
+                      ...(hoveredRow === contract.id && styles.tableRowHover),
+                      ...(selectedIds.has(contract.id) &&
+                        styles.tableRowSelected),
+                    }}
+                  >
+                    <td
+                      style={styles.tableCell}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {contract.status === 1 && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(contract.id)}
+                          onChange={() => handleSelect(contract.id)}
+                        />
+                      )}
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      #{contract.id}
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      {formatDate(contract.dateCreated)}
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      {contract.client.name}
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      {formatServices.formatDocument(contract.client.cpfCnpj)}
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      {formatCurrency(contract.amount)}
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      {formatDate(contract.endContractDate)}
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      <span
+                        style={{
+                          ...styles.statusBadge,
+                          ...styles[`status${statusStyleMap[contract.status]}`],
+                        }}
+                      >
+                        {statusMap[contract.status]}
+                      </span>
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {contract.status === 1 && (
+                        <div style={styles.actionButtons}>
+                          <button
+                            onClick={() => handleUpdateStatus([contract.id], 2)}
+                            style={{
+                              ...styles.actionButton,
+                              ...styles.approveBtn,
+                            }}
+                          >
+                            <i className="fa-solid fa-check"></i>
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus([contract.id], 3)}
+                            style={{
+                              ...styles.actionButton,
+                              ...styles.denyBtn,
+                            }}
+                          >
+                            <i className="fa-solid fa-xmark"></i>
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="9"
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
+                    Nenhum contrato encontrado para os filtros selecionados.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <div style={styles.paginationContainer}>
             <button
-              onClick={() => handleUpdateStatus(Array.from(selectedIds), 2)}
-              style={{ ...styles.bulkActionButton, ...styles.approveBtn }}
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              style={{
+                ...styles.paginationButton,
+                ...(currentPage === 1 && styles.paginationButtonDisabled),
+              }}
             >
-              {" "}
-              Ativar Selecionados{" "}
+              Anterior
             </button>
+            <span style={styles.paginationSpan}>
+              Página {currentPage} de {totalPages || 1}
+            </span>
             <button
-              onClick={() => handleUpdateStatus(Array.from(selectedIds), 3)}
-              style={{ ...styles.bulkActionButton, ...styles.denyBtn }}
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              style={{
+                ...styles.paginationButton,
+                ...(currentPage === totalPages &&
+                  styles.paginationButtonDisabled),
+              }}
             >
-              {" "}
-              Cancelar Selecionados{" "}
+              Próxima
             </button>
           </div>
         </div>
-      )}
-      <div style={styles.contractsTableCard}>
-        <table style={styles.contractsTable}>
-          <thead>
-            <tr>
-              <th style={{ ...styles.tableCell, width: "40px" }}>
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAllOnPage}
-                  checked={isAllSelectedOnPage}
-                />
-              </th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>ID</th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
-                Data de Criação
-              </th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
-                Cliente
-              </th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
-                CPF/CNPJ
-              </th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
-                Valor Investido
-              </th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
-                Finaliza em
-              </th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
-                Status
-              </th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
-                Ações
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td
-                  colSpan="9"
-                  style={{ textAlign: "center", padding: "20px" }}
-                >
-                  Buscando contratos...
-                </td>
-              </tr>
-            ) : contracts.length > 0 ? (
-              contracts.map((contract) => (
-                <tr
-                  key={contract.id}
-                  onMouseEnter={() => setHoveredRow(contract.id)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  style={{
-                    ...styles.tableRow,
-                    ...(hoveredRow === contract.id && styles.tableRowHover),
-                    ...(selectedIds.has(contract.id) &&
-                      styles.tableRowSelected),
-                  }}
-                >
-                  <td
-                    style={styles.tableCell}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {contract.status === 1 && (
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(contract.id)}
-                        onChange={() => handleSelect(contract.id)}
-                      />
-                    )}
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={() => handleNavigateToContract(contract.id)}
-                  >
-                    #{contract.id}
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={() => handleNavigateToContract(contract.id)}
-                  >
-                    {formatDate(contract.dateCreated)}
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={() => handleNavigateToContract(contract.id)}
-                  >
-                    {contract.client.name}
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={() => handleNavigateToContract(contract.id)}
-                  >
-                    {formatServices.formatDocument(contract.client.cpfCnpj)}
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={() => handleNavigateToContract(contract.id)}
-                  >
-                    {formatCurrency(contract.amount)}
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={() => handleNavigateToContract(contract.id)}
-                  >
-                    {formatDate(contract.endContractDate)}
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={() => handleNavigateToContract(contract.id)}
-                  >
-                    <span
-                      style={{
-                        ...styles.statusBadge,
-                        ...styles[`status${statusStyleMap[contract.status]}`],
-                      }}
-                    >
-                      {statusMap[contract.status]}
-                    </span>
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {contract.status === 1 && (
-                      <div style={styles.actionButtons}>
-                        <button
-                          onClick={() => handleUpdateStatus([contract.id], 2)}
-                          style={{
-                            ...styles.actionButton,
-                            ...styles.approveBtn,
-                          }}
-                        >
-                          <i className="fa-solid fa-check"></i>
-                        </button>
-                        <button
-                          onClick={() => handleUpdateStatus([contract.id], 3)}
-                          style={{ ...styles.actionButton, ...styles.denyBtn }}
-                        >
-                          <i className="fa-solid fa-xmark"></i>
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="9"
-                  style={{ textAlign: "center", padding: "20px" }}
-                >
-                  Nenhum contrato encontrado para os filtros selecionados.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        <div style={styles.paginationContainer}>
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            style={{
-              ...styles.paginationButton,
-              ...(currentPage === 1 && styles.paginationButtonDisabled),
-            }}
-          >
-            Anterior
-          </button>
-          <span style={styles.paginationSpan}>
-            Página {currentPage} de {totalPages || 1}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages || totalPages === 0}
-            style={{
-              ...styles.paginationButton,
-              ...(currentPage === totalPages &&
-                styles.paginationButtonDisabled),
-            }}
-          >
-            Próxima
-          </button>
-        </div>
       </div>
-    </div>
+      {modalCreateContract && (
+        <CreateContractModal
+          onClose={handleCloseModal} // <-- PASSA A FUNÇÃO DE FECHAMENTO AQUI
+        />
+      )}{" "}
+    </>
   );
 }
 

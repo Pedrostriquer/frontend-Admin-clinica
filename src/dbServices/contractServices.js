@@ -338,6 +338,18 @@ const contractServices = {
       throw error.response?.data || error;
     }
   },
+
+  createContractByAdmin: async (data) => {
+    try {
+      // O admin não precisa do Client-ID-Ref no header para criar o contrato
+      // Ele passa o ClientId no body, e o token de admin já autoriza.
+      const response = await api.post("contract/by-admin", data);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao criar contrato pelo admin:", error);
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default contractServices;

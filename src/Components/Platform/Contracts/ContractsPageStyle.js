@@ -1,11 +1,34 @@
 const styles = {
   contractsPageContainer: { fontFamily: "'Poppins', sans-serif" },
-  contractsPageHeader: { marginBottom: "24px" },
+  contractsPageHeader: {
+    marginBottom: "24px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   contractsPageHeaderH1: {
     fontSize: "2.25rem",
     fontWeight: 700,
     color: "#1a202c",
   },
+
+  // NOVO ESTILO: Botão de Criar Contrato
+  createContractButton: {
+    backgroundColor: "#22c55e",
+    color: "#fff",
+    border: "none",
+    borderRadius: "12px",
+    padding: "10px 20px",
+    fontWeight: 600,
+    fontSize: "1rem",
+    cursor: "pointer",
+    transition: "background-color 0.2s",
+    boxShadow: "0 4px 6px rgba(34, 197, 94, 0.2)",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   tableControlsHeader: {
     display: "flex",
     justifyContent: "space-between",
@@ -142,6 +165,18 @@ const styles = {
   },
   approveBtn: { backgroundColor: "#10b981" },
   denyBtn: { backgroundColor: "#ef4444" },
+  createContractButton: {
+    width: 200,
+    height: 40,
+    borderRadius: 8,
+    background: "rgba(50, 150, 200, 1)",
+    color: "white",
+    fontSize: 16,
+    fontWeight: 600,
+    border: 0,
+    cursor: "pointer",
+    transition: "background-color 0.2s"
+  }
 };
 
 export default styles;
