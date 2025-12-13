@@ -73,7 +73,7 @@ function ClientDetailPage() {
     setContractsLoading(true);
     startLoading();
     try {
-      const data = await clientServices.getById(clientId);
+      const data = await clientServices.getClientDataById(clientId);
       setClient(data);
       setEditableClient(data);
 
@@ -403,7 +403,7 @@ function ClientDetailPage() {
             </div>
             <div>
               <p style={styles.statLabel}>Total Investido</p>
-              <p style={styles.statValue}>-</p>
+              <p style={styles.statValue}>{client && formatCurrency(client.totalInvested)}</p>
             </div>
           </div>
           <div style={styles.statCard}>
@@ -412,10 +412,10 @@ function ClientDetailPage() {
             </div>
             <div>
               <p style={styles.statLabel}>Rendimento Total</p>
-              <p style={styles.statValue}>-</p>
+              <p style={styles.statValue}>{client && formatCurrency(client.totalIncome)}</p>
             </div>
           </div>
-          <div style={styles.statCard}>
+          {/* <div style={styles.statCard}>
             <ResponsiveContainer width="100%" height={60}>
               <AreaChart
                 data={chartData}
@@ -436,7 +436,7 @@ function ClientDetailPage() {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
+          </div> */}
         </div>
 
         <div style={styles.contentGrid}>
