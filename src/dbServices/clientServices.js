@@ -37,6 +37,17 @@ const clientServices = {
       throw error;
     }
   },
+
+  getClientDataById: async (id) => {
+    try {
+      const response = await api.get(`client/client-data/${id}`); // Interceptor cuida do token
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+  
   
   // FUNÇÃO ATUALIZADA PARA ACEITAR PARÂMETROS DE ORDENAÇÃO
   getClients: async (
