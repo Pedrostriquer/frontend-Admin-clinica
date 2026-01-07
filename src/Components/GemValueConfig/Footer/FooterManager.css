@@ -1,0 +1,154 @@
+/* Forçamos o box-sizing em absolutamente tudo dentro deste componente */
+.footer-editor-container, 
+.footer-editor-container * {
+    box-sizing: border-box !important;
+}
+
+.footer-editor-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    /* Permite scroll horizontal se o layout esmagar muito */
+    overflow-x: auto; 
+}
+
+.footer-editor-layout {
+    display: grid;
+    /* 400px fixo na esquerda, o resto na direita */
+    grid-template-columns: 400px 1fr;
+    gap: 30px;
+    max-width: 1500px;
+    margin: 0 auto;
+    /* Garante que o grid não colapse abaixo do tamanho dos inputs */
+    min-width: 1000px; 
+}
+
+/* --- COLUNA DA ESQUERDA (DARK) --- */
+.footer-brand-editor {
+    background: #0b2552;
+    padding: 25px;
+    border-radius: 20px;
+    color: white;
+    height: fit-content;
+    /* Impede que os filhos forcem a largura para fora */
+    overflow: hidden; 
+}
+
+.admin-field-box {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Ajuste crítico para os inputs não vazarem */
+.footer-brand-editor input,
+.footer-brand-editor textarea {
+    display: block;
+    width: 100%;
+    max-width: 100%; /* Não deixa passar do pai */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    padding: 12px;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+/* --- COLUNA DA DIREITA (LEGAL) --- */
+.footer-legal-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    /* Impede que esta coluna "empurre" o layout */
+    min-width: 0; 
+}
+
+.legal-doc-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.legal-header {
+    background: #f8fafc;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* O TEXTAREA QUE NÃO PODE CORTAR TEXTO */
+.legal-textarea {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 25px 30px; /* Mais espaço nas laterais */
+    border: none;
+    resize: vertical;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #475569;
+    background: #ffffff;
+    /* Garante que o scroll interno funcione se necessário */
+    overflow-y: auto; 
+}
+
+/* GUIA DE DICAS */
+.legal-formatting-cheat {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 20px;
+    border-radius: 12px;
+    width: 100%;
+}
+
+.cheat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.cheat-grid div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cheat-grid code {
+    background: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #2563eb;
+    font-weight: 800;
+    border: 1px solid #dbeafe;
+}
+
+/* LINKS DE REDES E CONTATO */
+.link-edit-row {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.link-edit-row input {
+    width: 100%;
+    margin-top: 5px;
+}
+
+/* Scrollbar para o container principal caso a tela seja muito pequena */
+.footer-editor-container::-webkit-scrollbar {
+    height: 8px;
+}
+.footer-editor-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}

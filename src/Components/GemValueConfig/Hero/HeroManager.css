@@ -1,0 +1,145 @@
+.hero-editor-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.hero-editor-layout {
+    display: grid;
+    grid-template-columns: 450px 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+/* FORMULÁRIO */
+.hero-editor-form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.hero-input-h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    width: 100%;
+    resize: none;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+}
+
+.hero-input-info-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #0f172a;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.hero-input-info {
+    background: transparent;
+    border: none;
+    color: #CADEED;
+    flex: 1;
+    outline: none;
+}
+
+/* GESTÃO DE PROOFS */
+.hero-proofs-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.proof-input-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f5f9;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.proof-input-item input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-weight: 500;
+}
+
+.btn-remove-proof {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-add-proof {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #cbd5e1;
+    background: transparent;
+    color: #64748b;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* PREVIEW (DARK MODE SITE) */
+.hero-preview-box {
+    background: #05142e; /* Azul Escuro Real do Site */
+    border-radius: 20px;
+    padding: 60px 50px;
+    min-height: 600px;
+    position: relative;
+    overflow: hidden;
+    color: white;
+}
+
+.preview-navbar { margin-bottom: 40px; }
+.preview-logo { 
+    font-weight: 800; font-size: 1.2rem; 
+    background: linear-gradient(to right, #fff, #CADEED);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.preview-h1 { font-size: 2.5rem; line-height: 1.2; margin-bottom: 20px; }
+.preview-p { color: #b4c6e0; font-size: 1rem; margin-bottom: 25px; line-height: 1.6; }
+
+.preview-info {
+    display: flex; align-items: center; gap: 8px;
+    color: #CADEED; font-size: 0.85rem; margin-bottom: 30px;
+}
+
+.preview-btn {
+    background: #2563EB; color: white; border: none;
+    padding: 12px 24px; border-radius: 6px; font-weight: 600;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 50px;
+}
+
+.preview-proofs {
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+}
+
+.preview-proof-item {
+    display: flex; align-items: center; gap: 10px; color: #b4c6e0; font-size: 0.8rem;
+}
+
+.p-icon {
+    width: 24px; height: 24px; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; color: #4ade80;
+}

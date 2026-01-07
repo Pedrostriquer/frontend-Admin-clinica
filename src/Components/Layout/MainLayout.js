@@ -30,9 +30,11 @@ export default function MainLayout() {
 
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Determina qual contexto está ativo com base na URL atual
   const getActiveContext = (path) => {
     if (path.startsWith("/ecommerce")) return "ecommerce";
     if (path.startsWith("/site")) return "site";
+    if (path.startsWith("/gemvalue")) return "gemvalue"; // Detecta o contexto GemValue
     return "platform";
   };
 
@@ -42,10 +44,18 @@ export default function MainLayout() {
     navigate(path);
   };
 
+  // Gerencia a troca de contexto quando os botões da Sidebar são clicados
   const handleContextChange = (context) => {
     let newPath = "/platform/dashboard";
-    if (context === "ecommerce") newPath = "/ecommerce/dashboard";
-    if (context === "site") newPath = "/site/home";
+    
+    if (context === "ecommerce") {
+      newPath = "/ecommerce/dashboard";
+    } else if (context === "site") {
+      newPath = "/site/home";
+    } else if (context === "gemvalue") {
+      newPath = "/gemvalue/hero"; // Rota inicial definida para o GemValue
+    }
+    
     handleNavigate(newPath);
   };
 

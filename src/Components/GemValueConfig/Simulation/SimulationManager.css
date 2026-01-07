@@ -1,0 +1,125 @@
+.sim-editor-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.sim-editor-layout {
+    display: grid;
+    grid-template-columns: 480px 1fr;
+    gap: 40px;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+/* FORMULÁRIO (ESQUERDA) */
+.sim-form-editor {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.sim-input-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+}
+
+.sim-input-desc-field {
+    width: 100%;
+    resize: none;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.sim-labels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.sim-whatsapp-box {
+    background: #f0fdf4;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #dcfce7;
+}
+
+.wp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #166534;
+    font-weight: 700;
+}
+
+.wp-row input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #bbf7d0;
+    flex: 1;
+}
+
+/* PREVIEW (DIREITA - DESIGN DO SITE) */
+.visual-preview-column { position: sticky; top: 20px; }
+
+.site-bg-preview {
+    background: #0b2552; /* Fundo Real do Site */
+    padding: 60px 40px;
+    border-radius: 24px;
+    color: white;
+    min-height: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-text { text-align: center; max-width: 400px; }
+.p-title { font-size: 2.2rem; line-height: 1.1; margin-bottom: 15px; }
+.p-gradient { background: linear-gradient(90deg, #93c5fd, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.p-desc { color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; }
+
+/* O CARD NO PREVIEW */
+.p-card {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.p-input-group { display: flex; flex-direction: column; gap: 8px; }
+.p-label-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #bfdbfe; }
+.p-val { font-weight: 700; color: white; background: rgba(37,99,235,0.2); padding: 2px 8px; border-radius: 4px; }
+.p-range-sim { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; position: relative; }
+.p-range-sim::after { content: ""; position: absolute; left: 30%; top: -4px; width: 14px; height: 14px; background: #3b82f6; border: 2px solid white; border-radius: 50%; }
+
+.p-check-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #cbd5e1; }
+.p-box { width: 18px; height: 18px; border: 2px solid #64748b; border-radius: 4px; }
+
+.p-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); }
+
+.p-result-area { text-align: center; padding: 10px 0; }
+.p-status { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+.p-placeholder { color: #94a3b8; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px; }
+
+.p-btn-main {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    border: none; color: white; padding: 14px; border-radius: 12px; font-weight: 700; text-transform: uppercase; font-size: 0.85rem;
+}

@@ -4,7 +4,7 @@ import { useAuth } from '../../Context/AuthContext';
 import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 
-// Componente FirebaseLoginModal (COM alterações)
+// Componente FirebaseLoginModal
 const FirebaseLoginModal = ({ onClose, onSuccess }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -27,11 +27,9 @@ const FirebaseLoginModal = ({ onClose, onSuccess }) => {
                 <h4>Acesso Restrito</h4>
                 <p>Insira suas credenciais de administrador do site.</p>
                 <form onSubmit={handleLogin}>
-                    {/* Estilos aplicados aqui */}
                     <input style={styles.firebaseInput} type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     <input style={styles.firebaseInput} type="password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     {error && <p style={{color: 'red', fontSize: '0.8rem'}}>{error}</p>}
-                    {/* Estilo aplicado aqui */}
                     <button style={styles.firebaseButton} type="submit">Entrar</button>
                 </form>
                 <button style={styles.firebaseModalClose} onClick={onClose}>&times;</button>
@@ -40,8 +38,7 @@ const FirebaseLoginModal = ({ onClose, onSuccess }) => {
     );
 };
 
-
-// Componente ContextButton (sem alterações)
+// Componente ContextButton
 const ContextButton = ({ isActive, isCollapsed, onClick, icon, children }) => {
     const [isHovered, setIsHovered] = useState(false);
     const style = {
@@ -58,7 +55,7 @@ const ContextButton = ({ isActive, isCollapsed, onClick, icon, children }) => {
     );
 };
 
-// Componente NavItem (sem alterações)
+// Componente NavItem
 const NavItem = ({ isActive, isCollapsed, onClick, icon, children, hoverStyle }) => {
     const [isHovered, setIsHovered] = useState(false);
     const style = {
@@ -117,6 +114,7 @@ function Sidebar({ activeContext, onContextChange, isSidebarCollapsed, onToggle,
         { name: 'Catalogo GemCash', icon: 'fa-solid fa-newspaper', path: '/platform/catalogo-gemcash' },
         { name: 'Controlador', icon: 'fa-solid fa-sliders', path: '/platform/controller' },
     ];
+
     const ecommerceMenu = [
         { name: 'Dashboard', icon: 'fa-solid fa-chart-pie', path: '/ecommerce/dashboard' },
         { name: 'Produtos', icon: 'fa-solid fa-gem', path: '/ecommerce/products' },
@@ -126,6 +124,7 @@ function Sidebar({ activeContext, onContextChange, isSidebarCollapsed, onToggle,
         { name: 'Promoções', icon: 'fa-solid fa-tags', path: '/ecommerce/promotions' },
         { name: 'Pedidos', icon: 'fa-solid fa-box-open', path: '/ecommerce/orders' },
     ];
+
     const siteMenu = [
         { name: 'Home', icon: 'fa-solid fa-house', path: '/site/home' },
         { name: 'GemCash', icon: 'fa-solid fa-coins', path: '/site/gemcash' },
@@ -133,8 +132,21 @@ function Sidebar({ activeContext, onContextChange, isSidebarCollapsed, onToggle,
         { name: 'Leads Simulação', icon: 'fa-solid fa-users-line', path: '/site/leads' },
     ];
 
+    const gemvalueMenu = [
+        { name: 'Início (Hero)', icon: 'fa-solid fa-star', path: '/gemvalue/hero' },
+        { name: 'Ativos Físicos', icon: 'fa-solid fa-box-open', path: '/gemvalue/why-physical' },
+        { name: 'Por que Diamantes', icon: 'fa-solid fa-gem', path: '/gemvalue/why-diamonds' },
+        { name: 'Como Funciona', icon: 'fa-solid fa-gears', path: '/gemvalue/how-it-works' },
+        { name: 'Parâmetros', icon: 'fa-solid fa-list-check', path: '/gemvalue/parameters' },
+        { name: 'Autoridade', icon: 'fa-solid fa-award', path: '/gemvalue/authority' },
+        { name: 'Público-Alvo', icon: 'fa-solid fa-users-rectangle', path: '/gemvalue/target-audience' },
+        { name: 'Simulação', icon: 'fa-solid fa-calculator', path: '/gemvalue/simulation' },
+        { name: 'FAQ (Dúvidas)', icon: 'fa-solid fa-question-circle', path: '/gemvalue/faq' },
+        { name: 'Rodapé', icon: 'fa-solid fa-window-maximize', path: '/gemvalue/footer' },
+        // { name: 'WhatsApp', icon: 'fa-solid fa-comment-dots', path: '/gemvalue/whatsapp' },
+    ];
+
     const getMenu = () => {
-        // Se o caminho ativo for '/support', nenhum menu de contexto é exibido
         if (activePath.startsWith('/support')) {
             return [];
         }
@@ -142,6 +154,7 @@ function Sidebar({ activeContext, onContextChange, isSidebarCollapsed, onToggle,
             case 'platform': return platformMenu;
             case 'ecommerce': return ecommerceMenu;
             case 'site': return siteMenu;
+            case 'gemvalue': return gemvalueMenu;
             default: return [];
         }
     };
@@ -180,7 +193,16 @@ function Sidebar({ activeContext, onContextChange, isSidebarCollapsed, onToggle,
                         <ContextButton isActive={activeContext === 'platform'} isCollapsed={isSidebarCollapsed} onClick={() => handleContextClick('platform')} icon="fa-solid fa-briefcase">Plataforma</ContextButton>
                         <ContextButton isActive={activeContext === 'ecommerce'} isCollapsed={isSidebarCollapsed} onClick={() => handleContextClick('ecommerce')} icon="fa-solid fa-store">Gemas Preciosas</ContextButton>
                         <ContextButton isActive={activeContext === 'site'} isCollapsed={isSidebarCollapsed} onClick={() => handleContextClick('site')} icon="fa-solid fa-globe">Site</ContextButton>
-                        {/* BOTÃO DE SUPORTE ADICIONADO ABAIXO */}
+                        
+                        <ContextButton 
+                            isActive={activeContext === 'gemvalue'} 
+                            isCollapsed={isSidebarCollapsed} 
+                            onClick={() => handleContextClick('gemvalue')} 
+                            icon="fa-solid fa-gem"
+                        >
+                            Site GemValue
+                        </ContextButton>
+
                         <ContextButton 
                             isActive={activePath === '/support'} 
                             isCollapsed={isSidebarCollapsed} 

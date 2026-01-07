@@ -1,0 +1,116 @@
+.auth-editor-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.auth-editor-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* COLUNA ESQUERDA (DARK STYLE) */
+.auth-cards-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.admin-auth-card {
+    background: #0b2552; /* Cor exata da seção */
+    padding: 24px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    aspect-ratio: 1 / 1;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.admin-auth-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #60a5fa;
+    margin-bottom: 5px;
+}
+
+.admin-auth-input-title {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+    outline: none;
+    padding: 5px 0;
+}
+
+.admin-auth-input-text {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    resize: none;
+    outline: none;
+}
+
+/* COLUNA DIREITA (TITANIUM STYLE) */
+.auth-content-main {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+}
+
+.auth-input-h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    /* Simulação visual do gradiente titânio */
+    color: #334155; 
+    border: none;
+    border-bottom: 2px solid #f1f5f9;
+    width: 100%;
+    resize: none;
+    line-height: 1.2;
+}
+
+.auth-input-body {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #475569;
+    border: 1px solid #f1f5f9;
+    padding: 15px;
+    resize: none;
+    border-radius: 10px;
+}
+
+.auth-admin-divider {
+    width: 80px;
+    height: 4px;
+    background: #2563eb;
+    border-radius: 2px;
+    margin: 30px 0;
+}
+
+.admin-info-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-style: italic;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+}
