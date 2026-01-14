@@ -832,12 +832,38 @@ function ContractDetailPage() {
 
             <div style={styles.progressSection}>
               <div style={styles.progressHeader}>
-                <h3 style={styles.progressTitle}>Progresso do Contrato</h3>
+                {/* Agrupamento do Título + Badge de % */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <h3 style={styles.progressTitle}>Progresso do Contrato</h3>
+                  
+                  {/* --- NOVO: Badge de Porcentagem Mensal --- */}
+                  <span
+                    style={{
+                      backgroundColor: "#f0fdf4", // Verde claro (Tailwind green-50)
+                      color: "#15803d",           // Verde escuro (Tailwind green-700)
+                      border: "1px solid #bbf7d0",
+                      padding: "2px 8px",
+                      borderRadius: "6px",
+                      fontSize: "0.75rem",
+                      fontWeight: "700",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                    title="Rendimento mensal contratado"
+                  >
+                    <i className="fa-solid fa-chart-line"></i>
+                    {contract.gainPercentage}% a.m.
+                  </span>
+                  {/* ----------------------------------------- */}
+                </div>
+
                 <span style={styles.progressDates}>
                   {formatDate(contract.activationDate)} -{" "}
                   {formatDate(contract.endContractDate)}
                 </span>
               </div>
+              
               <div style={styles.progressBarContainer}>
                 <div
                   style={{

@@ -13,7 +13,7 @@ const StatusToggleButton = ({ lead, onUpdate }) => {
 
   return (
     <button 
-      onClick={() => onUpdate(lead.id, !isContacted)} 
+      onClick={(e) => { e.stopPropagation(); onUpdate(lead.id, !isContacted); }} 
       className={`LeadsPage-action-button LeadsPage-status-button ${buttonClass}`}
       title={actionText}
     >
@@ -59,9 +59,9 @@ const LeadDetailModal = ({ lead, onClose, onUpdate, onDelete }) => {
               Marcar como {lead.contacted ? '"Não Contactado"' : '"Contactado"'}
             </button>
             <button onClick={handleWhatsappClick} className="LeadsPage-modal-action-button LeadsPage-modal-whatsapp">
-              <i className="fa-brands fa-whatsapp"></i> Chamar no WhatsApp
+              <i className="fa-brands fa-whatsapp"></i> WhatsApp
             </button>
-        </div>
+          </div>
         </div>
       </div>
     </div>
@@ -73,24 +73,28 @@ const LeadDetailModal = ({ lead, onClose, onUpdate, onDelete }) => {
 // ===================
 function LeadsPage() {
   const [leads, setLeads] = useState([]);
-  const [meta, setMeta] = useState({ PageNumber: 1, PageSize: 10, TotalPages: 1 });
+  // Inicializamos com valores seguros. PageSize padrão é 10.
+  const [meta, setMeta] = useState({ PageNumber: 1, PageSize: 10 });
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedLead, setSelectedLead] = useState(null);
 
+  // Debounce da busca
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Função de busca
   const fetchLeads = useCallback(async (pageNumber = 1) => {
     setIsLoading(true);
     try {
       const response = await leadsService.getAllLeads({ pageNumber, searchTerm: debouncedSearch, status: statusFilter });
       setLeads(response.data);
-      setMeta(response.meta);
+      // Atualiza o meta com o que vier do service (seja real ou o "fake" do contorno)
+      setMeta(prev => ({ ...prev, ...response.meta }));
     } catch (error) {
       console.error("Falha ao buscar leads.");
     } finally {
@@ -100,15 +104,20 @@ function LeadsPage() {
 
   useEffect(() => { fetchLeads(1); }, [debouncedSearch, statusFilter, fetchLeads]);
 
+  // Atualizar status
   const handleUpdateStatus = async (id, newStatus) => {
     try {
       await leadsService.updateLeadStatus(id, newStatus);
+      if (selectedLead && selectedLead.id === id) {
+          setSelectedLead(prev => ({ ...prev, contacted: newStatus }));
+      }
       fetchLeads(meta.PageNumber);
     } catch (error) {
       alert('Falha ao atualizar o status.');
     }
   };
 
+  // Deletar Lead
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este lead? Esta ação não pode ser desfeita.')) {
       try {
@@ -121,8 +130,9 @@ function LeadsPage() {
     }
   };
 
+  // Mudança de página
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= meta.TotalPages) {
+    if (newPage >= 1) {
       fetchLeads(newPage);
     }
   };
@@ -130,7 +140,9 @@ function LeadsPage() {
   return (
     <div className="LeadsPage-container">
       {selectedLead && <LeadDetailModal lead={selectedLead} onClose={() => setSelectedLead(null)} onUpdate={handleUpdateStatus} onDelete={handleDelete} />}
+      
       <div className="LeadsPage-header"><h1>Leads da Simulação</h1></div>
+      
       <div className="LeadsPage-filters-container">
         <input type="text" className="LeadsPage-search-input" placeholder="Buscar por nome..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         <select className="LeadsPage-status-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
@@ -145,29 +157,57 @@ function LeadsPage() {
             <tr><th>Nome</th><th>Data</th><th>Origem</th><th>Status</th><th>Ações</th></tr>
           </thead>
           <tbody>
-            {leads.map(lead => (
-              <tr key={lead.id} onClick={() => setSelectedLead(lead)}>
-                <td>{lead.name}</td>
-                <td>{new Date(lead.dateCreated).toLocaleDateString()}</td>
-                <td>{lead.fromCity || 'N/A'}</td>
-                <td><span className={`LeadsPage-status-badge LeadsPage-status-${lead.contacted}`}>{lead.contacted ? 'Contactado' : 'Não Contactado'}</span></td>
-                <td onClick={e => e.stopPropagation()}>
-                  <div className="LeadsPage-actions-cell">
-                    <button onClick={() => window.open(`https://wa.me/55${lead.phone.replace(/\D/g, '')}`, '_blank')} className="LeadsPage-action-button LeadsPage-whatsapp-button" title="Chamar no WhatsApp"><i className="fa-brands fa-whatsapp"></i></button>
-                    <StatusToggleButton lead={lead} onUpdate={handleUpdateStatus} />
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {isLoading ? (
+                <tr><td colSpan="5" style={{textAlign: 'center', padding: '2rem'}}>Carregando...</td></tr>
+            ) : leads.length === 0 ? (
+                <tr><td colSpan="5" style={{textAlign: 'center', padding: '2rem'}}>Nenhum lead encontrado.</td></tr>
+            ) : (
+                leads.map(lead => (
+                <tr key={lead.id} onClick={() => setSelectedLead(lead)}>
+                    <td>{lead.name}</td>
+                    <td>{new Date(lead.dateCreated).toLocaleDateString()}</td>
+                    <td>{lead.fromCity || 'N/A'}</td>
+                    <td><span className={`LeadsPage-status-badge LeadsPage-status-${lead.contacted}`}>{lead.contacted ? 'Contactado' : 'Não Contactado'}</span></td>
+                    <td onClick={e => e.stopPropagation()}>
+                    <div className="LeadsPage-actions-cell">
+                        <button onClick={() => window.open(`https://wa.me/55${lead.phone.replace(/\D/g, '')}`, '_blank')} className="LeadsPage-action-button LeadsPage-whatsapp-button" title="Chamar no WhatsApp"><i className="fa-brands fa-whatsapp"></i></button>
+                        <StatusToggleButton lead={lead} onUpdate={handleUpdateStatus} />
+                    </div>
+                    </td>
+                </tr>
+                ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {meta.TotalPages > 1 && (
+      {/* --- PAGINAÇÃO ADAPTADA PARA FUNCIONAR SEM BACKEND CORS --- */}
+      {/* Só mostra a barra se não for a página 1 vazia */}
+      {(leads.length > 0 || meta.PageNumber > 1) && (
         <div className="LeadsPage-pagination-container">
-          <button className="LeadsPage-pagination-button" onClick={() => handlePageChange(meta.PageNumber - 1)} disabled={meta.PageNumber <= 1}>Anterior</button>
-          <span style={{margin: '0 1rem', color: '#6c757d', fontSize: '0.9rem'}}>Página {meta.PageNumber} de {meta.TotalPages}</span>
-          <button className="LeadsPage-pagination-button" onClick={() => handlePageChange(meta.PageNumber + 1)} disabled={meta.PageNumber >= meta.TotalPages}>Próxima</button>
+          <button 
+            className="LeadsPage-pagination-button" 
+            onClick={() => handlePageChange(meta.PageNumber - 1)} 
+            disabled={meta.PageNumber <= 1}
+            title="Página Anterior"
+          >
+            <i className="fa-solid fa-angle-left"></i> Anterior
+          </button>
+          
+          <span style={{margin: '0 1rem', color: '#6c757d', fontSize: '0.9rem', fontWeight: '600'}}>
+            Página {meta.PageNumber}
+          </span>
+
+          <button 
+            className="LeadsPage-pagination-button" 
+            onClick={() => handlePageChange(meta.PageNumber + 1)} 
+            // LÓGICA DE CONTORNO: Se vieram menos itens que o tamanho da página (10), 
+            // significa que a lista acabou, então desabilita o botão.
+            disabled={leads.length < meta.PageSize}
+            title="Próxima Página"
+          >
+             Próxima <i className="fa-solid fa-angle-right"></i>
+          </button>
         </div>
       )}
     </div>
