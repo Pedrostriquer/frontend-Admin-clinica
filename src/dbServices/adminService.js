@@ -1,11 +1,10 @@
-// src/services/adminServices.js
+// src/dbServices/adminService.js
 
-import api from "./api/api"; // <-- 1. IMPORTA A INSTÂNCIA CENTRAL
+import api from "./api/api";
 
 const adminServices = {
   getAllAdmins: async () => {
     try {
-      // Usa 'api' e não precisa mais do header de autorização
       const response = await api.get("admin");
       return response.data;
     } catch (error) {
@@ -23,6 +22,18 @@ const adminServices = {
       throw error;
     }
   },
+
+  // --- NOVO MÉTODO ADICIONADO ---
+  createAdmin: async (userData) => {
+    try {
+      // O endpoint conforme sua documentação
+      const response = await api.post("admin", userData);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao criar novo admin:", error);
+      throw error;
+    }
+  }
 };
 
 export default adminServices;

@@ -1,4 +1,17 @@
 const styles = {
+    selectedPermissionsList: { 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        gap: '8px',       // Isso separa os botões
+        marginTop: '12px' 
+    },
+
+    // Apenas para garantir que este também esteja correto (já estava no seu código, mas reforçando):
+    permissionButtonSelected: { 
+        backgroundColor: '#3b82f6', 
+        color: '#fff', 
+        borderColor: '#3b82f6' 
+    },
     // Estilos da Página
     usersPageContainer: { fontFamily: "'Poppins', sans-serif" },
     usersPageHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
