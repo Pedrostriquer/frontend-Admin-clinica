@@ -301,10 +301,24 @@ const PostModal = ({ post, categories, onClose, onSave, onStatusChange, isClosin
       setManagedCtas(newManaged);
   };
 
-  const handleFile = async (e) => {
-      const file = e.target.files[0]; if (!file) return; setIsUploading(true);
-      try { const url = await blogServices.uploadPostImage(file); setFormData(prev => ({ ...prev, imageUrls: [...prev.imageUrls, url] })); } catch { alert("Erro no upload"); } finally { setIsUploading(false); }
-  };
+    const handleFile = async (e) => {
+        const file = e.target.files[0]; 
+        if (!file) return; 
+        
+        setIsUploading(true);
+        try { 
+            const url = await blogServices.uploadPostImage(file); 
+            // Aqui está a mudança: removemos o "...prev.imageUrls" para substituir
+            setFormData(prev => ({ 
+                ...prev, 
+                imageUrls: [url] 
+            })); 
+        } catch { 
+            alert("Erro no upload"); 
+        } finally { 
+            setIsUploading(false); 
+        }
+    };
 
   const handleSave = () => {
       const finalText = prepareContentForSave(formData.text);
