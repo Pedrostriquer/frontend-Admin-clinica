@@ -917,3 +917,111 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
     -moz-appearance: textfield;
 }
+
+.featured-section-prod {
+    margin-top: 8px;
+    padding: 16px;
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-add-featured {
+    background-color: #fff;
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-add-featured:hover {
+    background-color: #3b82f6;
+    color: #fff;
+}
+
+.featured-active-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.featured-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.featured-header span {
+    font-weight: 600;
+    color: #f59e0b;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-remove-featured {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.featured-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.featured-input-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 8px;
+}
+
+.input-with-button input {
+    flex: 1;
+}
+
+.input-with-button button {
+    padding: 0 12px;
+    border-radius: 8px;
+    border: none;
+    background-color: #10b981;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.input-with-button button.secondary {
+    background-color: #3b82f6;
+}
+
+.featured-info-text {
+    font-size: 0.7rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.animate-in {
+    animation: fadeInSlideUp 0.3s ease-out;
+}

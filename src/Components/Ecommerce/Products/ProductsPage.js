@@ -250,6 +250,8 @@ const ProductModal = ({
   onClose,
   onSave,
   isClosing,
+  onToggleFeatured,
+  onUpdateFeaturedPosition,
 }) => {
   const isEditing = !!product;
   const [formData, setFormData] = useState({
@@ -262,6 +264,8 @@ const ProductModal = ({
     status: isEditing ? product.status : 1,
     itemType: isEditing ? product.itemType : 2,
     categories: isEditing ? product.categories || [] : [],
+    isFeatured: isEditing ? product.isFeatured : false,
+    featuredPosition: isEditing ? product.featuredPosition || "" : "",
     media: isEditing
       ? (product.mediaUrls || []).map((url) => ({
           type: isVideoUrl(url) ? "video" : "image",
@@ -286,6 +290,48 @@ const ProductModal = ({
   const [newMediaType, setNewMediaType] = useState("image");
   const [newMediaUrl, setNewMediaUrl] = useState("");
   const fileInputRef = useRef(null);
+  const [showFeaturedInput, setShowFeaturedInput] = useState(false);
+  const [tempPosition, setTempPosition] = useState(formData.featuredPosition);
+
+  const handleFeaturedAction = async () => {
+    if (!formData.isFeatured) {
+      if (!showFeaturedInput) {
+        setShowFeaturedInput(true);
+        return;
+      }
+      if (!tempPosition || tempPosition <= 0) {
+        alert("Informe uma posição válida.");
+        return;
+      }
+      const success = await onToggleFeatured(formData.id, true, tempPosition);
+      if (success) {
+        setFormData((prev) => ({
+          ...prev,
+          isFeatured: true,
+          featuredPosition: tempPosition,
+        }));
+        setShowFeaturedInput(false);
+      }
+    } else {
+      const success = await onToggleFeatured(formData.id, false);
+      if (success) {
+        setFormData((prev) => ({
+          ...prev,
+          isFeatured: false,
+          featuredPosition: "",
+        }));
+      }
+    }
+  };
+
+  const handleUpdatePosition = async () => {
+    if (!tempPosition || tempPosition <= 0) return;
+    const success = await onUpdateFeaturedPosition(formData.id, tempPosition);
+    if (success) {
+      setFormData((prev) => ({ ...prev, featuredPosition: tempPosition }));
+      alert("Posição atualizada com sucesso!");
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -297,6 +343,7 @@ const ProductModal = ({
 
   const handleFormChange = (name, value) =>
     setFormData((prev) => ({ ...prev, [name]: value }));
+
   const handleInfoChange = (name, value) =>
     setFormData((prev) => ({ ...prev, info: { ...prev.info, [name]: value } }));
   const handleStoneChange = (index, stoneData) => {
@@ -509,6 +556,74 @@ const ProductModal = ({
                     </span>
                   ))}
                 </div>
+              </div>
+
+              <div className="featured-section-prod">
+                {!formData.isFeatured ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-add-featured"
+                      onClick={handleFeaturedAction}
+                    >
+                      <i className="fa-solid fa-star"></i> Adicionar aos
+                      Destaques
+                    </button>
+                    {showFeaturedInput && (
+                      <div className="featured-input-group animate-in">
+                        <label>Posição no Destaque</label>
+                        <div className="input-with-button">
+                          <input
+                            type="number"
+                            placeholder="Ex: 1"
+                            value={tempPosition}
+                            onChange={(e) => setTempPosition(e.target.value)}
+                          />
+                          <button type="button" onClick={handleFeaturedAction}>
+                            Confirmar
+                          </button>
+                        </div>
+                        <p className="featured-info-text">
+                          <i className="fa-solid fa-circle-info"></i> Se um
+                          produto já estiver nesta posição, ele e os seguintes
+                          serão empurrados para a frente.
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="featured-active-box">
+                    <div className="featured-header">
+                      <span>
+                        <i className="fa-solid fa-star"></i> Produto em Destaque
+                      </span>
+                      <button
+                        type="button"
+                        className="btn-remove-featured"
+                        onClick={handleFeaturedAction}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                    <div className="featured-input-group">
+                      <label>Alterar Posição</label>
+                      <div className="input-with-button">
+                        <input
+                          type="number"
+                          value={tempPosition || formData.featuredPosition}
+                          onChange={(e) => setTempPosition(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          className="secondary"
+                          onClick={handleUpdatePosition}
+                        >
+                          Atualizar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             <div className="form-col">
@@ -742,6 +857,38 @@ function ProductsPage() {
 
   const debouncedFilters = useDebounce(filters, 500);
   const { startLoading, stopLoading } = useLoad();
+
+  const handleToggleFeatured = async (productId, status, position = null) => {
+    try {
+      startLoading();
+      if (status) {
+        await productServices.addToFeatured(productId, position);
+      } else {
+        await productServices.removeFromFeatured(productId);
+      }
+      fetchProducts(currentPage, debouncedFilters);
+      return true;
+    } catch (error) {
+      alert("Erro ao alterar destaque.");
+      return false;
+    } finally {
+      stopLoading();
+    }
+  };
+
+  const handleUpdateFeaturedPosition = async (productId, newPosition) => {
+    try {
+      startLoading();
+      await productServices.updateFeaturedPosition(productId, newPosition);
+      fetchProducts(currentPage, debouncedFilters);
+      return true;
+    } catch (error) {
+      alert("Erro ao atualizar posição.");
+      return false;
+    } finally {
+      stopLoading();
+    }
+  };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchProducts = useCallback(async (page, currentFilters) => {
@@ -1074,6 +1221,12 @@ function ProductsPage() {
                   </td>
                   <td onClick={() => handleOpenModal("edit", product)}>
                     <div className="product-info-cell">
+                      {product.isFeatured && (
+                        <i
+                          className="fa-solid fa-star featured-star-icon"
+                          title={`Posição: ${product.featuredPosition}`}
+                        ></i>
+                      )}
                       {isVideoUrl(product.mediaUrls?.[0]) ? (
                         <video
                           src={product.mediaUrls[0]}
@@ -1169,6 +1322,8 @@ function ProductsPage() {
           onClose={handleCloseModal}
           onSave={handleSaveProduct}
           isClosing={isClosing}
+          onToggleFeatured={handleToggleFeatured} // <-- ADICIONE ESTA LINHA
+          onUpdateFeaturedPosition={handleUpdateFeaturedPosition} // <-- ADICIONE ESTA LINHA
         />
       )}
       {modal.type === "bulk_delete" && (

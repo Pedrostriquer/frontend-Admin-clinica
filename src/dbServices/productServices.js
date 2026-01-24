@@ -163,6 +163,46 @@ const productServices = {
       throw error;
     }
   },
+
+  addToFeatured: async (productId, position) => {
+    try {
+      const response = await api.post(`Product/${productId}/featured?position=${position}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao adicionar aos destaques:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  removeFromFeatured: async (productId) => {
+    try {
+      const response = await api.delete(`Product/${productId}/featured`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao remover dos destaques:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  updateFeaturedPosition: async (productId, newPosition) => {
+    try {
+      const response = await api.patch(`Product/${productId}/featured-position?newPosition=${newPosition}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar posição do destaque:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  getFeaturedProducts: async () => {
+    try {
+      const response = await api.get("Product/featured");
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar produtos em destaque:", error.response?.data || error.message);
+      throw error;
+    }
+  },
 };
 
 export default productServices;
