@@ -65,6 +65,8 @@ import TargetAudienceManager from "./Components/GemValueConfig/TargetAudience/Ta
 import SimulationManager from "./Components/GemValueConfig/Simulation/SimulationManager";
 import FAQManager from "./Components/GemValueConfig/FAQ/FAQManager";
 import FooterManager from "./Components/GemValueConfig/Footer/FooterManager";
+import PopUps from "./Components/PopUps/PopUps";
+import TestePopUp from "./Components/PopUps/TestePopUp";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
 
 
@@ -113,6 +115,7 @@ const AppContent = () => {
             <Route path="platform/notifications" element={<MessagesPage />} />
             <Route path="platform/catalogo-gemcash" element={<Catalog />} />
             <Route path="clients/create" element={<CreateClientPage />} />
+            <Route path="platform/pop-ups" element={<PopUps />} />
 
             {/* Sub-Roteamento: E-commerce */}
             <Route path="ecommerce/dashboard" element={<EcommerceDashboard />} />

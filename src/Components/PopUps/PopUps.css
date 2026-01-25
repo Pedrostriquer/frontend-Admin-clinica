@@ -1,0 +1,338 @@
+:root {
+    --pu-primary: #4f46e5;
+    --pu-primary-light: #818cf8;
+    --pu-bg: #f8fafc;
+    --pu-text-main: #1e293b;
+    --pu-text-sub: #64748b;
+    --pu-border: #e2e8f0;
+    --pu-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    --pu-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.pu-dashboard-container {
+    padding: 2rem;
+    background-color: var(--pu-bg);
+    min-height: 100vh;
+    animation: puFadeIn 0.5s ease;
+}
+
+@keyframes puFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pu-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.pu-title-wrapper h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--pu-text-main);
+    margin: 0 0 5px 0;
+}
+
+.pu-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--pu-text-sub);
+    font-size: 0.85rem;
+}
+
+.pu-btn-primary {
+    padding: 0.8rem 1.5rem;
+    background: var(--pu-primary);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--pu-transition);
+}
+
+.pu-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+.pu-btn-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pu-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.pu-stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    border: 1px solid var(--pu-border);
+}
+
+.pu-stat-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.pu-stat-icon.blue {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.pu-stat-icon.purple {
+    background: #f5f3ff;
+    color: #8b5cf6;
+}
+
+.pu-stat-data p {
+    color: var(--pu-text-sub);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.pu-stat-data h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 2px 0 0;
+    color: var(--pu-text-main);
+}
+
+.pu-content-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid var(--pu-border);
+    padding: 1.5rem;
+    box-shadow: var(--pu-shadow);
+}
+
+.pu-table-actions {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.pu-search-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+}
+
+.pu-search-container i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--pu-text-sub);
+}
+
+.pu-search-container input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--pu-border);
+    background: #f8fafc;
+    outline: none;
+    transition: var(--pu-transition);
+}
+
+.pu-search-container input:focus {
+    border-color: var(--pu-primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.05);
+}
+
+.pu-clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--pu-text-sub);
+}
+
+.pu-table-relative {
+    position: relative;
+    min-height: 200px;
+}
+
+.pu-loading-blur .pu-table-wrapper {
+    filter: blur(4px);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.pu-table-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.pu-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--pu-primary);
+    border-radius: 50%;
+    animation: puSpin 0.8s linear infinite;
+}
+
+@keyframes puSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pu-modern-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pu-modern-table th {
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--pu-text-sub);
+    border-bottom: 2px solid var(--pu-bg);
+}
+
+.pu-modern-table td {
+    padding: 1.2rem 1rem;
+    border-bottom: 1px solid var(--pu-bg);
+}
+
+.pu-campaign-cell {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.pu-id-tag {
+    font-size: 0.7rem;
+    color: var(--pu-primary);
+    font-weight: 700;
+}
+
+.pu-name-text {
+    font-weight: 600;
+    color: var(--pu-text-main);
+}
+
+.pu-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.pu-status-pill.active {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.pu-status-pill.paused {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.pu-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.pu-action-group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.pu-action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.pu-action-btn.view {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.pu-action-btn.edit {
+    background: #eef2ff;
+    color: var(--pu-primary);
+}
+
+.pu-action-btn:hover {
+    transform: scale(1.1);
+}
+
+.pu-pagination {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.pu-page-btn {
+    background: white;
+    border: 1px solid var(--pu-border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.pu-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

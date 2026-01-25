@@ -413,18 +413,23 @@ const ProductModal = ({
       const parsable = str.replace(/\./g, "").replace(",", ".");
       return parseFloat(parsable) || 0;
     };
+  
     const localFiles = formData.media.filter((m) => m.file).map((m) => m.file);
     const existingUrls = formData.media
       .filter((m) => !m.file)
       .map((m) => m.url);
+  
     const finalData = { ...formData };
-
-    finalData.value = cleanAndParseFloat(finalData.value);
-    finalData.stock = parseInt(finalData.stock, 10);
-    if (isNaN(finalData.stock)) {
-      finalData.stock = null;
+  
+    if (finalData.featuredPosition === "" || finalData.featuredPosition === null) {
+      finalData.featuredPosition = null;
+    } else {
+      finalData.featuredPosition = parseInt(finalData.featuredPosition, 10);
     }
-
+  
+    finalData.value = cleanAndParseFloat(finalData.value);
+    finalData.stock = finalData.stock === "" ? null : parseInt(finalData.stock, 10);
+  
     if (finalData.info) {
       finalData.info.weightInGrams = cleanAndParseFloat(
         finalData.info.weightInGrams
@@ -440,6 +445,7 @@ const ProductModal = ({
         }));
       }
     }
+  
     delete finalData.media;
     onSave(finalData, localFiles, existingUrls);
   };

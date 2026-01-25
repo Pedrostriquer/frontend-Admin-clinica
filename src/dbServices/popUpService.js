@@ -1,0 +1,35 @@
+import api from "./api/api";
+
+const popUpService = {
+  getPopUpsPaged: async (page = 1, pageSize = 10, searchTerm = "") => {
+    // ADICIONADO /paged para bater com o [HttpGet("paged")] do Controller
+    const response = await api.get(
+      `PopUp/paged?page=${page}&pageSize=${pageSize}&search=${searchTerm}`
+    );
+    return response.data;
+  },
+
+  getPopUpById: async (id) => {
+    const response = await api.get(`PopUp/${id}`);
+    return response.data;
+  },
+
+  getPopUpResponses: async (popUpId, page = 1, pageSize = 10) => {
+    const response = await api.get(
+      `PopUp/${popUpId}/responses?page=${page}&pageSize=${pageSize}`
+    );
+    return response.data;
+  },
+
+  getPopUpStats: async () => {
+    const response = await api.get("PopUp/stats");
+    return response.data;
+  },
+
+  createPopUp: async (payload) => {
+    const response = await api.post("PopUp", payload);
+    return response.data;
+  },
+};
+
+export default popUpService;
