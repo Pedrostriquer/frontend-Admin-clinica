@@ -20,8 +20,24 @@ const useDebounce = (value, delay) => {
 
 const formatCurrency = (value) =>
   (value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
 const formatDate = (dateString) =>
   dateString ? new Date(dateString).toLocaleDateString("pt-BR") : "N/A";
+
+const formatDateTime = (dateString) => {
+  return dateString 
+    ? new Date(dateString).toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit", // Opcional: remova se não quiser os segundos
+      })
+    : "N/A";
+};
+
 const statusMap = {
   1: "Pendente",
   2: "Valorizando",
@@ -305,7 +321,7 @@ function ContractsPage() {
                       style={styles.tableCell}
                       onClick={() => handleNavigateToContract(contract.id)}
                     >
-                      {formatDate(contract.dateCreated)}
+                      {formatDateTime(contract.dateCreated)}
                     </td>
                     <td
                       style={styles.tableCell}
