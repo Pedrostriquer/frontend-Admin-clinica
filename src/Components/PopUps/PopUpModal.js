@@ -3,11 +3,12 @@ import "./PopUpModal.css";
 import popUpService from "../../dbServices/popUpService";
 import FormModel from "./Forms/FormModel";
 
-const PopUpModal = ({ popUp, onClose }) => {
+const PopUpModal = ({ popUp: initialPopUp, onClose }) => {
   const [activeTab, setActiveTab] = useState("info");
   const [responses, setResponses] = useState([]);
   const [loadingResp, setLoadingResp] = useState(false);
-  const [filterType, setFilterType] = useState("all"); // all, communicated, pending
+  const [filterType, setFilterType] = useState("all");
+  const [popUp, setPopUp] = useState(initialPopUp);
 
   useEffect(() => {
     if (activeTab === "responses") loadResponses();
@@ -38,6 +39,15 @@ const PopUpModal = ({ popUp, onClose }) => {
     }
   };
 
+  const handleTogglePopUpStatus = async () => {
+    try {
+      await popUpService.togglePopUpActive(popUp.id);
+      setPopUp((prev) => ({ ...prev, isActive: !prev.isActive }));
+    } catch (error) {
+      alert("Erro ao alterar status da campanha.");
+    }
+  };
+
   const filteredResponses = responses.filter((res) => {
     if (filterType === "communicated") return res.isCommunicated;
     if (filterType === "pending") return !res.isCommunicated;
@@ -47,16 +57,18 @@ const PopUpModal = ({ popUp, onClose }) => {
   const renderLivePreview = () => {
     const parts = popUp.contentHtml.split("{{FORM}}");
     return (
-      <div className="pum-preview-render">
-        <div dangerouslySetInnerHTML={{ __html: parts[0] }} />
-        {popUp.formSchema && parts.length > 1 && (
-          <div className="pum-form-wrapper">
-            <FormModel initialSchema={popUp.formSchema} isAdmin={false} />
-          </div>
-        )}
-        {parts.length > 1 && (
-          <div dangerouslySetInnerHTML={{ __html: parts[1] }} />
-        )}
+      <div className="pum-preview-render-center">
+        <div className="pum-preview-inner-content">
+          <div dangerouslySetInnerHTML={{ __html: parts[0] }} />
+          {popUp.formSchema && parts.length > 1 && (
+            <div className="pum-form-wrapper-preview">
+              <FormModel initialSchema={popUp.formSchema} isAdmin={false} />
+            </div>
+          )}
+          {parts.length > 1 && (
+            <div dangerouslySetInnerHTML={{ __html: parts[1] }} />
+          )}
+        </div>
       </div>
     );
   };
@@ -119,13 +131,33 @@ const PopUpModal = ({ popUp, onClose }) => {
                       <p>{popUp.displayLocation}</p>
                     </div>
                     <div className="pum-info-item">
-                      <label>Delay (Segundos)</label>
-                      <p>{popUp.displayDelaySeconds}s</p>
+                      <label>Delay</label>
+                      <p>{popUp.displayDelaySeconds} segundos</p>
                     </div>
                   </div>
 
+                  <div className="pum-control-section">
+                    <button
+                      className={`pum-toggle-status-btn ${
+                        popUp.isActive ? "deactivate" : "activate"
+                      }`}
+                      onClick={handleTogglePopUpStatus}
+                    >
+                      {popUp.isActive ? (
+                        <>
+                          <i className="fa-solid fa-pause"></i> Desativar
+                          Campanha
+                        </>
+                      ) : (
+                        <>
+                          <i className="fa-solid fa-play"></i> Ativar Campanha
+                        </>
+                      )}
+                    </button>
+                  </div>
+
                   <div className="pum-code-section">
-                    <label>Código Estrutural (HTML)</label>
+                    <label>Estrutura HTML</label>
                     <div className="pum-code-block">
                       <pre>
                         <code>{popUp.contentHtml}</code>
@@ -136,7 +168,7 @@ const PopUpModal = ({ popUp, onClose }) => {
 
                 <div className="pum-preview-section">
                   <div className="pum-preview-header">
-                    <i className="fa-solid fa-eye"></i> Visualização Final
+                    <i className="fa-solid fa-eye"></i> Preview em Tempo Real
                   </div>
                   <div className="pum-preview-window">
                     <div className="pum-browser-bar">
@@ -146,7 +178,7 @@ const PopUpModal = ({ popUp, onClose }) => {
                         <span></span>
                       </div>
                     </div>
-                    <div className="pum-browser-body">
+                    <div className="pum-browser-body-centered">
                       {renderLivePreview()}
                     </div>
                   </div>
@@ -157,9 +189,9 @@ const PopUpModal = ({ popUp, onClose }) => {
             <div className="pum-tab-content responses-view animate-fade-in">
               <div className="pum-section-header">
                 <div className="pum-header-left">
-                  <h2>Interações Coletadas</h2>
+                  <h2>Leads Coletados</h2>
                   <div className="pum-count-badge">
-                    {filteredResponses.length} leads
+                    {filteredResponses.length} registros
                   </div>
                 </div>
 
@@ -180,7 +212,7 @@ const PopUpModal = ({ popUp, onClose }) => {
                     className={filterType === "communicated" ? "active" : ""}
                     onClick={() => setFilterType("communicated")}
                   >
-                    Comunicados
+                    Atendidos
                   </button>
                 </div>
               </div>
@@ -226,12 +258,12 @@ const PopUpModal = ({ popUp, onClose }) => {
                           {res.isCommunicated ? (
                             <>
                               <i className="fa-solid fa-check-double"></i>{" "}
-                              Comunicado
+                              Atendido
                             </>
                           ) : (
                             <>
                               <i className="fa-regular fa-paper-plane"></i>{" "}
-                              Marcar Comunicado
+                              Marcar Atendido
                             </>
                           )}
                         </button>
@@ -242,7 +274,7 @@ const PopUpModal = ({ popUp, onClose }) => {
               ) : (
                 <div className="pum-empty-state">
                   <i className="fa-solid fa-inbox"></i>
-                  <p>Nenhum lead encontrado neste filtro.</p>
+                  <p>Nenhum lead encontrado.</p>
                 </div>
               )}
             </div>

@@ -10,43 +10,91 @@ const PopUps = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [selectedPopUp, setSelectedPopUp] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [internalLoading, setInternalLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({
+    show: false,
+    id: null,
+    name: "",
+  });
 
-  const fetchData = useCallback(async () => {
-    setInternalLoading(true);
-    try {
-      const [pagedData, statsData] = await Promise.all([
-        popUpService.getPopUpsPaged(currentPage, 10, searchTerm),
-        popUpService.getPopUpStats(),
-      ]);
-      setPopUps(pagedData.items || []);
-      setTotalPages(pagedData.totalPages || 1);
-      setStats(statsData);
-    } catch (error) {
-      alert("Erro ao sincronizar dados dos PopUps");
-    } finally {
-      setTimeout(() => setInternalLoading(false), 500);
-    }
-  }, [currentPage, searchTerm]);
+  const fetchData = useCallback(
+    async (isInitial = false) => {
+      if (isInitial) setLoading(true);
+      else setInternalLoading(true);
+
+      try {
+        const [pagedData, statsData] = await Promise.all([
+          popUpService.getPopUpsPaged(currentPage, 10, appliedSearch),
+          popUpService.getPopUpStats(),
+        ]);
+        setPopUps(pagedData.items || []);
+        setTotalPages(pagedData.totalPages || 1);
+        setStats(statsData);
+      } catch (error) {
+        console.error("Erro ao sincronizar dados");
+      } finally {
+        setLoading(false);
+        setInternalLoading(false);
+      }
+    },
+    [currentPage, appliedSearch]
+  );
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
   }, [fetchData]);
+
+  const handleSearchTrigger = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    setAppliedSearch(searchTerm);
+  };
 
   const handleOpenModal = (popUp) => {
     setSelectedPopUp(popUp);
     setIsModalOpen(true);
   };
 
-  const handleCreateSuccess = () => {
-    fetchData();
+  const handleToggleStatus = async (id) => {
+    try {
+      await popUpService.togglePopUpActive(id);
+      fetchData();
+    } catch (error) {
+      alert("Erro ao alterar status");
+    }
   };
 
+  const openDeleteDialog = (e, p) => {
+    e.stopPropagation();
+    setDeleteConfirm({ show: true, id: p.id, name: p.name });
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await popUpService.deletePopUp(deleteConfirm.id);
+      setDeleteConfirm({ show: false, id: null, name: "" });
+      fetchData();
+    } catch (error) {
+      alert("Erro ao excluir campanha");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="pu-main-loader">
+        <div className="pu-spinner-large"></div>
+        <p>Carregando campanhas...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="pu-dashboard-container">
+    <div className="pu-dashboard-container animate-fade-in">
       <header className="pu-main-header">
         <div className="pu-title-wrapper">
           <h1>PopUps Dinâmicos</h1>
@@ -64,7 +112,6 @@ const PopUps = () => {
             <i className="fa-solid fa-plus"></i>
             <span>Criar PopUp</span>
           </div>
-          <div className="pu-btn-glow"></div>
         </button>
       </header>
 
@@ -77,7 +124,6 @@ const PopUps = () => {
             <p>Total de Campanhas</p>
             <h3>{stats.totalPopUps}</h3>
           </div>
-          <div className="pu-card-decoration"></div>
         </div>
         <div className="pu-stat-card">
           <div className="pu-stat-icon purple">
@@ -87,126 +133,111 @@ const PopUps = () => {
             <p>Leads Coletados</p>
             <h3>{stats.totalResponses}</h3>
           </div>
-          <div className="pu-card-decoration"></div>
         </div>
       </section>
 
       <main className="pu-content-card">
         <div className="pu-table-actions">
-          <div className="pu-search-container">
-            <i className="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              placeholder="Pesquisar por nome ou ID..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-            />
-            {searchTerm && (
-              <button
-                className="pu-clear-search"
-                onClick={() => setSearchTerm("")}
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div
-          className={`pu-table-relative ${
-            internalLoading ? "pu-loading-blur" : ""
-          }`}
-        >
+          <form className="pu-search-group" onSubmit={handleSearchTrigger}>
+            <div className="pu-input-with-icon">
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                placeholder="Pesquisar por nome ou ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <button type="submit" className="pu-search-btn">
+              Buscar
+            </button>
+          </form>
           {internalLoading && (
-            <div className="pu-table-loader">
-              <div className="pu-spinner"></div>
-              <span>Atualizando dados...</span>
+            <div className="pu-sync-indicator">
+              <i className="fa-solid fa-rotate fa-spin"></i> Sincronizando...
             </div>
           )}
+        </div>
 
-          <div className="pu-table-wrapper">
-            <table className="pu-modern-table">
-              <thead>
-                <tr>
-                  <th>CAMPANHA</th>
-                  <th>CONFIGURAÇÃO</th>
-                  <th>EXPOSIÇÃO</th>
-                  <th>STATUS</th>
-                  <th className="text-center">AÇÕES</th>
-                </tr>
-              </thead>
-              <tbody>
-                {popUps.length > 0 ? (
-                  popUps.map((p, idx) => (
-                    <tr
-                      key={p.id}
-                      className="pu-row-animate"
-                      style={{ "--delay": `${idx * 0.05}s` }}
-                    >
-                      <td onClick={() => handleOpenModal(p)}>
-                        <div className="pu-campaign-cell">
-                          <span className="pu-id-tag">#{p.id}</span>
-                          <span className="pu-name-text">{p.name}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="pu-config-tag">
-                          <i className="fa-regular fa-clock"></i>
-                          {p.frequencyMinutes} min
-                        </div>
-                      </td>
-                      <td>
-                        <span className="pu-date-text">
-                          {new Date(p.dateCreated).toLocaleDateString()}
-                        </span>
-                      </td>
-                      <td>
-                        <div
-                          className={`pu-status-pill ${
-                            p.isActive ? "active" : "paused"
-                          }`}
+        <div className="pu-table-wrapper">
+          <table className="pu-modern-table">
+            <thead>
+              <tr>
+                <th>CAMPANHA</th>
+                <th>LOCALIZAÇÃO</th>
+                <th>CRIADO EM</th>
+                <th>STATUS</th>
+                <th className="text-center">AÇÕES</th>
+              </tr>
+            </thead>
+            <tbody>
+              {popUps.length > 0 ? (
+                popUps.map((p, idx) => (
+                  <tr
+                    key={p.id}
+                    className="pu-row-animate"
+                    style={{ "--delay": `${idx * 0.05}s` }}
+                  >
+                    <td onClick={() => handleOpenModal(p)}>
+                      <div className="pu-campaign-cell">
+                        <span className="pu-id-tag">#{p.id}</span>
+                        <span className="pu-name-text">{p.name}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="pu-config-tag">{p.displayLocation}</div>
+                    </td>
+                    <td>
+                      <span className="pu-date-text">
+                        {new Date(p.dateCreated).toLocaleDateString()}
+                      </span>
+                    </td>
+                    <td>
+                      <div
+                        className={`pu-status-pill ${
+                          p.isActive ? "active" : "paused"
+                        }`}
+                        onClick={() => handleToggleStatus(p.id)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <span className="pu-status-dot"></span>
+                        {p.isActive ? "Ativo" : "Inativo"}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="pu-action-group">
+                        <button
+                          className="pu-action-btn view"
+                          onClick={() => handleOpenModal(p)}
                         >
-                          <span className="pu-status-dot"></span>
-                          {p.isActive ? "Ativo" : "Pausado"}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="pu-action-group">
-                          <button
-                            className="pu-action-btn view"
-                            onClick={() => handleOpenModal(p)}
-                          >
-                            <i className="fa-solid fa-eye"></i>
-                          </button>
-                          <button className="pu-action-btn edit">
-                            <i className="fa-solid fa-pen-to-square"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5">
-                      <div className="pu-empty-state">
-                        <i className="fa-solid fa-box-open"></i>
-                        <p>Nenhum popup encontrado.</p>
+                          <i className="fa-solid fa-eye"></i>
+                        </button>
+                        <button
+                          className="pu-action-btn delete"
+                          onClick={(e) => openDeleteDialog(e, p)}
+                        >
+                          <i className="fa-solid fa-trash-can"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5">
+                    <div className="pu-empty-state">
+                      <p>Nenhum popup encontrado.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         <footer className="pu-pagination">
           <div className="pu-page-info">
-            Página <strong>{currentPage}</strong> de{" "}
-            <strong>{totalPages}</strong>
+            Página {currentPage} de {totalPages}
           </div>
           <div className="pu-page-controls">
             <button
@@ -227,6 +258,34 @@ const PopUps = () => {
         </footer>
       </main>
 
+      {deleteConfirm.show && (
+        <div className="pu-delete-overlay">
+          <div className="pu-delete-modal">
+            <div className="pu-delete-icon">
+              <i className="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <h2>Tem certeza?</h2>
+            <p>
+              Você está prestes a excluir a campanha{" "}
+              <strong>{deleteConfirm.name}</strong>.
+            </p>
+            <div className="pu-delete-actions">
+              <button
+                className="pu-btn-cancel"
+                onClick={() =>
+                  setDeleteConfirm({ show: false, id: null, name: "" })
+                }
+              >
+                Cancelar
+              </button>
+              <button className="pu-btn-confirm" onClick={confirmDelete}>
+                Sim, Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isModalOpen && (
         <PopUpModal
           popUp={selectedPopUp}
@@ -236,7 +295,7 @@ const PopUps = () => {
       {isCreateModalOpen && (
         <CreatePopUpModal
           onClose={() => setIsCreateModalOpen(false)}
-          onSave={handleCreateSuccess}
+          onSave={() => fetchData()}
         />
       )}
     </div>

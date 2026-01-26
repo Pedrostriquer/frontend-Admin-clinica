@@ -36,6 +36,16 @@ const popUpService = {
     const response = await api.post("PopUp", payload);
     return response.data;
   },
+
+  deletePopUp: async (id) => {
+    const response = await api.delete(`PopUp/${id}`);
+    return response.data;
+  },
+
+  togglePopUpActive: async (id) => {
+    const response = await api.patch(`PopUp/${id}/toggle-active`);
+    return response.data;
+  },
 };
 
 export default popUpService;
