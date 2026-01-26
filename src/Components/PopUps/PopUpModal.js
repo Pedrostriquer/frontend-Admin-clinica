@@ -7,6 +7,7 @@ const PopUpModal = ({ popUp, onClose }) => {
   const [activeTab, setActiveTab] = useState("info");
   const [responses, setResponses] = useState([]);
   const [loadingResp, setLoadingResp] = useState(false);
+  const [filterType, setFilterType] = useState("all"); // all, communicated, pending
 
   useEffect(() => {
     if (activeTab === "responses") loadResponses();
@@ -15,14 +16,33 @@ const PopUpModal = ({ popUp, onClose }) => {
   const loadResponses = async () => {
     setLoadingResp(true);
     try {
-      const data = await popUpService.getPopUpResponses(popUp.id, 1, 50);
+      const data = await popUpService.getPopUpResponses(popUp.id, 1, 100);
       setResponses(data.items || []);
     } catch (error) {
-      alert("Erro ao carregar respostas.");
+      console.error(error);
     } finally {
       setLoadingResp(false);
     }
   };
+
+  const handleToggleCommunication = async (resId) => {
+    try {
+      await popUpService.toggleResponseCommunication(resId);
+      setResponses((prev) =>
+        prev.map((r) =>
+          r.id === resId ? { ...r, isCommunicated: !r.isCommunicated } : r
+        )
+      );
+    } catch (error) {
+      alert("Erro ao atualizar status.");
+    }
+  };
+
+  const filteredResponses = responses.filter((res) => {
+    if (filterType === "communicated") return res.isCommunicated;
+    if (filterType === "pending") return !res.isCommunicated;
+    return true;
+  });
 
   const renderLivePreview = () => {
     const parts = popUp.contentHtml.split("{{FORM}}");
@@ -95,12 +115,12 @@ const PopUpModal = ({ popUp, onClose }) => {
 
                   <div className="pum-info-grid">
                     <div className="pum-info-item">
-                      <label>Frequência</label>
-                      <p>{popUp.frequencyMinutes} minutos</p>
+                      <label>Localização</label>
+                      <p>{popUp.displayLocation}</p>
                     </div>
                     <div className="pum-info-item">
-                      <label>Criação</label>
-                      <p>{new Date(popUp.dateCreated).toLocaleDateString()}</p>
+                      <label>Delay (Segundos)</label>
+                      <p>{popUp.displayDelaySeconds}s</p>
                     </div>
                   </div>
 
@@ -136,18 +156,48 @@ const PopUpModal = ({ popUp, onClose }) => {
           ) : (
             <div className="pum-tab-content responses-view animate-fade-in">
               <div className="pum-section-header">
-                <h2>Interações Coletadas</h2>
-                <div className="pum-count-badge">{responses.length} leads</div>
+                <div className="pum-header-left">
+                  <h2>Interações Coletadas</h2>
+                  <div className="pum-count-badge">
+                    {filteredResponses.length} leads
+                  </div>
+                </div>
+
+                <div className="pum-filters">
+                  <button
+                    className={filterType === "all" ? "active" : ""}
+                    onClick={() => setFilterType("all")}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    className={filterType === "pending" ? "active" : ""}
+                    onClick={() => setFilterType("pending")}
+                  >
+                    Pendentes
+                  </button>
+                  <button
+                    className={filterType === "communicated" ? "active" : ""}
+                    onClick={() => setFilterType("communicated")}
+                  >
+                    Comunicados
+                  </button>
+                </div>
               </div>
 
               {loadingResp ? (
                 <div className="pum-loader-container">
                   <div className="pum-spinner"></div>
                 </div>
-              ) : responses.length > 0 ? (
+              ) : filteredResponses.length > 0 ? (
                 <div className="pum-responses-grid">
-                  {responses.map((res) => (
-                    <div key={res.id} className="pum-response-card">
+                  {filteredResponses.map((res) => (
+                    <div
+                      key={res.id}
+                      className={`pum-response-card ${
+                        res.isCommunicated ? "done" : ""
+                      }`}
+                    >
                       <div className="pum-res-header">
                         <div className="pum-res-avatar">
                           <i className="fa-solid fa-user"></i>
@@ -166,13 +216,33 @@ const PopUpModal = ({ popUp, onClose }) => {
                           </div>
                         ))}
                       </div>
+                      <div className="pum-res-footer">
+                        <button
+                          className={`pum-comm-btn ${
+                            res.isCommunicated ? "is-done" : ""
+                          }`}
+                          onClick={() => handleToggleCommunication(res.id)}
+                        >
+                          {res.isCommunicated ? (
+                            <>
+                              <i className="fa-solid fa-check-double"></i>{" "}
+                              Comunicado
+                            </>
+                          ) : (
+                            <>
+                              <i className="fa-regular fa-paper-plane"></i>{" "}
+                              Marcar Comunicado
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="pum-empty-state">
                   <i className="fa-solid fa-inbox"></i>
-                  <p>Ainda não houve interações com este PopUp.</p>
+                  <p>Nenhum lead encontrado neste filtro.</p>
                 </div>
               )}
             </div>

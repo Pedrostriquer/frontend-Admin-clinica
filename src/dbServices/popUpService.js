@@ -2,7 +2,6 @@ import api from "./api/api";
 
 const popUpService = {
   getPopUpsPaged: async (page = 1, pageSize = 10, searchTerm = "") => {
-    // ADICIONADO /paged para bater com o [HttpGet("paged")] do Controller
     const response = await api.get(
       `PopUp/paged?page=${page}&pageSize=${pageSize}&search=${searchTerm}`
     );
@@ -17,6 +16,13 @@ const popUpService = {
   getPopUpResponses: async (popUpId, page = 1, pageSize = 10) => {
     const response = await api.get(
       `PopUp/${popUpId}/responses?page=${page}&pageSize=${pageSize}`
+    );
+    return response.data;
+  },
+
+  toggleResponseCommunication: async (responseId) => {
+    const response = await api.patch(
+      `PopUp/responses/${responseId}/toggle-communication`
     );
     return response.data;
   },

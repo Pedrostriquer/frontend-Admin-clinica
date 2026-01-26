@@ -129,7 +129,6 @@
     gap: 30px;
     height: 100%;
     min-width: 0;
-    /* Previne que o grid expanda além do container */
 }
 
 .pum-details-section {
@@ -143,6 +142,14 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.pum-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .pum-section-header h2 {
@@ -150,9 +157,32 @@
     color: #1e293b;
     font-weight: 800;
     margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+.pum-filters {
+    display: flex;
+    background: #e2e8f0;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 2px;
+}
+
+.pum-filters button {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: transparent;
+    color: #64748b;
+    transition: 0.2s;
+}
+
+.pum-filters button.active {
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .pum-status-tag {
@@ -193,21 +223,6 @@
     margin: 0;
 }
 
-.pum-code-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.pum-code-section label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-}
-
 .pum-code-block {
     background: #0f172a;
     padding: 15px;
@@ -217,35 +232,13 @@
     max-height: 400px;
 }
 
-.pum-code-block pre {
-    margin: 0;
-}
-
 .pum-code-block code {
     font-family: 'Fira Code', monospace;
     color: #38bdf8;
     font-size: 0.8rem;
     line-height: 1.5;
     white-space: pre-wrap;
-    /* Força quebra de linha no código */
     word-break: break-all;
-}
-
-.pum-preview-section {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 0;
-}
-
-.pum-preview-header {
-    font-weight: 800;
-    color: #64748b;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
 .pum-preview-window {
@@ -259,34 +252,9 @@
     flex: 1;
 }
 
-.pum-browser-bar {
-    background: #f1f5f9;
-    padding: 10px 15px;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.pum-dots {
-    display: flex;
-    gap: 5px;
-}
-
-.pum-dots span {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #cbd5e1;
-}
-
-.pum-browser-body {
-    padding: 25px;
-    overflow-y: auto;
-    flex: 1;
-    background: #fff;
-}
-
 .pum-responses-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 20px;
 }
 
@@ -295,6 +263,15 @@
     padding: 20px;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    transition: 0.3s;
+}
+
+.pum-response-card.done {
+    background: #f8fafc;
+    border-color: #38bdf8;
+    opacity: 0.8;
 }
 
 .pum-res-header {
@@ -306,39 +283,37 @@
     border-bottom: 1px solid #f1f5f9;
 }
 
-.pum-res-avatar {
-    width: 35px;
-    height: 35px;
-    background: #f1f5f9;
-    color: #64748b;
+.pum-res-footer {
+    margin-top: auto;
+    padding-top: 15px;
+}
+
+.pum-comm-btn {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #38bdf8;
+    background: transparent;
+    color: #38bdf8;
     border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
 }
 
-.pum-res-date {
-    font-size: 0.8rem;
-    color: #94a3b8;
-    font-weight: 600;
+.pum-comm-btn:hover {
+    background: #38bdf8;
+    color: white;
 }
 
-.pum-res-line {
-    margin-bottom: 8px;
-}
-
-.pum-res-key {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    margin-right: 5px;
-}
-
-.pum-res-val {
-    color: #1e293b;
-    font-weight: 600;
-    font-size: 0.9rem;
+.pum-comm-btn.is-done {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #38bdf8;
 }
 
 .pum-count-badge {

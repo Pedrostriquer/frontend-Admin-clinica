@@ -9,7 +9,8 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
   const [htmlContent, setHtmlContent] = useState(
     "<h2>Olá!</h2>\n<p>Assine nossa newsletter:</p>\n{{FORM}}"
   );
-  const [frequency, setFrequency] = useState(60);
+  const [displayDelaySeconds, setDisplayDelaySeconds] = useState(5);
+  const [displayLocation, setDisplayLocation] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [showFormBuilder, setShowFormBuilder] = useState(false);
   const [formSchema, setFormSchema] = useState([
@@ -66,8 +67,8 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
 
   const handleSave = async () => {
     if (!name) {
-        alert("Dê um nome à campanha");
-        return;
+      alert("Dê um nome à campanha");
+      return;
     }
 
     startLoading();
@@ -75,7 +76,8 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
       const payload = {
         name,
         contentHtml: htmlContent,
-        frequencyMinutes: parseInt(frequency),
+        displayDelaySeconds: parseInt(displayDelaySeconds),
+        displayLocation: parseInt(displayLocation),
         isActive,
         formSchema: showFormBuilder ? formSchema : null,
       };
@@ -97,10 +99,10 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
         <div dangerouslySetInnerHTML={{ __html: parts[0] }} />
         {showFormBuilder && parts.length > 1 && (
           <div className="pu-preview-form-wrapper">
-            <FormModel 
-                initialSchema={formSchema} 
-                isAdmin={true} 
-                onSchemaChange={(newSchema) => setFormSchema(newSchema)}
+            <FormModel
+              initialSchema={formSchema}
+              isAdmin={true}
+              onSchemaChange={(newSchema) => setFormSchema(newSchema)}
             />
           </div>
         )}
@@ -126,7 +128,30 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Black Friday 2024"
+                placeholder="Ex: Promoção de Verão"
+              />
+            </div>
+
+            <div className="pu-input-group">
+              <label>Onde mostrar?</label>
+              <select
+                value={displayLocation}
+                onChange={(e) => setDisplayLocation(e.target.value)}
+                className="pu-select-custom"
+              >
+                <option value={0}>Apenas no Site</option>
+                <option value={1}>Apenas na Plataforma</option>
+                <option value={2}>Em Ambos (Site e Plataforma)</option>
+              </select>
+            </div>
+
+            <div className="pu-input-group">
+              <label>Aparecer após quantos segundos?</label>
+              <input
+                type="number"
+                value={displayDelaySeconds}
+                onChange={(e) => setDisplayDelaySeconds(e.target.value)}
+                min="0"
               />
             </div>
 
@@ -152,13 +177,23 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
             </div>
 
             <div className="pu-switch-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  fontSize: "0.85rem",
+                  color: "#64748b",
+                }}
+              >
                 <input
-                    type="checkbox"
-                    checked={showFormBuilder}
-                    onChange={(e) => setShowFormBuilder(e.target.checked)}
+                  type="checkbox"
+                  checked={showFormBuilder}
+                  onChange={(e) => setShowFormBuilder(e.target.checked)}
                 />
-                Habilitar Formulário Dinâmico?
+                HABILITAR FORMULÁRIO DINÂMICO?
               </label>
             </div>
 
@@ -206,31 +241,28 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
                     </div>
                   ))}
                 </div>
-                <small>
-                  <i className="fa-solid fa-info-circle"></i> No preview ao
-                  lado, você pode arrastar para reordenar.
-                </small>
               </div>
             )}
 
-            <div className="pu-input-group">
-              <label>Frequência (Minutos)</label>
-              <input
-                type="number"
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-              />
-            </div>
-            
-            <div className="pu-switch-group">
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                    <input
-                        type="checkbox"
-                        checked={isActive}
-                        onChange={(e) => setIsActive(e.target.checked)}
-                    />
-                    Campanha Ativa
-                </label>
+            <div className="pu-switch-group" style={{ marginTop: "20px" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  fontSize: "0.85rem",
+                  color: "#64748b",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                />
+                CAMPANHA ATIVA
+              </label>
             </div>
           </div>
 
