@@ -1,5 +1,7 @@
 .products-page-container {
     font-family: "Poppins", sans-serif;
+    padding: 40px;
+    box-sizing: border-box;
 }
 
 .products-page-header {

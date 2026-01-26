@@ -1,5 +1,5 @@
 const styles = {
-  contractsPageContainer: { fontFamily: "'Poppins', sans-serif" },
+  contractsPageContainer: { fontFamily: "'Poppins', sans-serif", padding: 40, boxSizing: "border-box" },
   contractsPageHeader: {
     marginBottom: "24px",
     display: "flex",

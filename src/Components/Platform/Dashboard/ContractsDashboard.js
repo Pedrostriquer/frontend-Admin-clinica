@@ -20,6 +20,7 @@ import { useLoad } from "../../../Context/LoadContext.js";
 const RoundedBar = (props) => {
   const { x, y, width, height, fill } = props;
   const radius = 8;
+  if (!x || !y) return null;
   return (
     <path
       d={`M${x},${y + radius} A${radius},${radius} 0 0 1 ${x + radius},${y} L${
@@ -33,8 +34,7 @@ const RoundedBar = (props) => {
 };
 
 const formatCurrency = (value) => {
-  if (value === null || value === undefined) return "R$ 0,00";
-  return `R$${value.toLocaleString("pt-BR", {
+  return `R$${(value || 0).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -53,7 +53,6 @@ const monthNumberToName = (monthNumber) => {
 };
 
 function ContractsDashboard() {
-  const [hoveredCard, setHoveredCard] = useState(null);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { token } = useAuth();
@@ -68,38 +67,31 @@ function ContractsDashboard() {
         startLoading();
         const dashboardData = await platformServices.getDashboardData();
         setData(dashboardData);
-      } catch (error) { // <-- SINTAXE CORRIGIDA AQUI
-        console.error("Falha ao buscar dados do dashboard:", error);
+      } catch (error) {
+        console.error("Erro dashboard:", error);
       } finally {
         setIsLoading(false);
-        stopLoading()
+        stopLoading();
       }
     };
     fetchData();
-  }, [token]); // <-- DEPENDÊNCIA RESTAURADA PARA A ORIGINAL, SEM LOOP
+  }, [token]);
 
-  // Lógica para processar a lista de clientes, filtrando e ordenando
   const processedBestClients = useMemo(() => {
-    // Retorna um array vazio se não houver dados para evitar erros
-    if (!data || !Array.isArray(data.bestClients)) {
-      return [];
-    }
-    // 1. Filtra para manter apenas clientes com valor > 0
-    // 2. Ordena a lista filtrada do maior para o menor valor
-    return data.bestClients
-      .filter(client => client.amount > 0)
-      .sort((a, b) => b.amount - a.amount);
-  }, [data]); // Recalcula apenas quando 'data' for atualizado
+    if (!data || !Array.isArray(data.bestClients)) return [];
 
-  if (isLoading) {
-    return <div>Carregando dados do dashboard...</div>;
-  }
+    return [...data.bestClients]
+      .map((c) => ({
+        ...c,
+        displayAmount: c.amount ?? c.balance ?? 0,
+      }))
+      .sort((a, b) => b.displayAmount - a.displayAmount)
+      .slice(0, 5);
+  }, [data]);
 
-  if (!data) {
-    return (
-      <div>Não foi possível carregar os dados. Tente novamente mais tarde.</div>
-    );
-  }
+  if (isLoading) return <div style={styles.loadingState}>Carregando...</div>;
+  if (!data)
+    return <div style={styles.loadingState}>Sem dados disponíveis.</div>;
 
   const kpiData = [
     {
@@ -110,23 +102,17 @@ function ContractsDashboard() {
     {
       title: "Contratos Ativos",
       value: data.activeContracts || 0,
-      data: [
-        { v: 10 }, { v: 20 }, { v: 15 }, { v: 30 }, { v: 25 }, { v: 40 }, { v: 35 },
-      ],
+      data: [{ v: 10 }, { v: 20 }, { v: 15 }, { v: 30 }],
     },
     {
       title: "Saques no Mês",
       value: formatCurrencyShort(data.monthlyWithdraw),
-      data: [
-        { v: 30 }, { v: 20 }, { v: 40 }, { v: 35 }, { v: 50 }, { v: 40 }, { v: 60 },
-      ],
+      data: [{ v: 30 }, { v: 20 }, { v: 40 }, { v: 35 }],
     },
     {
       title: "Ticket Médio",
       value: formatCurrencyShort(data.mediumTicket),
-      data: [
-        { v: 20 }, { v: 18 }, { v: 25 }, { v: 22 }, { v: 30 }, { v: 28 }, { v: 35 },
-      ],
+      data: [{ v: 20 }, { v: 18 }, { v: 25 }, { v: 22 }],
     },
   ];
 
@@ -137,32 +123,18 @@ function ContractsDashboard() {
     }))
     .reverse();
 
-  // A meta da barra de progresso agora é baseada no primeiro cliente da lista JÁ PROCESSADA
-  const topClientGoal = processedBestClients[0]?.amount || 1;
-
-  const goToClient = (id) => {
-    navigate(`/platform/clients/${id}`);
-  }
+  const topValue = processedBestClients[0]?.displayAmount || 1;
 
   return (
     <div style={styles.dashboardContainer}>
       <header style={styles.dashboardHeader}>
         <h1 style={styles.headerH1}>Dashboard</h1>
-        <p style={styles.headerP}>Visão geral do desempenho dos contratos</p>
+        <p style={styles.headerP}>Visão geral do desempenho</p>
       </header>
 
       <section style={styles.kpiGrid}>
         {kpiData.map((kpi, index) => (
-          <div
-            key={index}
-            style={{
-              ...styles.cardBase,
-              ...styles.kpiCard,
-              ...(hoveredCard === `kpi-${index}` && styles.cardHover),
-            }}
-            onMouseEnter={() => setHoveredCard(`kpi-${index}`)}
-            onMouseLeave={() => setHoveredCard(null)}
-          >
+          <div key={index} style={{ ...styles.cardBase, ...styles.kpiCard }}>
             <div style={styles.kpiBorder}></div>
             <div style={styles.kpiContent}>
               <span style={styles.kpiTitle}>{kpi.title}</span>
@@ -170,28 +142,14 @@ function ContractsDashboard() {
             </div>
             <div style={styles.kpiChart}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={kpi.data}
-                  margin={{ top: 5, right: 0, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id="gradient-blue"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <AreaChart data={kpi.data}>
                   <Area
                     type="monotone"
                     dataKey="v"
                     stroke="#3b82f6"
-                    strokeWidth={2.5}
-                    fill="url(#gradient-blue)"
+                    strokeWidth={2}
+                    fillOpacity={0.1}
+                    fill="#3b82f6"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -201,64 +159,51 @@ function ContractsDashboard() {
       </section>
 
       <section style={styles.mainGrid}>
-        <div
-          style={{
-            ...styles.cardBase,
-            ...styles.mainChartCard,
-            ...(hoveredCard === "chart" && styles.cardHover),
-          }}
-          onMouseEnter={() => setHoveredCard("chart")}
-          onMouseLeave={() => setHoveredCard(null)}
-        >
-          <h3 style={styles.cardTitle}>Visão Geral do Faturamento</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={barChartData}
-              margin={{ top: 20, right: 20, left: -10, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} />
-              <YAxis
-                tickFormatter={(val) => `R$${val}k`}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                cursor={{ fill: "transparent" }}
-                contentStyle={{
-                  background: "rgba(255, 255, 255, 0.7)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "12px",
-                  padding: "12px",
-                  boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
-                }}
-                formatter={(value) => `${formatCurrency(value * 1000)}`}
-              />
-              <Bar
-                dataKey="Faturamento"
-                shape={<RoundedBar />}
-                fill="#3b82f6"
-                barSize={30}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+        <div style={{ ...styles.cardBase, ...styles.mainChartCard }}>
+          <h3 style={styles.cardTitle}>Faturamento</h3>
+          <div style={styles.chartWrapper}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={barChartData}
+                margin={{ top: 20, right: 10, left: -20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis
+                  tickFormatter={(val) => `R$${val}k`}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip
+                  cursor={{ fill: "transparent" }}
+                  formatter={(value) => formatCurrency(value * 1000)}
+                />
+                <Bar
+                  dataKey="Faturamento"
+                  shape={<RoundedBar />}
+                  fill="#3b82f6"
+                  barSize={24}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div
-          style={{
-            ...styles.cardBase,
-            ...styles.sellersCard,
-            ...(hoveredCard === "sellers" && styles.cardHover),
-          }}
-          onMouseEnter={() => setHoveredCard("sellers")}
-          onMouseLeave={() => setHoveredCard(null)}
-        >
+        <div style={{ ...styles.cardBase, ...styles.sellersCard }}>
           <h3 style={styles.cardTitle}>Melhores Clientes</h3>
           <ul style={styles.sellersList}>
-            {/* A renderização agora usa a lista processada */}
             {processedBestClients.map((client) => (
-              <li onClick={() => goToClient(client.id)} key={client.id} style={styles.sellerItem}>
+              <li
+                onClick={() => navigate(`/platform/clients/${client.id}`)}
+                key={client.id}
+                style={styles.sellerItem}
+              >
                 <ImageWithLoader
                   src={
                     client.profilePictureUrl ||
@@ -266,20 +211,20 @@ function ContractsDashboard() {
                   }
                   alt={client.name}
                   style={styles.sellerAvatar}
-                />{" "}
+                />
                 <div style={styles.sellerInfo}>
                   <span style={styles.sellerName}>{client.name}</span>
                   <div style={styles.progressBar}>
                     <div
                       style={{
                         ...styles.progress,
-                        width: `${(client.amount / topClientGoal) * 100}%`,
+                        width: `${(client.displayAmount / topValue) * 100}%`,
                       }}
                     ></div>
                   </div>
                 </div>
                 <span style={styles.sellerSales}>
-                  {formatCurrency(client.amount)}
+                  {formatCurrencyShort(client.displayAmount)}
                 </span>
               </li>
             ))}

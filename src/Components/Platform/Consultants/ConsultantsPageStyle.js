@@ -1,5 +1,5 @@
 const styles = {
-  pageContainer: { fontFamily: "'Poppins', sans-serif" },
+  pageContainer: { fontFamily: "'Poppins', sans-serif", padding: 40 },
   pageHeader: { marginBottom: "24px" },
   headerTitle: { fontSize: "2.25rem", fontWeight: 700, color: "#1a202c" },
   controlsHeader: {

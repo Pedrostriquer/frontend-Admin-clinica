@@ -133,10 +133,7 @@ function WithdrawalsPage() {
 
     try {
       startLoading();
-      await withdrawServices.updateWithdrawalStatus(
-        idsToUpdate,
-        newStatus
-      );
+      await withdrawServices.updateWithdrawalStatus(idsToUpdate, newStatus);
       setSelectedIds((prev) => {
         const newSet = new Set(prev);
         idsToUpdate.forEach((id) => newSet.delete(id));
@@ -160,6 +157,7 @@ function WithdrawalsPage() {
       <header style={styles.withdrawalsPageHeader}>
         <h1 style={styles.headerH1}>Validar Saques</h1>
       </header>
+
       <div style={styles.tableControlsHeader}>
         <div style={styles.searchBox}>
           <i
@@ -169,7 +167,7 @@ function WithdrawalsPage() {
           <input
             type="text"
             name="searchTerm"
-            placeholder="Buscar por cliente, CPF ou telefone..."
+            placeholder="Buscar por cliente, CPF..."
             value={filters.searchTerm}
             onChange={handleFilterChange}
             style={styles.searchInput}
@@ -192,134 +190,145 @@ function WithdrawalsPage() {
             style={styles.createWithdrawalButton}
             onClick={handleGoToCreateWithdrawal}
           >
-            <i className="fa-solid fa-plus"></i> Realizar Novo Saque
+            <i className="fa-solid fa-plus"></i>{" "}
+            <span className="btn-text">Novo Saque</span>
           </button>
         </div>
       </div>
+
       {selectedIds.size > 0 && (
         <div style={styles.bulkActionsBar}>
-          <span>{selectedIds.size} selecionado(s)</span>
-          <div>
+          <span style={styles.bulkText}>{selectedIds.size} selecionado(s)</span>
+          <div style={styles.bulkButtonsGroup}>
             <button
               onClick={() => handleUpdateStatus(Array.from(selectedIds), 2)}
               style={{ ...styles.bulkActionButton, ...styles.approveBtn }}
             >
-              Aprovar Selecionados
+              Aprovar
             </button>
             <button
               onClick={() => handleUpdateStatus(Array.from(selectedIds), 3)}
               style={{ ...styles.bulkActionButton, ...styles.denyBtn }}
             >
-              Negar Selecionados
+              Negar
             </button>
           </div>
         </div>
       )}
+
       <div style={styles.withdrawalsTableCard}>
-        <table style={styles.withdrawalsTable}>
-          <thead>
-            <tr>
-              <th style={{ ...styles.tableHeaderCell, width: "40px" }}>
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAllOnPage}
-                  checked={isAllSelectedOnPage}
-                />
-              </th>
-              <th style={styles.tableHeaderCell}>Cliente</th>
-              <th style={styles.tableHeaderCell}>CPF</th>
-              <th style={styles.tableHeaderCell}>Data</th>
-              <th style={styles.tableHeaderCell}>Valor</th>
-              <th style={styles.tableHeaderCell}>Status</th>
-              <th style={styles.tableHeaderCell}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
+        <div style={styles.tableWrapper}>
+          <table style={styles.withdrawalsTable}>
+            <thead>
               <tr>
-                <td
-                  colSpan="7"
-                  style={{ textAlign: "center", padding: "20px" }}
-                >
-                  Buscando saques...
-                </td>
+                <th style={{ ...styles.tableHeaderCell, width: "40px" }}>
+                  <input
+                    type="checkbox"
+                    onChange={handleSelectAllOnPage}
+                    checked={isAllSelectedOnPage}
+                  />
+                </th>
+                <th style={styles.tableHeaderCell}>Cliente</th>
+                <th style={styles.tableHeaderCell}>CPF</th>
+                <th style={styles.tableHeaderCell}>Data</th>
+                <th style={styles.tableHeaderCell}>Valor</th>
+                <th style={styles.tableHeaderCell}>Status</th>
+                <th style={styles.tableHeaderCell}>Ações</th>
               </tr>
-            ) : withdrawals.length > 0 ? (
-              withdrawals.map((w) => (
-                <tr
-                  key={w.id}
-                  style={{
-                    ...styles.tableRow,
-                    ...(selectedIds.has(w.id) ? styles.tableRowSelected : {}),
-                  }}
-                  onClick={() => handleNavigateToDetail(w.id)}
-                >
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
                   <td
-                    style={styles.tableCell}
-                    onClick={(e) => e.stopPropagation()}
+                    colSpan="7"
+                    style={{ textAlign: "center", padding: "20px" }}
                   >
-                    {w.status === 1 && (
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(w.id)}
-                        onChange={() => handleSelect(w.id)}
-                      />
-                    )}
-                  </td>
-                  <td style={styles.tableCell}>{w.client.name}</td>
-                  <td style={styles.tableCell}>{w.client.cpfCnpj}</td>
-                  <td style={styles.tableCell}>{formatDate(w.dateCreated)}</td>
-                  <td style={styles.tableCell}>
-                    {formatCurrency(w.amountWithdrawn)}
-                  </td>
-                  <td style={styles.tableCell}>
-                    <span
-                      style={{
-                        ...styles.statusBadge,
-                        ...styles[`status${statusStyleMap[w.status]}`],
-                      }}
-                    >
-                      {statusMap[w.status]}
-                    </span>
-                  </td>
-                  <td
-                    style={styles.tableCell}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {w.status === 1 && (
-                      <div style={styles.actionButtons}>
-                        <button
-                          onClick={() => handleUpdateStatus([w.id], 2)}
-                          style={{
-                            ...styles.actionButton,
-                            ...styles.approveBtn,
-                          }}
-                        >
-                          <i className="fa-solid fa-check"></i>
-                        </button>
-                        <button
-                          onClick={() => handleUpdateStatus([w.id], 3)}
-                          style={{ ...styles.actionButton, ...styles.denyBtn }}
-                        >
-                          <i className="fa-solid fa-xmark"></i>
-                        </button>
-                      </div>
-                    )}
+                    Buscando saques...
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="7"
-                  style={{ textAlign: "center", padding: "20px" }}
-                >
-                  Nenhuma solicitação de saque encontrada.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ) : withdrawals.length > 0 ? (
+                withdrawals.map((w) => (
+                  <tr
+                    key={w.id}
+                    style={{
+                      ...styles.tableRow,
+                      ...(selectedIds.has(w.id) ? styles.tableRowSelected : {}),
+                    }}
+                    onClick={() => handleNavigateToDetail(w.id)}
+                  >
+                    <td
+                      style={styles.tableCell}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {w.status === 1 && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(w.id)}
+                          onChange={() => handleSelect(w.id)}
+                        />
+                      )}
+                    </td>
+                    <td style={styles.tableCell}>{w.client.name}</td>
+                    <td style={styles.tableCell}>{w.client.cpfCnpj}</td>
+                    <td style={styles.tableCell}>
+                      {formatDate(w.dateCreated)}
+                    </td>
+                    <td style={{ ...styles.tableCell, fontWeight: 600 }}>
+                      {formatCurrency(w.amountWithdrawn)}
+                    </td>
+                    <td style={styles.tableCell}>
+                      <span
+                        style={{
+                          ...styles.statusBadge,
+                          ...styles[`status${statusStyleMap[w.status]}`],
+                        }}
+                      >
+                        {statusMap[w.status]}
+                      </span>
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {w.status === 1 && (
+                        <div style={styles.actionButtons}>
+                          <button
+                            onClick={() => handleUpdateStatus([w.id], 2)}
+                            style={{
+                              ...styles.actionButton,
+                              ...styles.approveBtn,
+                            }}
+                          >
+                            <i className="fa-solid fa-check"></i>
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus([w.id], 3)}
+                            style={{
+                              ...styles.actionButton,
+                              ...styles.denyBtn,
+                            }}
+                          >
+                            <i className="fa-solid fa-xmark"></i>
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="7"
+                    style={{ textAlign: "center", padding: "20px" }}
+                  >
+                    Nenhuma solicitação de saque encontrada.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
         <div style={styles.paginationContainer}>
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -332,7 +341,7 @@ function WithdrawalsPage() {
             Anterior
           </button>
           <span style={styles.paginationSpan}>
-            Página {currentPage} de {totalPages || 1}
+            {currentPage} / {totalPages || 1}
           </span>
           <button
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}

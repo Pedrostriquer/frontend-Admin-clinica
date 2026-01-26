@@ -13,6 +13,7 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
   const [displayLocation, setDisplayLocation] = useState(0);
   const [isActive, setIsActive] = useState(true);
   const [showFormBuilder, setShowFormBuilder] = useState(false);
+  const [activeTab, setActiveTab] = useState("config");
   const [formSchema, setFormSchema] = useState([
     {
       id: "1",
@@ -37,9 +38,8 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
     const textarea = textareaRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const text = htmlContent;
-    const before = text.substring(0, start);
-    const after = text.substring(end, text.length);
+    const before = htmlContent.substring(0, start);
+    const after = htmlContent.substring(end, htmlContent.length);
     setHtmlContent(before + "{{FORM}}" + after);
   };
 
@@ -70,7 +70,6 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
       alert("Dê um nome à campanha");
       return;
     }
-
     startLoading();
     try {
       const payload = {
@@ -116,7 +115,26 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
   return (
     <div className="pu-create-overlay">
       <div className="pu-create-window">
-        <div className="pu-create-sidebar">
+        <div className="pu-mobile-tabs">
+          <button
+            className={activeTab === "config" ? "active" : ""}
+            onClick={() => setActiveTab("config")}
+          >
+            Configuração
+          </button>
+          <button
+            className={activeTab === "preview" ? "active" : ""}
+            onClick={() => setActiveTab("preview")}
+          >
+            Visualização
+          </button>
+        </div>
+
+        <div
+          className={`pu-create-sidebar ${
+            activeTab === "config" ? "show-mobile" : "hide-mobile"
+          }`}
+        >
           <div className="pu-sidebar-header">
             <i className="fa-solid fa-wand-magic-sparkles"></i>
             <h2>Novo PopUp</h2>
@@ -146,7 +164,7 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
             </div>
 
             <div className="pu-input-group">
-              <label>Aparecer após quantos segundos?</label>
+              <label>Delay (segundos)</label>
               <input
                 type="number"
                 value={displayDelaySeconds}
@@ -158,10 +176,7 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
             <div className="pu-input-group">
               <label>Editor HTML</label>
               <div className="pu-editor-toolbar">
-                <button
-                  onClick={insertFormShortcode}
-                  title="Inserir Marcador de Formulário"
-                >
+                <button onClick={insertFormShortcode}>
                   <i className="fa-solid fa-wpforms"></i> + Inserir Formulário
                 </button>
               </div>
@@ -169,25 +184,11 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
                 ref={textareaRef}
                 value={htmlContent}
                 onChange={(e) => setHtmlContent(e.target.value)}
-                placeholder="Insira seu HTML aqui..."
               />
-              <small>
-                Use <code>{"{{FORM}}"}</code> para posicionar o formulário.
-              </small>
             </div>
 
             <div className="pu-switch-group">
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: "0.85rem",
-                  color: "#64748b",
-                }}
-              >
+              <label className="pu-checkbox-label">
                 <input
                   type="checkbox"
                   checked={showFormBuilder}
@@ -200,13 +201,13 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
             {showFormBuilder && (
               <div className="pu-form-builder-area">
                 <div className="pu-builder-header">
-                  <span>Campos do Formulário</span>
+                  <span>Campos</span>
                   <div className="pu-builder-actions">
                     <button onClick={() => addFormField("input")}>
-                      <i className="fa-solid fa-plus"></i> Input
+                      + Input
                     </button>
                     <button onClick={() => addFormField("textArea")}>
-                      <i className="fa-solid fa-plus"></i> Texto
+                      + Texto
                     </button>
                   </div>
                 </div>
@@ -244,18 +245,8 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
               </div>
             )}
 
-            <div className="pu-switch-group" style={{ marginTop: "20px" }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: "0.85rem",
-                  color: "#64748b",
-                }}
-              >
+            <div className="pu-switch-group">
+              <label className="pu-checkbox-label">
                 <input
                   type="checkbox"
                   checked={isActive}
@@ -271,14 +262,18 @@ const CreatePopUpModal = ({ onClose, onSave }) => {
               Descartar
             </button>
             <button className="pu-btn-save" onClick={handleSave}>
-              Publicar Campanha
+              Publicar
             </button>
           </div>
         </div>
 
-        <div className="pu-preview-container">
+        <div
+          className={`pu-preview-container ${
+            activeTab === "preview" ? "show-mobile" : "hide-mobile"
+          }`}
+        >
           <div className="pu-preview-header">
-            <i className="fa-solid fa-eye"></i> Visualização em Tempo Real
+            <i className="fa-solid fa-eye"></i> Visualização
           </div>
           <div className="pu-preview-canvas">
             <div className="pu-mock-browser">

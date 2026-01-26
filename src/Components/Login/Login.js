@@ -1,31 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
-import styles from './LoginStyle';
+import styles from "./LoginStyle";
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focusedInput, setFocusedInput] = useState(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoggingIn(true);
     try {
       await login(email, password, rememberMe);
     } catch (err) {
-      setError('Email ou senha inválidos. Tente novamente.');
+      setError("Email ou senha inválidos. Tente novamente.");
       setIsLoggingIn(false);
     }
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
 
   return (
@@ -33,76 +29,134 @@ function Login() {
       <style>{`
         @keyframes pulse {
           0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.2); opacity: 0.7; }
+          50% { transform: scale(1.1); opacity: 0.7; }
           100% { transform: scale(1); opacity: 1; }
         }
+        @media (max-width: 900px) {
+          .admin-branding-panel { display: none !important; }
+          .admin-form-area { width: 100% !important; flex: none !important; padding: 20px !important; }
+          .mobile-header { display: flex !important; }
+        }
       `}</style>
-      <div style={styles.loginBranding}>
+
+      <div className="admin-branding-panel" style={styles.loginBranding}>
         <div style={styles.brandingContent}>
-          <i className="fa-solid fa-gem" style={styles.brandingIcon}></i>
-          <h1 style={styles.brandingH1}>Gemas brilhantes</h1>
-          <p style={styles.brandingP}>Plataforma de Administração de Contratos e E-commerce de Gemas.</p>
+          <div style={styles.iconCircle}>
+            <i className="fa-solid fa-gem" style={styles.brandingIcon}></i>
+          </div>
+          <h1 style={styles.brandingH1}>Gemas Brilhantes</h1>
+          <p style={styles.brandingP}>
+            Gestão inteligente de contratos e ativos preciosos em um só lugar.
+          </p>
         </div>
       </div>
-      <div style={styles.loginFormArea}>
+
+      <div className="admin-form-area" style={styles.loginFormArea}>
         {isLoggingIn && (
           <div style={styles.loadingOverlay}>
-            <i className="fa-solid fa-gem" style={styles.loadingIcon}></i>
-            <p style={styles.loadingText}>Verificando credenciais...</p>
+            <div
+              className="pu-spinner"
+              style={{
+                width: "40px",
+                height: "40px",
+                border: "3px solid #f3f3f3",
+                borderTop: "3px solid #007bff",
+                borderRadius: "50%",
+                animation: "spin 0.8s linear infinite",
+              }}
+            ></div>
+            <p style={styles.loadingText}>Autenticando...</p>
           </div>
         )}
+
         <form style={styles.loginForm} onSubmit={handleLogin}>
-          <h2 style={styles.loginFormH2}>Bem-vindo de volta!</h2>
-          <p style={styles.formSubtitle}>Faça login para acessar o painel.</p>
-
-          {error && <p style={styles.errorMessage}>{error}</p>}
-          
-          <div style={styles.inputGroup}>
-            <i className="fa-solid fa-envelope" style={{...styles.inputIcon, ...(focusedInput === 'email' && styles.inputIconFocus)}}></i>
-            <input 
-              type="email" 
-              placeholder="Email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required 
-              style={{...styles.inputField, ...(focusedInput === 'email' && styles.inputFieldFocus)}}
-              onFocus={() => setFocusedInput('email')}
-              onBlur={() => setFocusedInput(null)}
-            />
-          </div>
-          
-          <div style={styles.inputGroup}>
-            <i className="fa-solid fa-lock" style={{...styles.inputIcon, ...(focusedInput === 'password' && styles.inputIconFocus)}}></i>
-            <input 
-              type={showPassword ? 'text' : 'password'} 
-              placeholder="Senha" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required 
-              style={{...styles.inputField, ...(focusedInput === 'password' && styles.inputFieldFocus)}}
-              onFocus={() => setFocusedInput('password')}
-              onBlur={() => setFocusedInput(null)}
-            />
-            <i 
-              className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}
-              style={{...styles.passwordToggleIcon, ...(focusedInput === 'password' && styles.inputIconFocus)}}
-              onClick={togglePasswordVisibility}
-            ></i>
+          <div className="mobile-header" style={styles.mobileHeader}>
+            <i className="fa-solid fa-gem" style={styles.mobileIcon}></i>
+            <h2 style={styles.mobileTitle}>Gemas Brilhantes</h2>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-            <input
+          <div style={styles.textHeader}>
+            <h2 style={styles.loginFormH2}>Painel Administrativo</h2>
+            <p style={styles.formSubtitle}>
+              Entre com suas credenciais de acesso.
+            </p>
+          </div>
+
+          {error && (
+            <div style={styles.errorMessage}>
+              <i className="fa-solid fa-triangle-exclamation"></i> {error}
+            </div>
+          )}
+
+          <div style={styles.inputGroup}>
+            <label style={styles.fieldLabel}>E-mail</label>
+            <div
+              style={{
+                ...styles.inputWrapper,
+                ...(focusedInput === "email" && styles.inputWrapperFocus),
+              }}
+            >
+              <i className="fa-solid fa-envelope" style={styles.inputIcon}></i>
+              <input
+                type="email"
+                placeholder="exemplo@gemas.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={styles.inputField}
+                onFocus={() => setFocusedInput("email")}
+                onBlur={() => setFocusedInput(null)}
+              />
+            </div>
+          </div>
+
+          <div style={styles.inputGroup}>
+            <label style={styles.fieldLabel}>Senha</label>
+            <div
+              style={{
+                ...styles.inputWrapper,
+                ...(focusedInput === "password" && styles.inputWrapperFocus),
+              }}
+            >
+              <i className="fa-solid fa-lock" style={styles.inputIcon}></i>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={styles.inputField}
+                onFocus={() => setFocusedInput("password")}
+                onBlur={() => setFocusedInput(null)}
+              />
+              <i
+                className={`fa-solid ${
+                  showPassword ? "fa-eye-slash" : "fa-eye"
+                }`}
+                style={styles.passwordToggleIcon}
+                onClick={() => setShowPassword(!showPassword)}
+              ></i>
+            </div>
+          </div>
+
+          <div style={styles.optionsRow}>
+            <label style={styles.checkboxLabel}>
+              <input
                 type="checkbox"
-                id="rememberMe"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                style={{ marginRight: '8px' }}
-            />
-            <label htmlFor="rememberMe" style={{ color: '#555', fontSize: '0.9rem' }}>Lembrar de mim</label>
+                style={styles.checkbox}
+              />
+              Mantenha-me conectado
+            </label>
           </div>
-          
-          <button type="submit" style={styles.loginButton} disabled={isLoggingIn}>
-            {isLoggingIn ? 'Entrando...' : 'Entrar'}
+
+          <button
+            type="submit"
+            style={styles.loginButton}
+            disabled={isLoggingIn}
+          >
+            {isLoggingIn ? "Processando..." : "Acessar Painel"}
           </button>
         </form>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import MyOffers from "./MyOffers/MyOffers";
 import styles from "./OffersPageStyle";
 import offerService from "../../../dbServices/offerService";
@@ -14,6 +14,16 @@ const GlobalStyle = () => (
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+        @media (max-width: 992px) {
+            .creation-grid { grid-template-columns: 1fr !important; }
+            .preview-section { border-left: none !important; border-top: 1px solid #e2e8f0; }
+            .offers-container { padding: 1rem !important; }
+            .page-title { font-size: 1.75rem !important; }
+        }
+        @media (max-width: 600px) {
+            .toggle-container { max-width: 100% !important; flex-direction: column; }
+            .save-btn { width: 100% !important; }
         }
     `}</style>
 );
@@ -188,20 +198,17 @@ function OffersPage() {
   };
 
   const handleCreateOrUpdateOffer = async () => {
-    if (
-      !newOffer.title ||
-      !newOffer.mideaUrl ||
-      !newOffer.categoryName
-    ) {
+    if (!newOffer.title || !newOffer.mideaUrl || !newOffer.categoryName) {
       alert("Por favor, preencha os campos obrigatórios.");
       return;
     }
     setLoading((prev) => ({ ...prev, form: true }));
     try {
       if (editingOffer) {
-        await offerService.updateOffer(
-          editingOffer.id,
-          { ...newOffer, id: editingOffer.id }        );
+        await offerService.updateOffer(editingOffer.id, {
+          ...newOffer,
+          id: editingOffer.id,
+        });
         alert("Anúncio atualizado com sucesso!");
       } else {
         await offerService.createOffer(newOffer);
@@ -225,7 +232,7 @@ function OffersPage() {
         await fetchInitialData();
       } catch (error) {
         console.error("Erro ao excluir anúncio:", error);
-        alert("Não foi possível excluir o anúncio.");
+        alert("Não foi possível excluir the anúncio.");
         setLoading((prev) => ({ ...prev, page: false }));
       }
     }
@@ -359,15 +366,17 @@ function OffersPage() {
     categories.find((cat) => cat.name === newOffer.categoryName)?.id || "";
 
   return (
-    <div style={styles.offersPageContainer}>
+    <div style={styles.offersPageContainer} className="offers-container">
       <GlobalStyle />
       <header style={styles.offersPageHeader}>
-        <h1 style={styles.headerH1}>Gerenciador de Anúncios</h1>
+        <h1 style={styles.headerH1} className="page-title">
+          Gerenciador de Anúncios
+        </h1>
         <p style={styles.headerP}>
           Crie, configure e gerencie os anúncios para seus clientes.
         </p>
       </header>
-      <div style={styles.viewToggleContainer}>
+      <div style={styles.viewToggleContainer} className="toggle-container">
         <button
           style={
             view === "creator" ? styles.toggleButtonActive : styles.toggleButton
@@ -393,7 +402,7 @@ function OffersPage() {
       {view === "creator" && (
         <div style={styles.offerCreationCard}>
           {loading.form && <LoadingOverlay />}
-          <div style={styles.creationCardGrid}>
+          <div style={styles.creationCardGrid} className="creation-grid">
             <div style={styles.offerFormSection}>
               <div style={styles.cardHeaderNoBorder}>
                 <i
@@ -517,6 +526,7 @@ function OffersPage() {
               </div>
               <div style={styles.cardFooter}>
                 <button
+                  className="save-btn"
                   style={{
                     ...styles.saveOfferButton,
                     ...(loading.form && styles.saveOfferButtonDisabled),
@@ -528,7 +538,7 @@ function OffersPage() {
                 </button>
               </div>
             </div>
-            <div style={styles.offerPreviewSection}>
+            <div style={styles.offerPreviewSection} className="preview-section">
               <div style={styles.cardHeaderNoBorder}>
                 <i
                   className="fa-solid fa-eye"

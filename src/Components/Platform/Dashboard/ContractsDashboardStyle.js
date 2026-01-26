@@ -1,111 +1,95 @@
 const styles = {
-  // Estilos da Página
   dashboardContainer: {
     fontFamily: "'Poppins', sans-serif",
+    padding: "20px",
+    maxWidth: "1600px",
+    margin: "0 auto",
+    boxSizing: "border-box",
+    width: "100%",
   },
   dashboardHeader: {
     marginBottom: "32px",
   },
   headerH1: {
-    fontSize: "2.25rem",
+    fontSize: "clamp(1.5rem, 5vw, 2.25rem)",
     fontWeight: 700,
     color: "#1a202c",
     margin: 0,
   },
   headerP: {
-    fontSize: "1rem",
+    fontSize: "clamp(0.875rem, 2vw, 1rem)",
     color: "#718096",
     marginTop: "4px",
   },
-
-  // Grid dos Cards
   kpiGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(4, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
     gap: "20px",
     marginBottom: "32px",
   },
   mainGrid: {
     display: "grid",
-    gridTemplateColumns: "2fr 1fr",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
     gap: "24px",
   },
-
-  // Estilos Base dos Cards
   cardBase: {
-    background: "rgba(255, 255, 255, 0.6)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-    borderRadius: "16px",
-    border: "1px solid rgba(255, 255, 255, 0.25)",
-    boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.04)",
-    transition: "all 0.25s ease-in-out",
+    background: "#ffffff",
+    borderRadius: "20px",
+    border: "1px solid #edf2f7",
+    boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.03)",
+    transition: "all 0.3s ease",
+    overflow: "hidden",
   },
-  cardHover: {
-    transform: "translateY(-5px)",
-    boxShadow: "0px 8px 25px rgba(0, 0, 0, 0.06)",
-  },
-
-  // Card KPI
   kpiCard: {
     display: "flex",
     justifyContent: "space-between",
     position: "relative",
-    overflow: "hidden",
-    padding: "16px",
+    padding: "20px",
   },
   kpiBorder: {
     position: "absolute",
     left: 0,
-    top: 0,
-    bottom: 0,
-    width: "5px",
+    top: "25%",
+    bottom: "25%",
+    width: "4px",
     backgroundColor: "#3b82f6",
+    borderRadius: "0 4px 4px 0",
   },
   kpiContent: {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    paddingLeft: "15px",
+    paddingLeft: "10px",
   },
   kpiTitle: {
-    fontSize: "0.8rem",
+    fontSize: "0.85rem",
     fontWeight: 500,
-    color: "#4a5568",
+    color: "#718096",
     marginBottom: "4px",
   },
   kpiValue: {
-    fontSize: "1.4rem",
-    fontWeight: 600,
+    fontSize: "1.5rem",
+    fontWeight: 700,
     color: "#1a202c",
-    marginBottom: "6px",
-  },
-  kpiChange: {
-    fontSize: "0.8rem",
-    fontWeight: 500,
-  },
-  kpiChangePositive: {
-    color: "#10b981",
-  },
-  kpiChangeNegative: {
-    color: "#ef4444",
   },
   kpiChart: {
-    width: "70px",
-    height: "45px",
-    alignSelf: "center",
-    opacity: 0.8,
+    width: "80px",
+    height: "50px",
   },
-
-  // Card Principal (Gráfico e Vendedores)
   mainChartCard: {
-    padding: "28px",
+    padding: "24px",
+    minHeight: "450px",
+  },
+  chartWrapper: {
+    width: "100%",
+    height: "350px",
+    marginTop: "20px",
   },
   sellersCard: {
-    padding: "28px",
+    padding: "24px",
   },
   cardTitle: {
-    fontSize: "1.25rem",
+    fontSize: "1.1rem",
     fontWeight: 600,
     color: "#2d3748",
     margin: "0 0 24px 0",
@@ -116,68 +100,63 @@ const styles = {
     margin: 0,
     display: "flex",
     flexDirection: "column",
-    gap: "24px",
+    gap: "20px",
   },
   sellerItem: {
     display: "flex",
     alignItems: "center",
-    gap: "16px",
+    gap: "12px",
+    cursor: "pointer",
+    padding: "8px",
+    borderRadius: "12px",
+    transition: "background 0.2s",
   },
   sellerAvatar: {
-    width: "40px",
-    height: "40px",
-    borderRadius: "50%",
+    width: "44px",
+    height: "44px",
+    borderRadius: "12px",
+    objectFit: "cover",
+    backgroundColor: "#f7fafc",
   },
   sellerInfo: {
     flexGrow: 1,
+    minWidth: 0,
   },
   sellerName: {
     fontSize: "0.9rem",
     fontWeight: 500,
     color: "#2d3748",
-    marginBottom: "8px",
+    marginBottom: "6px",
     display: "block",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   sellerSales: {
-    fontSize: "0.9rem",
+    fontSize: "0.85rem",
     fontWeight: 600,
     color: "#1a202c",
+    minWidth: "75px",
+    textAlign: "right",
   },
   progressBar: {
     width: "100%",
-    height: "8px",
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    borderRadius: "4px",
-    overflow: "hidden",
+    height: "6px",
+    backgroundColor: "#edf2f7",
+    borderRadius: "3px",
   },
   progress: {
     height: "100%",
     backgroundColor: "#3b82f6",
-    borderRadius: "4px",
+    borderRadius: "3px",
+    transition: "width 1s ease-in-out",
   },
-  progress: {
-    height: "100%",
-    backgroundColor: "#3b82f6",
-    borderRadius: "4px",
-  },
-
-  // 👇 ADICIONE OS ESTILOS ABAIXO 👇
-  skeletonLoader: {
-    width: "100%",
-    height: "100%",
-    borderRadius: "50%", // Para manter a forma circular
-    background: "linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%)",
-    backgroundSize: "200% 100%",
-    animation: "shimmer 1.5s infinite",
-  },
-
-  "@keyframes shimmer": {
-    "0%": {
-      backgroundPosition: "200% 0",
-    },
-    "100%": {
-      backgroundPosition: "-200% 0",
-    },
+  loadingState: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    color: "#718096",
   },
 };
 

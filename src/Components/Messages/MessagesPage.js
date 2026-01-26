@@ -21,6 +21,14 @@ const GlobalStyle = () => (
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        @media (max-width: 768px) {
+            .msg-page-header { flex-direction: column; align-items: stretch !important; gap: 20px; }
+            .msg-page-title { font-size: 1.8rem !important; }
+            .msg-detail-content { padding-left: 20px !important; margin: 0 !important; }
+            .msg-footer { flex-direction: column; align-items: stretch !important; gap: 15px; }
+            .msg-item-header { gap: 12px !important; }
+        }
     `}</style>
 );
 
@@ -48,25 +56,22 @@ const ClientSelector = ({
   const [isSearching, setIsSearching] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const searchClients = useCallback(
-    async (search) => {
-      if (!search) {
-        setSearchResults([]);
-        return;
-      }
-      setIsSearching(true);
-      try {
-        const data = await clientServices.getClients(search, 1, 15);
-        setSearchResults(data.items || []);
-      } catch (error) {
-        console.error("Erro ao buscar clientes", error);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    },
-    []
-  );
+  const searchClients = useCallback(async (search) => {
+    if (!search) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const data = await clientServices.getClients(search, 1, 15);
+      setSearchResults(data.items || []);
+    } catch (error) {
+      console.error("Erro ao buscar clientes", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
   useEffect(() => {
     searchClients(debouncedSearchTerm);
@@ -113,7 +118,7 @@ const ClientSelector = ({
           )}
           <input
             type="text"
-            placeholder="Buscar cliente por nome ou CPF..."
+            placeholder="Buscar cliente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ ...styles.formInput, marginBottom: "10px" }}
@@ -283,7 +288,11 @@ const MessageItem = ({ message, isExpanded, onToggle, onDelete }) => {
         animationDelay: `${message.index * 0.05}s`,
       }}
     >
-      <div style={styles.messageHeader} onClick={onToggle}>
+      <div
+        className="msg-item-header"
+        style={styles.messageHeader}
+        onClick={onToggle}
+      >
         <div style={styles.messageIcon}>
           <FontAwesomeIcon icon={isToAll ? faUsers : faEnvelopeOpenText} />
         </div>
@@ -309,7 +318,7 @@ const MessageItem = ({ message, isExpanded, onToggle, onDelete }) => {
             : styles.messageDetailCollapsed),
         }}
       >
-        <div style={styles.messageDetailContent}>
+        <div className="msg-detail-content" style={styles.messageDetailContent}>
           <div style={styles.recipientsContainer}>
             <h4 style={styles.recipientsTitle}>Destinatários</h4>
             {isToAll ? (
@@ -335,6 +344,7 @@ const MessageItem = ({ message, isExpanded, onToggle, onDelete }) => {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      fontSize: "0.7rem",
                     }}
                   >
                     +{message.clients.length - 5}
@@ -344,7 +354,7 @@ const MessageItem = ({ message, isExpanded, onToggle, onDelete }) => {
             )}
           </div>
           <p style={styles.messageText}>{message.text}</p>
-          <div style={styles.messageFooter}>
+          <div className="msg-footer" style={styles.messageFooter}>
             {message.redirectUrl ? (
               <a
                 href={message.redirectUrl}
@@ -352,7 +362,7 @@ const MessageItem = ({ message, isExpanded, onToggle, onDelete }) => {
                 rel="noopener noreferrer"
                 style={styles.messageLink}
               >
-                <FontAwesomeIcon icon={faLink} /> {message.redirectUrl}
+                <FontAwesomeIcon icon={faLink} /> Link Externo
               </a>
             ) : (
               <div></div>
@@ -435,8 +445,10 @@ const MessagesPage = () => {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}
       />
-      <div style={styles.pageHeader}>
-        <h1 style={styles.pageTitle}>Central de Mensagens</h1>
+      <div className="msg-page-header" style={styles.pageHeader}>
+        <h1 className="msg-page-title" style={styles.pageTitle}>
+          Central de Mensagens
+        </h1>
         <button
           style={{
             ...styles.newMessageButton,
@@ -451,7 +463,9 @@ const MessagesPage = () => {
       </div>
       <div style={styles.messageList}>
         {loading ? (
-          <p>Carregando mensagens...</p>
+          <p style={{ textAlign: "center", color: "#64748b" }}>
+            Carregando mensagens...
+          </p>
         ) : (
           messages.map((msg, index) => (
             <MessageItem

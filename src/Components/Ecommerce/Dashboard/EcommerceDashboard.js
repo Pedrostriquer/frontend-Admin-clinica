@@ -16,10 +16,10 @@ import { useAuth } from "../../../Context/AuthContext";
 import ecommerceDashboardService from "../../../dbServices/ecommerceDashboardService";
 import formatServices from "../../../formatServices/formatServices";
 
-// --- Componente Customizado para Barras Arredondadas ---
 const RoundedBar = (props) => {
   const { x, y, width, height, fill } = props;
-  const radius = 8;
+  const radius = 6;
+  if (height < 0) return null;
   return (
     <path
       d={`M${x},${y + radius} A${radius},${radius} 0 0 1 ${x + radius},${y} L${
@@ -32,7 +32,6 @@ const RoundedBar = (props) => {
   );
 };
 
-// --- Dados Falsos para o Gráfico de Área (apenas para visual) ---
 const mockAreaData = [
   { v: 10 },
   { v: 15 },
@@ -52,34 +51,26 @@ function EcommerceDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
-
       setIsLoading(true);
       startLoading();
       try {
-        const dashboardData = await ecommerceDashboardService.getDashboardData();
+        const dashboardData =
+          await ecommerceDashboardService.getDashboardData();
         setData(dashboardData);
       } catch (error) {
-        console.error(
-          "Falha ao carregar dados do dashboard de e-commerce:",
-          error
-        );
+        console.error("Erro dashboard:", error);
       } finally {
         setIsLoading(false);
         stopLoading();
       }
     };
     fetchData();
-  }, [token]); // <-- Array de dependências estável (só depende do token)
+  }, [token]);
 
   if (isLoading || !data) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center" }}>
-        Carregando dashboard...
-      </div>
-    );
+    return <div className="dashboard-loading">Carregando indicadores...</div>;
   }
 
-  // --- Mapeamento dos dados da API para o formato que os componentes esperam ---
   const kpiData = [
     {
       title: "Produtos Ativos",
@@ -138,10 +129,7 @@ function EcommerceDashboard() {
             </div>
             <div className="kpi-chart-neumorph">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={kpi.data}
-                  margin={{ top: 5, right: 0, left: 0, bottom: 0 }}
-                >
+                <AreaChart data={kpi.data}>
                   <defs>
                     <linearGradient
                       id="gradient-blue"
@@ -150,7 +138,7 @@ function EcommerceDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -158,7 +146,7 @@ function EcommerceDashboard() {
                     type="monotone"
                     dataKey="v"
                     stroke="#3b82f6"
-                    strokeWidth={2.5}
+                    strokeWidth={2}
                     fill="url(#gradient-blue)"
                   />
                 </AreaChart>
@@ -170,44 +158,47 @@ function EcommerceDashboard() {
 
       <section className="main-grid-neumorph">
         <div className="main-chart-card-neumorph">
-          <h3 className="card-title-neumorph">
-            Faturamento Mensal (Ano Atual)
-          </h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={barChartData}
-              margin={{ top: 20, right: 20, left: -10, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} />
-              <YAxis
-                tickFormatter={(val) => `R$${val}k`}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                cursor={{ fill: "transparent" }}
-                contentStyle={{
-                  background: "rgba(255, 255, 255, 0.7)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "12px",
-                  padding: "12px",
-                  boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
-                }}
-                formatter={(value) => [
-                  `R$ ${formatServices.formatCurrencyBR(value * 1000)}`,
-                  "Faturamento",
-                ]}
-              />
-              <Bar
-                dataKey="Faturamento"
-                shape={<RoundedBar />}
-                fill="#3b82f6"
-                barSize={30}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          <h3 className="card-title-neumorph">Faturamento Mensal (k)</h3>
+          <div className="chart-wrapper-neumorph">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={barChartData}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#e2e8f0"
+                />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#718096" }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#718096" }}
+                />
+                <Tooltip
+                  cursor={{ fill: "transparent" }}
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "none",
+                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                  }}
+                  formatter={(value) => [`R$ ${value}k`, "Faturamento"]}
+                />
+                <Bar
+                  dataKey="Faturamento"
+                  shape={<RoundedBar />}
+                  fill="#3b82f6"
+                  barSize={window.innerWidth < 768 ? 15 : 30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="sellers-card-neumorph">
@@ -215,24 +206,22 @@ function EcommerceDashboard() {
           <ul className="sellers-list-neumorph">
             {topProductsData.length > 0 ? (
               topProductsData.map((product, index) => (
-                <li key={index}>
+                <li key={index} className="seller-item-neumorph">
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="seller-avatar-neumorph product-image"
+                    className="product-image-neumorph"
                   />
                   <div className="seller-info-neumorph">
-                    <span>{product.name}</span>
+                    <span className="product-name-txt">{product.name}</span>
+                    <span className="sales-count-txt">
+                      {product.sales} vendas
+                    </span>
                   </div>
-                  <span className="seller-sales-neumorph">
-                    {product.sales} vendas
-                  </span>
                 </li>
               ))
             ) : (
-              <p style={{ textAlign: "center", color: "#718096" }}>
-                Nenhum produto vendido ainda.
-              </p>
+              <p className="empty-txt">Nenhum produto vendido.</p>
             )}
           </ul>
         </div>
