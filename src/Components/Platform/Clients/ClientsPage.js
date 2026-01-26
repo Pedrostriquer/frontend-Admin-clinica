@@ -19,6 +19,21 @@ const formatDate = (dateString) => {
   });
 };
 
+const formatDateTime = (dateString) => {
+  return dateString 
+    ? new Date(dateString).toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit", // Opcional: remova se não quiser os segundos
+      })
+    : "N/A";
+};
+
+
 const ITEMS_PER_PAGE = 10;
 
 const useDebounce = (value, delay) => {
@@ -217,7 +232,7 @@ function ClientsPage() {
                   </td>
                   <td style={styles.tableCell}>{client.phoneNumber}</td>
                   <td style={styles.tableCell}>
-                    {formatDate(client.dateCreated)}
+                    {formatDateTime(client.dateCreated)}
                   </td>
                   <td style={styles.tableCell}>
                     {formatCurrency(client.balance)}
