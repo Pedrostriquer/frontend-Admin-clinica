@@ -243,6 +243,21 @@ function ClientDetailPage() {
     }
   };
 
+  const handleToggleBlock = async () => {
+    const action = client.isBlocked ? "desbloquear" : "bloquear";
+    if (window.confirm(`Tem certeza que deseja ${action} este cliente?`)) {
+      try {
+        startLoading();
+        await clientServices.toggleBlockClient(clientId); // Certifique-se que esta função existe no seu clientServices.js
+        await fetchClientData(); // Recarrega os dados do cliente para atualizar o estado
+      } catch (error) {
+        alert("Erro ao alterar status de bloqueio.");
+      } finally {
+        stopLoading();
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div style={styles.loadingContainer}>Carregando perfil do cliente...</div>
@@ -360,11 +375,46 @@ function ClientDetailPage() {
               )}
             </div>
             <div>
-              <h1 style={styles.clientName}>{client.name}</h1>
+              <div>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  <h1 style={styles.clientName}>{client.name}</h1>
+                  {client.isBlocked && (
+                    <span
+                      style={{
+                        ...styles.statusBadge,
+                        backgroundColor: "#fee2e2",
+                        color: "#ef4444",
+                      }}
+                    >
+                      Bloqueado
+                    </span>
+                  )}
+                </div>
+                <p style={styles.clientEmail}>{client.email}</p>
+              </div>{" "}
               <p style={styles.clientEmail}>{client.email}</p>
             </div>
           </div>
           <div style={styles.headerActions}>
+            <button
+              onClick={handleToggleBlock}
+              style={{
+                ...styles.actionButton,
+                ...styles.blockButton,
+                backgroundColor: client.isBlocked ? "#dcfce7" : "#fee2e2",
+                color: client.isBlocked ? "#16a34a" : "#dc2626",
+                borderColor: client.isBlocked ? "#16a34a" : "#dc2626",
+              }}
+            >
+              <i
+                className={`fa-solid ${
+                  client.isBlocked ? "fa-unlock" : "fa-user-slash"
+                }`}
+              ></i>
+              {client.isBlocked ? "Ativar Conta" : "Desativar Conta"}
+            </button>
             <button
               onClick={() => setIsBalanceModalOpen(true)}
               style={styles.actionButton}
@@ -403,7 +453,9 @@ function ClientDetailPage() {
             </div>
             <div>
               <p style={styles.statLabel}>Total Investido</p>
-              <p style={styles.statValue}>{client && formatCurrency(client.totalInvested)}</p>
+              <p style={styles.statValue}>
+                {client && formatCurrency(client.totalInvested)}
+              </p>
             </div>
           </div>
           <div style={styles.statCard}>
@@ -412,7 +464,9 @@ function ClientDetailPage() {
             </div>
             <div>
               <p style={styles.statLabel}>Rendimento Total</p>
-              <p style={styles.statValue}>{client && formatCurrency(client.totalIncome)}</p>
+              <p style={styles.statValue}>
+                {client && formatCurrency(client.totalIncome)}
+              </p>
             </div>
           </div>
           {/* <div style={styles.statCard}>

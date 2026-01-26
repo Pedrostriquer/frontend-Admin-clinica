@@ -13,7 +13,7 @@ const clientServices = {
   loginAsClient: async (clientId) => {
     try {
       const response = await api.post(
-        'auth/login/as-client',
+        "auth/login/as-client",
         {},
         {
           headers: {
@@ -38,6 +38,11 @@ const clientServices = {
     }
   },
 
+  toggleBlockClient: async (id) => {
+    const response = await api.patch(`Client/${id}/toggle-block`);
+    return response.data;
+  },
+
   getClientDataById: async (id) => {
     try {
       const response = await api.get(`client/client-data/${id}`); // Interceptor cuida do token
@@ -47,8 +52,7 @@ const clientServices = {
       throw error;
     }
   },
-  
-  
+
   // FUNÇÃO ATUALIZADA PARA ACEITAR PARÂMETROS DE ORDENAÇÃO
   getClients: async (
     searchFilter,
@@ -60,7 +64,7 @@ const clientServices = {
     try {
       const normalizedFilter = normalizeSearchString(searchFilter);
       // Usando 'params' para uma URL mais limpa e adicionando ordenação
-      const response = await api.get('client/search', {
+      const response = await api.get("client/search", {
         params: {
           searchFilter: normalizedFilter,
           pageNumber,
@@ -75,7 +79,7 @@ const clientServices = {
       throw error;
     }
   },
-  
+
   editClient: async (id, updates) => {
     try {
       const response = await api.patch(`client/${id}`, updates, {
@@ -93,14 +97,17 @@ const clientServices = {
       const response = await api.patch(`client/${id}`, updates);
       return response.data;
     } catch (error) {
-      console.error("Erro ao atualizar parcialmente o cliente:", error.response?.data || error);
+      console.error(
+        "Erro ao atualizar parcialmente o cliente:",
+        error.response?.data || error
+      );
       throw error.response?.data || error;
     }
   },
 
   informacoesCarteiraCliente: async (id) => {
     try {
-      const response = await api.get('withdraw/client/wallet-info', {
+      const response = await api.get("withdraw/client/wallet-info", {
         headers: { "Client-ID-Ref": id }, // Interceptor adicionará 'Authorization'
       });
       return response.data;
@@ -109,50 +116,82 @@ const clientServices = {
       throw error;
     }
   },
-  
+
   cadastrar: async (info) => {
     try {
-      const response = await api.post('client', info);
+      const response = await api.post("client", info);
       return response.data;
     } catch (error) {
-      console.error("Erro ao cadastrar cliente:", error.response?.data || error.message);
-      throw (error.response?.data || new Error("Não foi possível completar o cadastro."));
+      console.error(
+        "Erro ao cadastrar cliente:",
+        error.response?.data || error.message
+      );
+      throw (
+        error.response?.data ||
+        new Error("Não foi possível completar o cadastro.")
+      );
     }
   },
-  
+
   requestPasswordReset: async (email) => {
     try {
-      const response = await api.post('verification/forgot-password', { email });
+      const response = await api.post("verification/forgot-password", {
+        email,
+      });
       return response.data;
     } catch (error) {
-      console.error("Erro ao solicitar redefinição de senha:", error.response?.data || error.message);
-      throw (error.response?.data || new Error("Não foi possível solicitar a redefinição de senha."));
+      console.error(
+        "Erro ao solicitar redefinição de senha:",
+        error.response?.data || error.message
+      );
+      throw (
+        error.response?.data ||
+        new Error("Não foi possível solicitar a redefinição de senha.")
+      );
     }
   },
-  
+
   resetPassword: async (verificationCode, newPassword) => {
     try {
-      const response = await api.post('client/reset-password', { verificationCode, newPassword });
+      const response = await api.post("client/reset-password", {
+        verificationCode,
+        newPassword,
+      });
       return response.data;
     } catch (error) {
-      console.error("Erro ao redefinir senha:", error.response?.data || error.message);
-      throw (error.response?.data || new Error("Não foi possível redefinir a senha."));
+      console.error(
+        "Erro ao redefinir senha:",
+        error.response?.data || error.message
+      );
+      throw (
+        error.response?.data || new Error("Não foi possível redefinir a senha.")
+      );
     }
   },
 
   addExtraBalance: async (clientId, amount, description) => {
     try {
-      const response = await api.post('extra', { clientId, amount, description });
+      const response = await api.post("extra", {
+        clientId,
+        amount,
+        description,
+      });
       return response.data;
     } catch (error) {
-      console.error("Erro ao adicionar saldo extra:", error.response?.data || error);
+      console.error(
+        "Erro ao adicionar saldo extra:",
+        error.response?.data || error
+      );
       throw error.response?.data || error;
     }
   },
 
   changePasswordByAdmin: async (clientId, newPassword) => {
     try {
-      const response = await api.post(`client/${clientId}/change-password-admin`, { newPassword });
+      const response = await api.post(
+        `client/${clientId}/change-password-admin`,
+        { newPassword }
+      );
       return response.data;
     } catch (error) {
       console.error("Erro ao alterar senha:", error.response?.data || error);
@@ -162,7 +201,10 @@ const clientServices = {
 
   associateConsultant: async (clientId, consultantId) => {
     try {
-      const response = await api.post(`client/${clientId}/associate-consultant/${consultantId}`, null);
+      const response = await api.post(
+        `client/${clientId}/associate-consultant/${consultantId}`,
+        null
+      );
       return response.data;
     } catch (error) {
       console.error("Erro ao associar consultor:", error);
@@ -185,8 +227,13 @@ const clientServices = {
       const response = await api.delete(`client/${id}/profile-picture`);
       return response.data;
     } catch (error) {
-      console.error("Erro ao deletar a foto:", error.response?.data || error.message);
-      throw (error.response?.data || new Error("Não foi possível deletar a foto."));
+      console.error(
+        "Erro ao deletar a foto:",
+        error.response?.data || error.message
+      );
+      throw (
+        error.response?.data || new Error("Não foi possível deletar a foto.")
+      );
     }
   },
 
@@ -195,7 +242,10 @@ const clientServices = {
       const response = await api.get(`BankAccount/client/${clientId}`);
       return response.data;
     } catch (error) {
-      console.error("Erro ao obter conta bancária do cliente:", error.response?.data || error.message);
+      console.error(
+        "Erro ao obter conta bancária do cliente:",
+        error.response?.data || error.message
+      );
       throw error;
     }
   },

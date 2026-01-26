@@ -331,6 +331,17 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s",
   },
+  statusBadge: {
+    padding: "4px 12px",
+    borderRadius: "20px",
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    textTransform: "uppercase",
+  },
+  blockButton: {
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    // O resto será aplicado dinamicamente via style inline no componente
+  },
 };
 // Adicionando pseudo-seletores de forma que o React entenda
 styles.paginationButton[":disabled"] = {
