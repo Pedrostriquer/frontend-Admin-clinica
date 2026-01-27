@@ -1,0 +1,363 @@
+/* --- CONTAINER DO MODAL E ESTRUTURA --- */
+.modal-backdrop-prod.full-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content-prod.full-screen {
+    width: 98vw;
+    height: 95vh;
+    max-width: 1800px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header-prod,
+.modal-footer-prod {
+    padding: 15px 25px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-footer-prod {
+    border-top: 1px solid #eee;
+    border-bottom: none;
+}
+
+/* --- LAYOUT DIVIDIDO (EDITOR VS PREVIEW) --- */
+.split-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.editor-pane {
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-right: 1px solid #e2e8f0;
+    background: #fff;
+}
+
+.preview-pane {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #eef2f6;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+}
+
+/* --- TOOLBAR E GAVETAS DE FERRAMENTAS --- */
+.toolbar-cms {
+    display: flex;
+    gap: 10px;
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.tool-btn {
+    border: 1px solid #cbd5e1;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #475569;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.tool-btn.active {
+    background: #3A506B;
+    color: white;
+}
+
+.tool-btn.highlighted {
+    border-color: #C5A95C;
+    color: #9A7D30;
+}
+
+.tool-btn.highlighted.active {
+    background: #C5A95C;
+    color: white;
+}
+
+.tool-drawer {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* --- ELEMENTOS DO FORMULÁRIO --- */
+.form-group-prod {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-row-prod {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group-prod.half {
+    flex: 1;
+}
+
+.cms-select,
+.cms-input,
+.cms-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.cms-input,
+.cms-select {
+    padding: 10px;
+}
+
+.cms-textarea {
+    flex: 1;
+    padding: 25px;
+    min-height: 500px;
+    resize: none;
+    line-height: 1.6;
+}
+
+/* --- UPLOAD DE IMAGEM E REMOÇÃO --- */
+.file-importer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.delete-img-btn {
+    background: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.upload-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* --- PREVIEW DO CARD E DA PÁGINA --- */
+.preview-box {
+    width: 100%;
+    max-width: 600px;
+}
+
+.preview-header {
+    font-weight: 800;
+    color: #94a3b8;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.blog-horizontal-card.preview {
+    display: flex;
+    height: 140px;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+}
+
+.horizontal-card-image-wrapper {
+    width: 140px;
+    flex-shrink: 0;
+}
+
+.horizontal-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.horizontal-card-content {
+    padding: 15px;
+    flex: 1;
+}
+
+.preview-page-frame.web {
+    background: #fff;
+    border-radius: 8px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e8f0;
+    min-width: 100%;
+    min-height: 450px;
+}
+
+.post-hero-preview {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, rgba(18, 44, 79, 0.8));
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 25px;
+    color: white;
+}
+
+.post-body-preview {
+    padding: 25px;
+    line-height: 1.8;
+    color: #334155;
+}
+
+/* --- BOTÕES DE AÇÃO DO RODAPÉ --- */
+.footer-actions-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.left-actions,
+.right-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.status-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-btn.publish {
+    background: #10b981;
+    color: white;
+}
+
+.status-btn.archive {
+    background: #f59e0b;
+    color: white;
+}
+
+.status-btn.cancel {
+    background: #ef4444;
+    color: white;
+}
+
+.close-btn-prod {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.save-btn-prod {
+    background: #122C4F;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.delete-btn-prod {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* --- AUXILIARES --- */
+.active-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.active-item-card {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delete-icon-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+}

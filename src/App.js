@@ -67,6 +67,7 @@ import FAQManager from "./Components/GemValueConfig/FAQ/FAQManager";
 import FooterManager from "./Components/GemValueConfig/Footer/FooterManager";
 import PopUps from "./Components/PopUps/PopUps";
 import TestePopUp from "./Components/PopUps/TestePopUp";
+import SimulateAdd from "./Components/Ecommerce/BlogAdminPage/SimulateAdd";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
 
 
@@ -81,8 +82,8 @@ const AppContent = () => {
       <Routes>
         {/* Rota de Acesso Público */}
         <Route path="/login" element={<Login />} />
+        {/* <Route path="/test-adds" element={<SimulateAdd />} /> */}
 
-        {/* Rotas Privadas (Protegidas por Token/Auth) */}
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             

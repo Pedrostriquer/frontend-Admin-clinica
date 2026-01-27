@@ -1,0 +1,123 @@
+.adds-manager-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    animation: fadeIn 0.3s ease;
+}
+
+.add-form-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.add-inputs-row {
+    display: flex;
+    gap: 15px;
+}
+
+.add-inputs-row input {
+    flex: 2;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+.size-inputs {
+    flex: 1;
+    display: flex;
+    gap: 10px;
+}
+
+.size-inputs input {
+    width: 80px;
+}
+
+.add-upload-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.image-preview-mini {
+    width: 100px;
+    height: 60px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.image-preview-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-btn-adds {
+    background: #f1f5f9;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #cbd5e1;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.save-add-btn {
+    background: #122C4F;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+.adds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.add-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    position: relative;
+}
+
+.add-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.add-card-info {
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-card-info h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #122C4F;
+}
+
+.del-add-btn {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+}
