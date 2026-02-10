@@ -203,6 +203,13 @@ function ContractsDashboard() {
                 onClick={() => navigate(`/platform/clients/${client.id}`)}
                 key={client.id}
                 style={styles.sellerItem}
+                // Adicionando um efeito de hover simples via inline ou classe se preferir
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#f8fafc")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }
               >
                 <ImageWithLoader
                   src={
@@ -223,8 +230,9 @@ function ContractsDashboard() {
                     ></div>
                   </div>
                 </div>
+                {/* ALTERADO AQUI: De formatCurrencyShort para formatCurrency */}
                 <span style={styles.sellerSales}>
-                  {formatCurrencyShort(client.displayAmount)}
+                  {formatCurrency(client.displayAmount)}
                 </span>
               </li>
             ))}

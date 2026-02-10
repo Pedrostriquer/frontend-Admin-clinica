@@ -105,39 +105,42 @@ const styles = {
   sellerItem: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "16px", // Aumentei o espaço
     cursor: "pointer",
-    padding: "8px",
-    borderRadius: "12px",
-    transition: "background 0.2s",
+    padding: "12px", // Aumentei o preenchimento
+    borderRadius: "16px",
+    transition: "all 0.2s ease",
+    border: "1px solid transparent", // Para evitar pulos no hover
   },
   sellerAvatar: {
-    width: "44px",
-    height: "44px",
+    width: "48px", // Ligeiramente maior
+    height: "48px",
     borderRadius: "12px",
     objectFit: "cover",
     backgroundColor: "#f7fafc",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)", // Sombra leve na foto
   },
   sellerInfo: {
     flexGrow: 1,
     minWidth: 0,
   },
   sellerName: {
-    fontSize: "0.9rem",
-    fontWeight: 500,
-    color: "#2d3748",
-    marginBottom: "6px",
+    fontSize: "0.95rem", // Nome um pouco mais visível
+    fontWeight: 600, // Negrito mais forte
+    color: "#1a202c",
+    marginBottom: "8px",
     display: "block",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
   },
   sellerSales: {
-    fontSize: "0.85rem",
-    fontWeight: 600,
-    color: "#1a202c",
-    minWidth: "75px",
+    fontSize: "0.9rem",
+    fontWeight: 700,
+    color: "#2f855a", // Um tom de verde escuro para dinheiro (opcional)
+    minWidth: "110px", // Aumentei para caber "R$ 10.000,00" sem quebrar
     textAlign: "right",
+    fontFamily: "'Inter', monospace", // Fonte mono ajuda a alinhar números
   },
   progressBar: {
     width: "100%",
@@ -148,8 +151,9 @@ const styles = {
   progress: {
     height: "100%",
     backgroundColor: "#3b82f6",
+    backgroundImage: "linear-gradient(90deg, #3b82f6, #60a5fa)", // Degradê suave
     borderRadius: "3px",
-    transition: "width 1s ease-in-out",
+    transition: "width 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
   },
   loadingState: {
     display: "flex",
