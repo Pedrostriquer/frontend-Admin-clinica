@@ -144,6 +144,19 @@ const contractServices = {
     }
   },
 
+  releaseContribution: async (contractId) => {
+    try {
+      const response = await api.post(
+        `contract/${contractId}/release-contribution`,
+        {}
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao liberar aporte do contrato:", error);
+      throw error.response?.data || error;
+    }
+  },
+
   reinvestirLucroCliente: async (data, idCliente) => {
     try {
       const response = await api.post("reinvestment", data, {
@@ -151,7 +164,7 @@ const contractServices = {
       });
       return response.data;
     } catch (error) {
-      console.error("Erro ao obter meses disponíveis:", error);
+      console.error("Erro ao realizar reinvestimento:", error);
       throw error;
     }
   },

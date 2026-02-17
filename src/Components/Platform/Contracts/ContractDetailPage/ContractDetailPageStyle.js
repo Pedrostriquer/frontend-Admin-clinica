@@ -588,6 +588,28 @@ const styles = {
     "0%": { transform: "rotate(0deg)" },
     "100%": { transform: "rotate(360deg)" },
   },
+
+  "@keyframes fadeInDown": {
+    from: {
+      opacity: 0,
+      transform: "translate3d(0, -20%, 0)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translate3d(0, 0, 0)",
+    },
+  },
+
+  "@keyframes zoomIn": {
+    from: {
+      opacity: 0,
+      transform: "scale(0.95)",
+    },
+    to: {
+      opacity: 1,
+      transform: "scale(1)",
+    },
+  },
 };
 
 export default styles;

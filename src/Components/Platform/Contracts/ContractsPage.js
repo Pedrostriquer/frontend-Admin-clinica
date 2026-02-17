@@ -25,7 +25,7 @@ const formatDate = (dateString) =>
   dateString ? new Date(dateString).toLocaleDateString("pt-BR") : "N/A";
 
 const formatDateTime = (dateString) => {
-  return dateString 
+  return dateString
     ? new Date(dateString).toLocaleString("pt-BR", {
         timeZone: "America/Sao_Paulo",
         day: "2-digit",
@@ -272,6 +272,9 @@ function ContractsPage() {
                   Status
                 </th>
                 <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                  Aporte Devolvido?
+                </th>
+                <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
                   Ações
                 </th>
               </tr>
@@ -359,6 +362,14 @@ function ContractsPage() {
                       >
                         {statusMap[contract.status]}
                       </span>
+                    </td>
+                    <td
+                      style={styles.tableCell}
+                      onClick={() => handleNavigateToContract(contract.id)}
+                    >
+                      {contract.isContributionReleased
+                        ? `Sim, dia ${formatDate(contract.contributionReleaseDate)}`
+                        : contract.status === 4 ? "Pendente De Envio" : "Ctr. Não Finalizado"}
                     </td>
                     <td
                       style={styles.tableCell}

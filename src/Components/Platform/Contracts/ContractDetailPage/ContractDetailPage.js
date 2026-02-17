@@ -11,6 +11,7 @@ import { toPng } from "html-to-image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useLoad } from "../../../../Context/LoadContext";
+import ReleaseContributionModal from "./ReleaseContributionModal";
 
 // --- Funções Auxiliares e Mapeamentos ---
 
@@ -344,6 +345,9 @@ function ContractDetailPage() {
   const [isTogglingReinvestment, setIsTogglingReinvestment] = useState(false);
   const [isTogglingAutoReinvest, setIsTogglingAutoReinvest] = useState(false);
 
+  const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
+  const [isReleasing, setIsReleasing] = useState(false);
+
   // Refs
   const mediaInputRef = useRef(null);
   const certImageInputRef = useRef(null);
@@ -370,6 +374,23 @@ function ContractDetailPage() {
     },
     [token]
   );
+
+  const handleReleaseContribution = async () => {
+    if (isReleasing) return;
+    setIsReleasing(true);
+    startLoading();
+    try {
+      await contractServices.releaseContribution(contractId);
+      setIsReleaseModalOpen(false);
+      alert("Valor do aporte liberado com sucesso para o cliente!");
+      await fetchContract(); // Atualiza os dados na tela
+    } catch (err) {
+      alert(err?.message || "Ocorreu um erro ao liberar o aporte.");
+    } finally {
+      setIsReleasing(false);
+      stopLoading();
+    }
+  };
 
   const fetchContract = useCallback(async () => {
     if (!token || !contractId) return;
@@ -462,10 +483,7 @@ function ContractDetailPage() {
     setIsUpdatingStatus(true);
     try {
       startLoading();
-      await contractServices.updateContractStatus(
-        [contractId],
-        newStatus
-      );
+      await contractServices.updateContractStatus([contractId], newStatus);
       await fetchContract();
       alert(
         `Contrato ${action === "ativar" ? "ativado" : "cancelado"} com sucesso!`
@@ -478,7 +496,47 @@ function ContractDetailPage() {
     }
   };
 
-  const handleReinvest = async () => {};
+  const handleReinvest = async () => {
+    // 1. Validação básica de entrada
+    if (!reinvestAmount || parseFloat(reinvestAmount.replace(",", ".")) <= 0) {
+      alert("Por favor, insira um valor válido para reinvestir.");
+      return;
+    }
+
+    const valorNumerico = parseFloat(reinvestAmount.replace(",", "."));
+
+    // 2. Confirmação do usuário
+    const confirmed = window.confirm(
+      `Deseja reinvestir ${formatCurrency(valorNumerico)} deste contrato?`
+    );
+
+    if (!confirmed) return;
+
+    setIsSaving(true); // Reutilizando estado de salvamento para o overlay
+    startLoading();
+
+    try {
+      const data = {
+        contractId: parseInt(contractId),
+        amount: valorNumerico,
+      };
+
+      // Chama o serviço (Note que o service pede data e idCliente)
+      await contractServices.reinvestirLucroCliente(data, contract.clientId);
+
+      alert("Reinvestimento realizado com sucesso!");
+      setReinvestAmount(""); // Limpa o campo
+      await fetchContract(); // Recarrega os dados do contrato
+    } catch (err) {
+      console.error(err);
+      const msg =
+        err.response?.data?.message || "Erro ao processar reinvestimento.";
+      alert(msg);
+    } finally {
+      setIsSaving(false);
+      stopLoading();
+    }
+  };
 
   const handleToggleAutoReinvest = async () => {
     if (isTogglingAutoReinvest) return;
@@ -609,11 +667,7 @@ function ContractDetailPage() {
     setIsDeleting(true);
     try {
       startLoading();
-      await contractServices.deleteContractFile(
-        contractId,
-        fileUrl,
-        fileType
-      );
+      await contractServices.deleteContractFile(contractId, fileUrl, fileType);
       await fetchContract();
     } catch (err) {
       alert("Erro ao excluir o arquivo.");
@@ -634,10 +688,7 @@ function ContractDetailPage() {
     setIsDeleting(true);
     try {
       startLoading();
-      await contractServices.deleteAllContractFiles(
-        contractId,
-        fileType
-      );
+      await contractServices.deleteAllContractFiles(contractId, fileType);
       await fetchContract();
     } catch (err) {
       alert(`Erro ao excluir todas as ${typeName}.`);
@@ -651,10 +702,7 @@ function ContractDetailPage() {
     setIsSaving(true);
     try {
       startLoading();
-      await contractServices.addOrUpdateTracking(
-        contractId,
-        trackingData
-      );
+      await contractServices.addOrUpdateTracking(contractId, trackingData);
       await fetchContract();
       alert("Informações de rastreio salvas com sucesso!");
     } catch (err) {
@@ -688,7 +736,7 @@ function ContractDetailPage() {
     );
 
   const progressPercentage =
-    (contract.totalIncome / contract.finalAmount) * 100;
+    (contract.totalIncome / (contract.finalAmount - contract.amount)) * 100;
 
   // --- JSX de Retorno ---
 
@@ -741,8 +789,29 @@ function ContractDetailPage() {
             >
               {contract.withGem ? "Com Gema" : "Sem Gema"}
             </span>
-            {/* ----- FIM DO NOVO ELEMENTO ----- */}
 
+            {contract.isContributionReleased && (
+              <span
+                style={{
+                  padding: "4px 12px",
+                  borderRadius: "16px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  marginLeft: "16px",
+                  alignSelf: "center",
+                  color: "#fff",
+                  backgroundColor: "green", // Verde para 'Com Gema', Cinza para 'Sem Gema'
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                {`Valor do aporte devolvido ao cliente dia ${formatDate(
+                  contract.contributionReleaseDate
+                )}`}
+              </span>
+            )}
+
+            {/* ----- FIM DO NOVO ELEMENTO ----- */}
           </div>
           <div style={styles.headerActions}>
             {hasPendingChanges && (
@@ -801,6 +870,64 @@ function ContractDetailPage() {
           </div>
         </header>
 
+        {contract.status === 4 && !contract.isContributionReleased && (
+          <div
+            style={{
+              backgroundColor: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: "12px",
+              padding: "16px 24px",
+              marginBottom: "24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              animation: "fadeInDown 0.5s ease-out", // Certifique-se de ter essa animação no CSS
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <h4
+                style={{
+                  margin: 0,
+                  color: "#166534",
+                  fontSize: "16px",
+                  fontWeight: "700",
+                }}
+              >
+                Liberação de Aporte Disponível
+              </h4>
+              <p
+                style={{
+                  margin: "4px 0 0 0",
+                  color: "#15803d",
+                  fontSize: "14px",
+                }}
+              >
+                O contrato finalizou. O aporte de{" "}
+                <strong>{formatCurrency(contract.amount)}</strong> já pode ser
+                devolvido ao saldo do cliente.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsReleaseModalOpen(true)}
+              style={{
+                backgroundColor: "#22c55e",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                padding: "10px 20px",
+                fontWeight: "600",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <i className="fa-solid fa-hand-holding-dollar"></i> Liberar Agora
+            </button>
+          </div>
+        )}
+
         <div style={styles.detailGrid}>
           <div style={styles.mainContent}>
             <div style={styles.kpiGrid}>
@@ -833,14 +960,16 @@ function ContractDetailPage() {
             <div style={styles.progressSection}>
               <div style={styles.progressHeader}>
                 {/* Agrupamento do Título + Badge de % */}
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
                   <h3 style={styles.progressTitle}>Progresso do Contrato</h3>
-                  
+
                   {/* --- NOVO: Badge de Porcentagem Mensal --- */}
                   <span
                     style={{
                       backgroundColor: "#f0fdf4", // Verde claro (Tailwind green-50)
-                      color: "#15803d",           // Verde escuro (Tailwind green-700)
+                      color: "#15803d", // Verde escuro (Tailwind green-700)
                       border: "1px solid #bbf7d0",
                       padding: "2px 8px",
                       borderRadius: "6px",
@@ -863,7 +992,7 @@ function ContractDetailPage() {
                   {formatDate(contract.endContractDate)}
                 </span>
               </div>
-              
+
               <div style={styles.progressBarContainer}>
                 <div
                   style={{
@@ -1138,24 +1267,29 @@ function ContractDetailPage() {
                 </button>
               )}
             </div>
-            
+
             {/* --- NOVO CARD E BOTÃO AQUI --- */}
             {contract.status === 2 && ( // Só mostra para contratos em valorização
-                <div style={styles.actionCard}>
+              <div style={styles.actionCard}>
                 <h3 style={styles.actionCardTitle}>
                   <i className="fa-solid fa-gears"></i> Ações Administrativas
                 </h3>
                 <button
                   onClick={handleAppreciateDay}
-                  style={{...styles.actionCardButton, ...styles.appreciateBtn}}
+                  style={{
+                    ...styles.actionCardButton,
+                    ...styles.appreciateBtn,
+                  }}
                   disabled={isAppreciating}
                 >
                   {isAppreciating ? (
-                      <div style={styles.buttonSpinner}></div>
-                    ) : (
-                      <i className="fa-solid fa-angles-up"></i>
-                    )}
-                  {isAppreciating ? "Valorizando..." : "Rodar Valorização Diária"}
+                    <div style={styles.buttonSpinner}></div>
+                  ) : (
+                    <i className="fa-solid fa-angles-up"></i>
+                  )}
+                  {isAppreciating
+                    ? "Valorizando..."
+                    : "Rodar Valorização Diária"}
                 </button>
               </div>
             )}
@@ -1324,6 +1458,16 @@ function ContractDetailPage() {
         onSubmit={handleSaveTracking}
         existingTracking={contract?.tracking}
       />
+
+      {isReleaseModalOpen && (
+        <ReleaseContributionModal
+          isOpen={isReleaseModalOpen}
+          onClose={() => setIsReleaseModalOpen(false)}
+          onConfirm={handleReleaseContribution}
+          amount={contract.amount}
+          isReleasing={isReleasing}
+        />
+      )}
     </>
   );
 }
