@@ -249,6 +249,20 @@ const clientServices = {
       throw error;
     }
   },
+
+  updateWithdrawPermission: async (clientId, canWithdrawAnytime) => {
+    try {
+      const response = await api.patch(
+        `client/${clientId}/withdraw-permission`,
+        canWithdrawAnytime, // Enviando o booleano diretamente no corpo
+        { headers: { "Content-Type": "application/json" } }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar permissão de saque:", error);
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default clientServices;

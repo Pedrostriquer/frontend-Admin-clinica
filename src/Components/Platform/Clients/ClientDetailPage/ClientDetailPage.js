@@ -112,7 +112,8 @@ function ClientDetailPage() {
     try {
       const authResponse = await clientServices.loginAsClient(clientId);
       const clientToken = authResponse.token;
-      const clientPlatformUrl = `http://gemas.demelloagent.app/plataforma/login?token=${clientToken}`;
+      const clientPlatformUrl = `https://gemcapital.com.br/sistema/login?token=${clientToken}`;
+      // const clientPlatformUrl = `http://localhost:3000/sistema/login?token=${clientToken}`;
       window.open(clientPlatformUrl, "_blank");
     } catch (error) {
       alert("Não foi possível logar como cliente. Tente novamente.");
@@ -167,6 +168,30 @@ function ClientDetailPage() {
         await fetchClientData();
       } catch (error) {
         alert("Falha ao remover consultor.");
+      } finally {
+        stopLoading();
+      }
+    }
+  };
+
+  const handleToggleWithdrawPermission = async () => {
+    const action = client.canWithdrawAnytime
+      ? "remover a liberação"
+      : "liberar o saque";
+    if (
+      window.confirm(`Tem certeza que deseja ${action} 24h para este cliente?`)
+    ) {
+      try {
+        startLoading();
+        // Inverte o estado atual
+        await clientServices.updateWithdrawPermission(
+          clientId,
+          !client.canWithdrawAnytime
+        );
+        await fetchClientData(); // Atualiza a tela
+        alert("Permissão de saque atualizada!");
+      } catch (error) {
+        alert("Erro ao alterar permissão de saque.");
       } finally {
         stopLoading();
       }
@@ -415,6 +440,30 @@ function ClientDetailPage() {
               ></i>
               {client.isBlocked ? "Ativar Conta" : "Desativar Conta"}
             </button>
+
+            <button
+              onClick={handleToggleWithdrawPermission}
+              style={{
+                ...styles.actionButton,
+                backgroundColor: client.canWithdrawAnytime
+                  ? "#fef9c3"
+                  : "#f3f4f6",
+                color: client.canWithdrawAnytime ? "#a16207" : "#374151",
+                borderColor: client.canWithdrawAnytime ? "#a16207" : "#d1d5db",
+              }}
+            >
+              <i
+                className={`fa-solid ${
+                  client.canWithdrawAnytime
+                    ? "fa-clock-rotate-left"
+                    : "fa-clock"
+                }`}
+              ></i>
+              {client.canWithdrawAnytime
+                ? "Saque: Liberado 24h"
+                : "Saque: Restrito (Horário)"}
+            </button>
+
             <button
               onClick={() => setIsBalanceModalOpen(true)}
               style={styles.actionButton}

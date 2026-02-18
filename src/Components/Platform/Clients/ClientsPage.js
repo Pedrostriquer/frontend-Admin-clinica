@@ -20,7 +20,7 @@ const formatDate = (dateString) => {
 };
 
 const formatDateTime = (dateString) => {
-  return dateString 
+  return dateString
     ? new Date(dateString).toLocaleString("pt-BR", {
         timeZone: "America/Sao_Paulo",
         day: "2-digit",
@@ -32,7 +32,6 @@ const formatDateTime = (dateString) => {
       })
     : "N/A";
 };
-
 
 const ITEMS_PER_PAGE = 10;
 
@@ -65,7 +64,7 @@ function ClientsPage() {
   const [totalClients, setTotalClients] = useState(0);
 
   const [sortBy] = useState("id");
-  const [sortDirection, setSortDirection] = useState("desc"); 
+  const [sortDirection, setSortDirection] = useState("desc");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
@@ -112,7 +111,7 @@ function ClientsPage() {
       <header style={styles.clientsPageHeader}>
         <h1 style={styles.clientsPageHeaderH1}>Clientes</h1>
       </header>
-      
+
       {/* 3. Seção com o card de KPI adicionado */}
       <section style={styles.kpiSection}>
         <div style={styles.kpiCard}>
@@ -150,7 +149,7 @@ function ClientsPage() {
               }
               style={styles.sortDirectionButton}
               title={
-                sortDirection === 'desc'
+                sortDirection === "desc"
                   ? "Mudar para Mais Antigos (Ascendente)"
                   : "Mudar para Mais Recentes (Descendente)"
               }
@@ -189,6 +188,7 @@ function ClientsPage() {
               <th style={styles.tableCell}>Email</th>
               <th style={styles.tableCell}>Celular</th>
               <th style={styles.tableCell}>Data de Criação</th>
+              <th style={styles.tableCell}>Saque</th>
               <th style={styles.tableCell}>Saldo em Conta</th>
             </tr>
           </thead>
@@ -233,6 +233,33 @@ function ClientsPage() {
                   <td style={styles.tableCell}>{client.phoneNumber}</td>
                   <td style={styles.tableCell}>
                     {formatDateTime(client.dateCreated)}
+                  </td>
+                  <td style={styles.tableCell}>
+                    {client.canWithdrawAnytime ? (
+                      <span
+                        style={{
+                          color: "#a16207",
+                          backgroundColor: "#fef9c3",
+                          padding: "4px 8px",
+                          borderRadius: "12px",
+                          fontSize: "11px",
+                          fontWeight: "bold",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <i
+                          className="fa-solid fa-bolt"
+                          style={{ fontSize: "10px" }}
+                        ></i>{" "}
+                        24H/7Dias
+                      </span>
+                    ) : (
+                      <span style={{ color: "#9ca3af", fontSize: "12px" }}>
+                        Padrão
+                      </span>
+                    )}
                   </td>
                   <td style={styles.tableCell}>
                     {formatCurrency(client.balance)}
