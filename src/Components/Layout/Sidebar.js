@@ -58,34 +58,6 @@ const FirebaseLoginModal = ({ onClose, onSuccess }) => {
   );
 };
 
-const ContextButton = ({ isActive, isCollapsed, onClick, icon, children }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const style = {
-    ...styles.contextButton,
-    ...(isActive && styles.contextButtonActive),
-    ...(isHovered && !isActive && styles.contextButtonHover),
-    ...(isCollapsed && styles.contextButtonCollapsed),
-  };
-  return (
-    <button
-      style={style}
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <i className={icon}></i>
-      <span
-        style={{
-          ...styles.contextButtonSpan,
-          ...(isCollapsed && styles.contextButtonSpanCollapsed),
-        }}
-      >
-        {children}
-      </span>
-    </button>
-  );
-};
-
 const NavItem = ({
   isActive,
   isCollapsed,
@@ -121,6 +93,146 @@ const NavItem = ({
   );
 };
 
+const platformMenu = [
+  {
+    name: "Dashboard",
+    icon: "fa-solid fa-chart-pie",
+    path: "/platform/dashboard",
+  },
+  { name: "Clientes", icon: "fa-solid fa-users", path: "/platform/clients" },
+  {
+    name: "Consultores",
+    icon: "fa-solid fa-user-tie",
+    path: "/platform/consultants",
+  },
+  {
+    name: "Contratos",
+    icon: "fa-solid fa-file-signature",
+    path: "/platform/contracts",
+  },
+  {
+    name: "Saques",
+    icon: "fa-solid fa-money-bill-wave",
+    path: "/platform/withdraws",
+  },
+  { name: "PopUps", icon: "fa-solid fa-bell", path: "/platform/pop-ups" },
+  {
+    name: "Notificações",
+    icon: "fa-solid fa-bell",
+    path: "/platform/notifications",
+  },
+  { name: "Ofertas", icon: "fa-solid fa-newspaper", path: "/platform/offers" },
+  {
+    name: "Catalogo GemCash",
+    icon: "fa-solid fa-newspaper",
+    path: "/platform/catalogo-gemcash",
+  },
+  {
+    name: "Controlador",
+    icon: "fa-solid fa-sliders",
+    path: "/platform/controller",
+  },
+];
+
+const ecommerceMenu = [
+  {
+    name: "Dashboard",
+    icon: "fa-solid fa-chart-pie",
+    path: "/ecommerce/dashboard",
+  },
+  { name: "Produtos", icon: "fa-solid fa-gem", path: "/ecommerce/products" },
+  {
+    name: "Categorias",
+    icon: "fa-solid fa-sitemap",
+    path: "/ecommerce/categories",
+  },
+  {
+    name: "Formulários",
+    icon: "fa-solid fa-file-alt",
+    path: "/ecommerce/forms",
+  },
+  { name: "Blog", icon: "fa-solid fa-newspaper", path: "/ecommerce/blog" },
+  {
+    name: "Promoções",
+    icon: "fa-solid fa-tags",
+    path: "/ecommerce/promotions",
+  },
+  { name: "Pedidos", icon: "fa-solid fa-box-open", path: "/ecommerce/orders" },
+];
+
+const siteMenu = [
+  { name: "Home", icon: "fa-solid fa-house", path: "/site/home" },
+  { name: "GemCash", icon: "fa-solid fa-coins", path: "/site/gemcash" },
+  { name: "Jóias", icon: "fa-solid fa-ring", path: "/site/personalizadas" },
+  {
+    name: "Leads Simulação",
+    icon: "fa-solid fa-users-line",
+    path: "/site/leads",
+  },
+];
+
+const gemvalueMenu = [
+  { name: "Início (Hero)", icon: "fa-solid fa-star", path: "/gemvalue/hero" },
+  {
+    name: "Ativos Físicos",
+    icon: "fa-solid fa-box-open",
+    path: "/gemvalue/why-physical",
+  },
+  {
+    name: "Por que Diamantes",
+    icon: "fa-solid fa-gem",
+    path: "/gemvalue/why-diamonds",
+  },
+  {
+    name: "Como Funciona",
+    icon: "fa-solid fa-gears",
+    path: "/gemvalue/how-it-works",
+  },
+  {
+    name: "Parâmetros",
+    icon: "fa-solid fa-list-check",
+    path: "/gemvalue/parameters",
+  },
+  {
+    name: "Autoridade",
+    icon: "fa-solid fa-award",
+    path: "/gemvalue/authority",
+  },
+  {
+    name: "Público-Alvo",
+    icon: "fa-solid fa-users-rectangle",
+    path: "/gemvalue/target-audience",
+  },
+  {
+    name: "Simulação",
+    icon: "fa-solid fa-calculator",
+    path: "/gemvalue/simulation",
+  },
+  {
+    name: "FAQ (Dúvidas)",
+    icon: "fa-solid fa-question-circle",
+    path: "/gemvalue/faq",
+  },
+  {
+    name: "Rodapé",
+    icon: "fa-solid fa-window-maximize",
+    path: "/gemvalue/footer",
+  },
+];
+
+const emailSenderMenu = [
+  {
+    name: "Modelos",
+    icon: "fa-solid fa-file-code",
+    path: "/emailsender/models",
+  },
+  {
+    name: "Campanhas",
+    icon: "fa-solid fa-paper-plane",
+    path: "/emailsender/campaigns",
+  },
+];
+
 function Sidebar({
   activeContext,
   onContextChange,
@@ -143,157 +255,10 @@ function Sidebar({
     return () => unsubscribe();
   }, []);
 
-  const handleContextClick = (context) => {
-    if (context === "site") {
-      if (firebaseUser) {
-        onContextChange("site");
-      } else {
-        setShowFirebaseModal(true);
-      }
-    } else {
-      onContextChange(context);
-    }
-  };
-
   const handleFirebaseLoginSuccess = () => {
     setShowFirebaseModal(false);
     onContextChange("site");
   };
-
-  const platformMenu = [
-    {
-      name: "Dashboard",
-      icon: "fa-solid fa-chart-pie",
-      path: "/platform/dashboard",
-    },
-    { name: "Clientes", icon: "fa-solid fa-users", path: "/platform/clients" },
-    {
-      name: "Consultores",
-      icon: "fa-solid fa-user-tie",
-      path: "/platform/consultants",
-    },
-    {
-      name: "Contratos",
-      icon: "fa-solid fa-file-signature",
-      path: "/platform/contracts",
-    },
-    {
-      name: "Saques",
-      icon: "fa-solid fa-money-bill-wave",
-      path: "/platform/withdraws",
-    },
-    { name: "PopUps", icon: "fa-solid fa-bell", path: "/platform/pop-ups" },
-    {
-      name: "Notificações",
-      icon: "fa-solid fa-bell",
-      path: "/platform/notifications",
-    },
-    {
-      name: "Ofertas",
-      icon: "fa-solid fa-newspaper",
-      path: "/platform/offers",
-    },
-    {
-      name: "Catalogo GemCash",
-      icon: "fa-solid fa-newspaper",
-      path: "/platform/catalogo-gemcash",
-    },
-    {
-      name: "Controlador",
-      icon: "fa-solid fa-sliders",
-      path: "/platform/controller",
-    },
-  ];
-
-  const ecommerceMenu = [
-    {
-      name: "Dashboard",
-      icon: "fa-solid fa-chart-pie",
-      path: "/ecommerce/dashboard",
-    },
-    { name: "Produtos", icon: "fa-solid fa-gem", path: "/ecommerce/products" },
-    {
-      name: "Categorias",
-      icon: "fa-solid fa-sitemap",
-      path: "/ecommerce/categories",
-    },
-    {
-      name: "Formulários",
-      icon: "fa-solid fa-file-alt",
-      path: "/ecommerce/forms",
-    },
-    { name: "Blog", icon: "fa-solid fa-newspaper", path: "/ecommerce/blog" },
-    {
-      name: "Promoções",
-      icon: "fa-solid fa-tags",
-      path: "/ecommerce/promotions",
-    },
-    {
-      name: "Pedidos",
-      icon: "fa-solid fa-box-open",
-      path: "/ecommerce/orders",
-    },
-  ];
-
-  const siteMenu = [
-    { name: "Home", icon: "fa-solid fa-house", path: "/site/home" },
-    { name: "GemCash", icon: "fa-solid fa-coins", path: "/site/gemcash" },
-    { name: "Jóias", icon: "fa-solid fa-ring", path: "/site/personalizadas" },
-    {
-      name: "Leads Simulação",
-      icon: "fa-solid fa-users-line",
-      path: "/site/leads",
-    },
-  ];
-
-  const gemvalueMenu = [
-    { name: "Início (Hero)", icon: "fa-solid fa-star", path: "/gemvalue/hero" },
-    {
-      name: "Ativos Físicos",
-      icon: "fa-solid fa-box-open",
-      path: "/gemvalue/why-physical",
-    },
-    {
-      name: "Por que Diamantes",
-      icon: "fa-solid fa-gem",
-      path: "/gemvalue/why-diamonds",
-    },
-    {
-      name: "Como Funciona",
-      icon: "fa-solid fa-gears",
-      path: "/gemvalue/how-it-works",
-    },
-    {
-      name: "Parâmetros",
-      icon: "fa-solid fa-list-check",
-      path: "/gemvalue/parameters",
-    },
-    {
-      name: "Autoridade",
-      icon: "fa-solid fa-award",
-      path: "/gemvalue/authority",
-    },
-    {
-      name: "Público-Alvo",
-      icon: "fa-solid fa-users-rectangle",
-      path: "/gemvalue/target-audience",
-    },
-    {
-      name: "Simulação",
-      icon: "fa-solid fa-calculator",
-      path: "/gemvalue/simulation",
-    },
-    {
-      name: "FAQ (Dúvidas)",
-      icon: "fa-solid fa-question-circle",
-      path: "/gemvalue/faq",
-    },
-    {
-      name: "Rodapé",
-      icon: "fa-solid fa-window-maximize",
-      path: "/gemvalue/footer",
-    },
-  ];
 
   const getMenu = () => {
     if (activePath.startsWith("/support")) return [];
@@ -306,6 +271,8 @@ function Sidebar({
         return siteMenu;
       case "gemvalue":
         return gemvalueMenu;
+      case "emailsender":
+        return emailSenderMenu;
       default:
         return [];
     }
@@ -367,64 +334,8 @@ function Sidebar({
           </button>
         )}
 
-        <header style={styles.header}>
-          <i className="fa-solid fa-gem" style={styles.logoIcon}></i>
-          <h1
-            style={{
-              ...styles.headerH1,
-              ...(isSidebarCollapsed && !isMobile && styles.headerH1Collapsed),
-            }}
-          >
-            Gemas brilhantes
-          </h1>
-        </header>
-
         <div style={styles.mainNav}>
-          <div style={styles.contextSwitcher}>
-            <ContextButton
-              isActive={activeContext === "platform"}
-              isCollapsed={isSidebarCollapsed && !isMobile}
-              onClick={() => handleContextClick("platform")}
-              icon="fa-solid fa-briefcase"
-            >
-              Plataforma
-            </ContextButton>
-            <ContextButton
-              isActive={activeContext === "ecommerce"}
-              isCollapsed={isSidebarCollapsed && !isMobile}
-              onClick={() => handleContextClick("ecommerce")}
-              icon="fa-solid fa-store"
-            >
-              Gemas Preciosas
-            </ContextButton>
-            <ContextButton
-              isActive={activeContext === "site"}
-              isCollapsed={isSidebarCollapsed && !isMobile}
-              onClick={() => handleContextClick("site")}
-              icon="fa-solid fa-globe"
-            >
-              Site
-            </ContextButton>
-            <ContextButton
-              isActive={activeContext === "gemvalue"}
-              isCollapsed={isSidebarCollapsed && !isMobile}
-              onClick={() => handleContextClick("gemvalue")}
-              icon="fa-solid fa-gem"
-            >
-              Site GemValue
-            </ContextButton>
-            <ContextButton
-              isActive={activePath === "/support"}
-              isCollapsed={isSidebarCollapsed && !isMobile}
-              onClick={() => onLinkClick("/support")}
-              icon="fa-solid fa-headset"
-            >
-              Suporte
-            </ContextButton>
-          </div>
-
           <div style={styles.menuContainer}>
-            <div style={styles.menuDivider}></div>
             <ul style={styles.globalMenu}>
               <NavItem
                 isActive={activePath === "/users"}

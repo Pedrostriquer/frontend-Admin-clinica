@@ -12,13 +12,13 @@ const colors = {
 const styles = {
   sidebar: {
     width: "260px",
-    height: "100vh",
+    height: "calc(100vh - 70px)", // Subtrai a altura da navbar
     backgroundColor: colors.bg,
     display: "flex",
     flexDirection: "column",
     borderRight: `1px solid ${colors.border}`,
     position: "fixed",
-    top: 0,
+    top: "70px", // COMEÇA DEPOIS DA NAVBAR
     left: 0,
     zIndex: 100,
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",

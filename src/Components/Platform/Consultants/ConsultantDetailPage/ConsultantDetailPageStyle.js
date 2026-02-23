@@ -1,7 +1,7 @@
 const styles = {
   pageContainer: {
     fontFamily: "'Poppins', sans-serif",
-    padding: "0 2rem 2rem 2rem",
+    padding: "60px 2rem 2rem 2rem",
   },
   header: {
     display: "flex",

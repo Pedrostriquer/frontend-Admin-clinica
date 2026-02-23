@@ -68,8 +68,9 @@ import FooterManager from "./Components/GemValueConfig/Footer/FooterManager";
 import PopUps from "./Components/PopUps/PopUps";
 import TestePopUp from "./Components/PopUps/TestePopUp";
 import SimulateAdd from "./Components/Ecommerce/BlogAdminPage/SimulateAdd";
+import EmailModelsPage from "./Components/EmailSender/Models/EmailModelsPage";
+import EmailCampaignsPage from "./Components/EmailSender/Campaigns/EmailCampaignsPage";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
-
 
 const AppContent = () => {
   const { loadState } = useLoad();
@@ -86,10 +87,9 @@ const AppContent = () => {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
-            
             {/* Redirecionamento Inicial */}
             <Route index element={<Navigate to="/platform/dashboard" />} />
-            
+
             {/* Menu Global */}
             <Route path="users" element={<UsersPage />} />
             <Route path="profile" element={<UserProfile />} />
@@ -97,18 +97,44 @@ const AppContent = () => {
             <Route path="support" element={<SupportPage />} />
             <Route path="support/:ticketId" element={<SupportPage />} />
 
+
+            {/* Sub-Roteamento: Email Sender */}
+            <Route path="emailsender/models" element={<EmailModelsPage />} />
+            <Route
+              path="emailsender/campaigns"
+              element={<EmailCampaignsPage />}
+            />
+
             {/* Sub-Roteamento: Plataforma */}
             <Route path="platform/dashboard" element={<ContractsDashboard />} />
             <Route path="platform/clients" element={<ClientsPage />} />
-            <Route path="platform/clients/:clientId" element={<ClientDetailPage />} />
+            <Route
+              path="platform/clients/:clientId"
+              element={<ClientDetailPage />}
+            />
             <Route path="platform/consultants" element={<ConsultantsPage />} />
-            <Route path="platform/consultants/create" element={<CreateConsultantPage />} />
-            <Route path="platform/consultants/:consultantId" element={<ConsultantDetailPage />} />
+            <Route
+              path="platform/consultants/create"
+              element={<CreateConsultantPage />}
+            />
+            <Route
+              path="platform/consultants/:consultantId"
+              element={<ConsultantDetailPage />}
+            />
             <Route path="platform/contracts" element={<ContractsPage />} />
-            <Route path="platform/contracts/:contractId" element={<ContractDetailPage />} />
+            <Route
+              path="platform/contracts/:contractId"
+              element={<ContractDetailPage />}
+            />
             <Route path="platform/withdraws" element={<WithdrawalsPage />} />
-            <Route path="platform/withdraws/create" element={<CreateWithdrawalPage />} />
-            <Route path="platform/withdraws/:withdrawalId" element={<WithdrawDetailPage />} />
+            <Route
+              path="platform/withdraws/create"
+              element={<CreateWithdrawalPage />}
+            />
+            <Route
+              path="platform/withdraws/:withdrawalId"
+              element={<WithdrawDetailPage />}
+            />
             <Route path="platform/controller" element={<ControllerPage />} />
             <Route path="platform/indication" element={<ReferralsPage />} />
             <Route path="platform/offers" element={<OffersPage />} />
@@ -119,9 +145,12 @@ const AppContent = () => {
             <Route path="platform/pop-ups" element={<PopUps />} />
 
             {/* Sub-Roteamento: E-commerce */}
-            <Route path="ecommerce/dashboard" element={<EcommerceDashboard />} />
+            <Route
+              path="ecommerce/dashboard"
+              element={<EcommerceDashboard />}
+            />
             <Route path="ecommerce/products" element={<ProductsPage />} />
-            <Route path="ecommerce/blog" element={<BlogAdminPage />} /> 
+            <Route path="ecommerce/blog" element={<BlogAdminPage />} />
             <Route path="ecommerce/orders" element={<OrdersPage />} />
             <Route path="ecommerce/promotions" element={<PromotionsPage />} />
             <Route path="ecommerce/categories" element={<CategoriesPage />} />
@@ -130,25 +159,42 @@ const AppContent = () => {
             {/* Sub-Roteamento: Configurações do Site (Original) */}
             <Route path="site/home" element={<HomeManager />} />
             <Route path="site/gemcash" element={<GemCashManager />} />
-            <Route path="site/personalizadas" element={<PersonalizadasManager />} />
+            <Route
+              path="site/personalizadas"
+              element={<PersonalizadasManager />}
+            />
             <Route path="site/leads" element={<LeadsPage />} />
 
             {/* Sub-Roteamento: Site GemValue (Novos Editores Visuais) */}
             <Route path="gemvalue/hero" element={<HeroManager />} />
-            <Route path="gemvalue/why-physical" element={<WhyPhysicalManager />} /> 
-            <Route path="gemvalue/why-diamonds" element={<WhyDiamondsManager />} />
-            <Route path="gemvalue/how-it-works" element={<HowItWorksManager />} />
+            <Route
+              path="gemvalue/why-physical"
+              element={<WhyPhysicalManager />}
+            />
+            <Route
+              path="gemvalue/why-diamonds"
+              element={<WhyDiamondsManager />}
+            />
+            <Route
+              path="gemvalue/how-it-works"
+              element={<HowItWorksManager />}
+            />
             <Route path="gemvalue/parameters" element={<ParametersManager />} />
             <Route path="gemvalue/authority" element={<AuthorityManager />} />
-            <Route path="gemvalue/target-audience" element={<TargetAudienceManager />} />
+            <Route
+              path="gemvalue/target-audience"
+              element={<TargetAudienceManager />}
+            />
             <Route path="gemvalue/simulation" element={<SimulationManager />} />
             <Route path="gemvalue/faq" element={<FAQManager />} />
             <Route path="gemvalue/footer" element={<FooterManager />} />
-            <Route path="gemvalue/whatsapp" element={<div>Página WhatsApp</div>} />
-            
+            <Route
+              path="gemvalue/whatsapp"
+              element={<div>Página WhatsApp</div>}
+            />
+
             {/* Exemplos de como ficarão quando prontos: */}
             {/* <Route path="gemvalue/how-it-works" element={<HowItWorksManager />} /> */}
-
           </Route>
         </Route>
 

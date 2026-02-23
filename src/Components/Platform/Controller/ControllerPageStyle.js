@@ -2,7 +2,7 @@ const styles = {
   controllerPageContainer: {
     fontFamily: "'Poppins', sans-serif",
     backgroundColor: "#f4f7fa",
-    padding: "32px",
+    padding: "82px 32px 32px 32px",
     minHeight: "100vh",
   },
   controllerPageHeader: {

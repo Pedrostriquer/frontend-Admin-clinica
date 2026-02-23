@@ -18,7 +18,7 @@ const permissionMap = {
   "Extrair Dados": 8,
   "Criar/Excluir Notícias": 9,
   "Gerenciar Consultores": 10,
-  "Indicação": 11,
+  Indicação: 11,
   "Gerenciar Mensagens": 12,
   "Ver Acessos": 13,
   "Gerenciar Produto": 14,
@@ -30,12 +30,26 @@ const permissionMap = {
 
 const allPermissions = {
   contracts: [
-    "Editar/Autorizar/Criar Contratos", "Acessar Contratos", "Criar/Editar/Autorizar Saques",
-    "Ver Saques", "Antecipar Saldo", "Criar/Editar Cliente", "Acessar Controlador",
-    "Extrair Dados", "Criar/Excluir Notícias", "Gerenciar Consultores", "Indicação",
-    "Gerenciar Mensagens", "Ver Acessos",
+    "Editar/Autorizar/Criar Contratos",
+    "Acessar Contratos",
+    "Criar/Editar/Autorizar Saques",
+    "Ver Saques",
+    "Antecipar Saldo",
+    "Criar/Editar Cliente",
+    "Acessar Controlador",
+    "Extrair Dados",
+    "Criar/Excluir Notícias",
+    "Gerenciar Consultores",
+    "Indicação",
+    "Gerenciar Mensagens",
+    "Ver Acessos",
   ],
-  ecommerce: ["Gerenciar Produto", "Gerenciar Promoções", "Gerenciar Clientes", "Gerenciar Pedidos"],
+  ecommerce: [
+    "Gerenciar Produto",
+    "Gerenciar Promoções",
+    "Gerenciar Clientes",
+    "Gerenciar Pedidos",
+  ],
   system: ["Criar Usuários (Admin)"],
 };
 
@@ -51,40 +65,76 @@ const GlobalStyles = () => (
 // --- MODAL DE DETALHES (Mantido igual) ---
 const UserDetailsModal = ({ user, onClose, isClosing }) =>
   ReactDOM.createPortal(
-    <div style={{ ...styles.modalBackdrop, ...(isClosing && styles.modalBackdropClosing) }}>
+    <div
+      style={{
+        ...styles.modalBackdrop,
+        ...(isClosing && styles.modalBackdropClosing),
+      }}
+    >
       <GlobalStyles />
-      <div style={{ ...styles.modalContent, ...(isClosing && styles.modalContentClosing) }} onClick={(e) => e.stopPropagation()}>
+      <div
+        style={{
+          ...styles.modalContent,
+          ...(isClosing && styles.modalContentClosing),
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div style={styles.modalHeader}>
           <h3 style={styles.modalHeaderH3}>Detalhes do Usuário</h3>
-          <button style={styles.modalHeaderButton} onClick={onClose}><i className="fa-solid fa-xmark"></i></button>
+          <button style={styles.modalHeaderButton} onClick={onClose}>
+            <i className="fa-solid fa-xmark"></i>
+          </button>
         </div>
         <div style={styles.userDetailsGrid}>
-          <p style={styles.userDetailsP}><span style={styles.userDetailsPSpan}>Nome:</span> {user.name}</p>
-          <p style={styles.userDetailsP}><span style={styles.userDetailsPSpan}>Email:</span> {user.email}</p>
-          <p style={styles.userDetailsP}><span style={styles.userDetailsPSpan}>Celular:</span> {user.phone || "Não informado"}</p>
-          <p style={styles.userDetailsP}><span style={styles.userDetailsPSpan}>Cargo:</span> {user.role || "Não informado"}</p>
+          <p style={styles.userDetailsP}>
+            <span style={styles.userDetailsPSpan}>Nome:</span> {user.name}
+          </p>
+          <p style={styles.userDetailsP}>
+            <span style={styles.userDetailsPSpan}>Email:</span> {user.email}
+          </p>
+          <p style={styles.userDetailsP}>
+            <span style={styles.userDetailsPSpan}>Celular:</span>{" "}
+            {user.phone || "Não informado"}
+          </p>
+          <p style={styles.userDetailsP}>
+            <span style={styles.userDetailsPSpan}>Cargo:</span>{" "}
+            {user.role || "Não informado"}
+          </p>
         </div>
         <div style={styles.permissionsDisplay}>
           <div style={styles.permissionGroup}>
             <h4 style={styles.permissionGroupH4}>IDs de Permissão</h4>
             <div style={styles.tags}>
               {user.permissionIds && user.permissionIds.length > 0 ? (
-                user.permissionIds.map((id) => <span key={id} style={styles.tagSpan}>{id}</span>)
+                user.permissionIds.map((id) => (
+                  <span key={id} style={styles.tagSpan}>
+                    {id}
+                  </span>
+                ))
               ) : (
-                <span style={{ ...styles.tagSpan, backgroundColor: "#e2e8f0", color: "#64748b" }}>Nenhuma permissão atribuída</span>
+                <span
+                  style={{
+                    ...styles.tagSpan,
+                    backgroundColor: "#e2e8f0",
+                    color: "#64748b",
+                  }}
+                >
+                  Nenhuma permissão atribuída
+                </span>
               )}
             </div>
           </div>
         </div>
       </div>
-    </div>, document.body
+    </div>,
+    document.body
   );
 
 // --- MODAL DE CRIAÇÃO (Atualizado com Lógica API) ---
 const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
   const [selectedPermissions, setSelectedPermissions] = useState(new Set());
   const [loading, setLoading] = useState(false);
-  
+
   // State para o formulário
   const [formData, setFormData] = useState({
     name: "",
@@ -92,12 +142,12 @@ const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
     phone: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const togglePermission = (permission) => {
@@ -125,8 +175,8 @@ const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
     try {
       // Converter Set de nomes para Array de IDs usando o permissionMap
       const permissionIds = Array.from(selectedPermissions)
-        .map(name => permissionMap[name])
-        .filter(id => id !== undefined); // Remove undefined se o nome não estiver no mapa
+        .map((name) => permissionMap[name])
+        .filter((id) => id !== undefined); // Remove undefined se o nome não estiver no mapa
 
       // Montar payload conforme Swagger
       const payload = {
@@ -140,15 +190,14 @@ const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
         status: 1, // 1 = Ativo
         permissionIds: permissionIds,
         refreshToken: "", // Campos opcionais/gerados pelo back
-        dateCreated: new Date().toISOString()
+        dateCreated: new Date().toISOString(),
       };
 
       await adminServices.createAdmin(payload);
-      
+
       alert("Usuário criado com sucesso!");
       onSuccess(); // Atualiza a lista no componente pai
-      onClose();   // Fecha modal
-
+      onClose(); // Fecha modal
     } catch (error) {
       console.error(error);
       alert("Erro ao criar usuário. Verifique o console.");
@@ -158,9 +207,21 @@ const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
   };
 
   return ReactDOM.createPortal(
-    <div style={{ ...styles.modalBackdrop, ...(isClosing && styles.modalBackdropClosing) }}>
+    <div
+      style={{
+        ...styles.modalBackdrop,
+        ...(isClosing && styles.modalBackdropClosing),
+      }}
+    >
       <GlobalStyles />
-      <div style={{ ...styles.modalContent, ...styles.modalContentLarge, ...(isClosing && styles.modalContentClosing) }} onClick={(e) => e.stopPropagation()}>
+      <div
+        style={{
+          ...styles.modalContent,
+          ...styles.modalContentLarge,
+          ...(isClosing && styles.modalContentClosing),
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div style={styles.modalHeader}>
           <h3 style={styles.modalHeaderH3}>Informações Novo Usuário</h3>
         </div>
@@ -169,27 +230,64 @@ const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
           <div style={styles.formColumn}>
             <div style={styles.formGroup}>
               <label style={styles.formLabel}>Nome</label>
-              <input name="name" value={formData.name} onChange={handleChange} type="text" style={styles.formInput} />
+              <input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                type="text"
+                style={styles.formInput}
+              />
             </div>
             <div style={styles.formGroup}>
               <label style={styles.formLabel}>CPF</label>
-              <input name="cpf" value={formData.cpf} onChange={handleChange} type="text" style={styles.formInput} placeholder="Opcional / Uso Interno" />
+              <input
+                name="cpf"
+                value={formData.cpf}
+                onChange={handleChange}
+                type="text"
+                style={styles.formInput}
+                placeholder="Opcional / Uso Interno"
+              />
             </div>
             <div style={styles.formGroup}>
               <label style={styles.formLabel}>Contato</label>
-              <input name="phone" value={formData.phone} onChange={handleChange} type="text" style={styles.formInput} />
+              <input
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                type="text"
+                style={styles.formInput}
+              />
             </div>
             <div style={styles.formGroup}>
               <label style={styles.formLabel}>Email</label>
-              <input name="email" value={formData.email} onChange={handleChange} type="email" style={styles.formInput} />
+              <input
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                type="email"
+                style={styles.formInput}
+              />
             </div>
             <div style={styles.formGroup}>
               <label style={styles.formLabel}>Senha</label>
-              <input name="password" value={formData.password} onChange={handleChange} type="password" style={styles.formInput} />
+              <input
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                type="password"
+                style={styles.formInput}
+              />
             </div>
             <div style={styles.formGroup}>
               <label style={styles.formLabel}>Confirme a Senha</label>
-              <input name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} type="password" style={styles.formInput} />
+              <input
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                type="password"
+                style={styles.formInput}
+              />
             </div>
           </div>
 
@@ -197,31 +295,49 @@ const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
           <div style={styles.permissionsColumn}>
             <h4 style={styles.permissionsColumnH4}>Permissões Disponíveis</h4>
             {Object.entries(allPermissions).map(([key, groupPerms]) => (
-                <div key={key} style={styles.permissionGroup}>
-                <h5 style={styles.permissionGroupH5}>{key.charAt(0).toUpperCase() + key.slice(1)}</h5>
+              <div key={key} style={styles.permissionGroup}>
+                <h5 style={styles.permissionGroupH5}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </h5>
                 <div style={styles.permissionButtons}>
-                    {groupPerms.filter((p) => !selectedPermissions.has(p)).map((p) => (
-                        <button key={p} style={styles.permissionButton} onClick={() => togglePermission(p)}>
+                  {groupPerms
+                    .filter((p) => !selectedPermissions.has(p))
+                    .map((p) => (
+                      <button
+                        key={p}
+                        style={styles.permissionButton}
+                        onClick={() => togglePermission(p)}
+                      >
                         {p}
-                        </button>
+                      </button>
                     ))}
                 </div>
-                </div>
+              </div>
             ))}
           </div>
 
           {/* Coluna de Permissões Selecionadas */}
-          <div style={{ ...styles.permissionsColumn, ...styles.permissionsColumnSelected }}>
+          <div
+            style={{
+              ...styles.permissionsColumn,
+              ...styles.permissionsColumnSelected,
+            }}
+          >
             <h4 style={styles.permissionsColumnH4}>Permissões Adicionadas</h4>
             {/* AQUI ESTÁ A CORREÇÃO VISUAL APLICADA: styles.selectedPermissionsList */}
-            <div style={styles.selectedPermissionsList}> 
+            <div style={styles.selectedPermissionsList}>
               {Array.from(selectedPermissions).length === 0 && (
-                <p style={styles.emptyState}>Clique em uma permissão para adicioná-la aqui.</p>
+                <p style={styles.emptyState}>
+                  Clique em uma permissão para adicioná-la aqui.
+                </p>
               )}
               {Array.from(selectedPermissions).map((p) => (
                 <button
                   key={p}
-                  style={{ ...styles.permissionButton, ...styles.permissionButtonSelected }}
+                  style={{
+                    ...styles.permissionButton,
+                    ...styles.permissionButtonSelected,
+                  }}
                   onClick={() => togglePermission(p)}
                 >
                   {p}
@@ -231,8 +347,14 @@ const CreateUserModal = ({ onClose, isClosing, onSuccess }) => {
           </div>
         </div>
         <div style={styles.modalFooter}>
-          <button style={styles.cancelBtn} onClick={onClose} disabled={loading}>Cancelar</button>
-          <button style={styles.createBtn} onClick={handleCreate} disabled={loading}>
+          <button style={styles.cancelBtn} onClick={onClose} disabled={loading}>
+            Cancelar
+          </button>
+          <button
+            style={styles.createBtn}
+            onClick={handleCreate}
+            disabled={loading}
+          >
             {loading ? "Criando..." : "Criar"}
           </button>
         </div>
@@ -281,22 +403,52 @@ function UsersPage() {
   };
 
   const renderTableContent = () => {
-    if (isLoading) return <tr><td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>Carregando usuários...</td></tr>;
-    if (error) return <tr><td colSpan="4" style={{ textAlign: "center", padding: "20px", color: "red" }}>{error}</td></tr>;
-    if (users.length === 0) return <tr><td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>Nenhum usuário encontrado.</td></tr>;
-    
+    if (isLoading)
+      return (
+        <tr>
+          <td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>
+            Carregando usuários...
+          </td>
+        </tr>
+      );
+    if (error)
+      return (
+        <tr>
+          <td
+            colSpan="4"
+            style={{ textAlign: "center", padding: "20px", color: "red" }}
+          >
+            {error}
+          </td>
+        </tr>
+      );
+    if (users.length === 0)
+      return (
+        <tr>
+          <td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>
+            Nenhum usuário encontrado.
+          </td>
+        </tr>
+      );
+
     return users.map((user) => (
       <tr
         key={user.id}
         onMouseEnter={() => setHoveredRow(user.id)}
         onMouseLeave={() => setHoveredRow(null)}
-        style={{ ...styles.tableRow, ...(hoveredRow === user.id && styles.tableRowHover) }}
+        style={{
+          ...styles.tableRow,
+          ...(hoveredRow === user.id && styles.tableRowHover),
+        }}
       >
         <td style={styles.tableCell}>{user.name}</td>
         <td style={styles.tableCell}>{user.email}</td>
         <td style={styles.tableCell}>{user.phone || "N/A"}</td>
         <td style={styles.tableCell}>
-          <button style={styles.optionsBtn} onClick={() => handleOpenModal("details", user)}>
+          <button
+            style={styles.optionsBtn}
+            onClick={() => handleOpenModal("details", user)}
+          >
             <i className="fa-solid fa-eye"></i>
           </button>
         </td>
@@ -308,36 +460,55 @@ function UsersPage() {
     <div style={styles.usersPageContainer}>
       <header style={styles.usersPageHeader}>
         <h1 style={styles.headerH1}>Usuários do Sistema</h1>
-        <button style={styles.addUserButton} onClick={() => handleOpenModal("create")}>
+        <button
+          style={styles.addUserButton}
+          onClick={() => handleOpenModal("create")}
+        >
           <i className="fa-solid fa-plus"></i> Adicionar Usuário
         </button>
       </header>
       <div style={styles.searchBox}>
-        <input type="text" placeholder="Pesquisar por nome ou cargo..." style={styles.searchInput} />
+        <input
+          type="text"
+          placeholder="Pesquisar por nome ou cargo..."
+          style={styles.searchInput}
+        />
       </div>
       <div style={styles.usersTableCard}>
         <table style={styles.usersTable}>
           <thead>
             <tr>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>Nome</th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>E-mail</th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>Celular</th>
-              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>Opções</th>
+              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                Nome
+              </th>
+              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                E-mail
+              </th>
+              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                Celular
+              </th>
+              <th style={{ ...styles.tableCell, ...styles.tableHeader }}>
+                Opções
+              </th>
             </tr>
           </thead>
           <tbody>{renderTableContent()}</tbody>
         </table>
       </div>
       {modal.type === "details" && (
-        <UserDetailsModal user={modal.data} onClose={handleCloseModal} isClosing={isClosing} />
+        <UserDetailsModal
+          user={modal.data}
+          onClose={handleCloseModal}
+          isClosing={isClosing}
+        />
       )}
       {modal.type === "create" && (
-        <CreateUserModal 
-            onClose={handleCloseModal} 
-            isClosing={isClosing} 
-            onSuccess={() => {
-                fetchUsers(); // Recarrega a tabela após criar
-            }}
+        <CreateUserModal
+          onClose={handleCloseModal}
+          isClosing={isClosing}
+          onSuccess={() => {
+            fetchUsers(); // Recarrega a tabela após criar
+          }}
         />
       )}
     </div>

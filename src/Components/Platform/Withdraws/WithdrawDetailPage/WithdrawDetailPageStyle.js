@@ -2,7 +2,7 @@ const styles = {
     detailPageContainer: {
       fontFamily: "'Poppins', sans-serif",
       background: "linear-gradient(120deg, #f8fafc, #f1f5f9)",
-      padding: "32px",
+      padding: "82px 32px 32px 32px",
       borderRadius: "24px",
     },
     detailHeader: {

@@ -44,7 +44,7 @@
 
 .orders-page-container {
     font-family: 'Poppins', sans-serif;
-    padding: 20px;
+    padding: 80px 20px 20px 20px !important;
     max-width: 1200px;
     margin: 0 auto;
 }

@@ -5,7 +5,7 @@ const styles = {
   catalogPageContainer: {
     fontFamily: "'Poppins', sans-serif",
     width: "100%",
-    padding: "24px",
+    padding: "64px 24px 24px 24px",
     boxSizing: "border-box",
     backgroundColor: "#f9fafb",
   },

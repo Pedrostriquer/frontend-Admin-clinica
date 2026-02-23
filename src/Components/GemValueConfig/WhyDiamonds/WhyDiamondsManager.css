@@ -1,6 +1,6 @@
 /* --- CONTAINER E ESTRUTURA GERAL --- */
 .visual-editor-container {
-    padding: 30px;
+    padding: 80px 30px 30px 30px;
     background: #f8fafc; /* Fundo neutro para destacar o editor */
     min-height: 100vh;
     font-family: 'Inter', sans-serif;

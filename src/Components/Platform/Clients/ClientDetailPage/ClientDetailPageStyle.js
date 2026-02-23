@@ -2,7 +2,7 @@ const styles = {
   pageContainer: {
     fontFamily: "'Poppins', sans-serif",
     width: "100%",
-    padding: "24px 32px",
+    padding: "84px 32px 24px 32px",
     backgroundColor: "#f8f9fa",
     boxSizing: "border-box",
   },

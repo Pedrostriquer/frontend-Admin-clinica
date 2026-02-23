@@ -1,6 +1,6 @@
 .dashboard-neumorph-container {
   font-family: 'Poppins', sans-serif;
-  padding: clamp(15px, 4vw, 30px);
+  padding: 80px 40px 40px 40px;
   background-color: #f8fafc;
   min-height: 100vh;
   box-sizing: border-box;

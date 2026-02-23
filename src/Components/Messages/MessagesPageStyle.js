@@ -1,6 +1,6 @@
 const styles = {
   messagesPageContainer: {
-    padding: "clamp(20px, 5vw, 40px)",
+    padding: "80px 30px 30px 30px",
     fontFamily: "'Poppins', sans-serif",
     backgroundColor: "#f8fafc",
     minHeight: "100vh",

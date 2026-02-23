@@ -346,21 +346,25 @@ const ProductModal = ({
 
   const handleInfoChange = (name, value) =>
     setFormData((prev) => ({ ...prev, info: { ...prev.info, [name]: value } }));
+
   const handleStoneChange = (index, stoneData) => {
     const newStones = [...(formData.info.stones || [])];
     newStones[index] = stoneData;
     handleInfoChange("stones", newStones);
   };
+
   const handleAddStone = () =>
     handleInfoChange("stones", [
       ...(formData.info.stones || []),
       { quantity: 1 },
     ]);
+
   const handleRemoveStone = (index) =>
     handleInfoChange(
       "stones",
       formData.info.stones.filter((_, i) => i !== index)
     );
+
   const handleAddMediaFromUrl = () => {
     if (newMediaUrl) {
       setFormData((prev) => ({
@@ -373,6 +377,7 @@ const ProductModal = ({
       setNewMediaUrl("");
     }
   };
+
   const handleRemoveMedia = (urlToRemove) => {
     const mediaToRemove = formData.media.find((m) => m.url === urlToRemove);
     if (mediaToRemove && mediaToRemove.file) {
@@ -383,12 +388,14 @@ const ProductModal = ({
       media: prev.media.filter((m) => m.url !== urlToRemove),
     }));
   };
+
   const handleAddCategory = (catId) =>
     !formData.categories.includes(catId) &&
     setFormData((prev) => ({
       ...prev,
       categories: [...prev.categories, catId],
     }));
+
   const handleRemoveCategory = (catId) =>
     setFormData((prev) => ({
       ...prev,
@@ -413,23 +420,27 @@ const ProductModal = ({
       const parsable = str.replace(/\./g, "").replace(",", ".");
       return parseFloat(parsable) || 0;
     };
-  
+
     const localFiles = formData.media.filter((m) => m.file).map((m) => m.file);
     const existingUrls = formData.media
       .filter((m) => !m.file)
       .map((m) => m.url);
-  
+
     const finalData = { ...formData };
-  
-    if (finalData.featuredPosition === "" || finalData.featuredPosition === null) {
+
+    if (
+      finalData.featuredPosition === "" ||
+      finalData.featuredPosition === null
+    ) {
       finalData.featuredPosition = null;
     } else {
       finalData.featuredPosition = parseInt(finalData.featuredPosition, 10);
     }
-  
+
     finalData.value = cleanAndParseFloat(finalData.value);
-    finalData.stock = finalData.stock === "" ? null : parseInt(finalData.stock, 10);
-  
+    finalData.stock =
+      finalData.stock === "" ? null : parseInt(finalData.stock, 10);
+
     if (finalData.info) {
       finalData.info.weightInGrams = cleanAndParseFloat(
         finalData.info.weightInGrams
@@ -445,7 +456,7 @@ const ProductModal = ({
         }));
       }
     }
-  
+
     delete finalData.media;
     onSave(finalData, localFiles, existingUrls);
   };
@@ -466,6 +477,7 @@ const ProductModal = ({
         <div className="modal-header-prod">
           <h3>{isEditing ? "Editar Produto" : "Criar Novo Produto"}</h3>
         </div>
+
         <div className="modal-body-prod">
           <div className="product-form-grid v2">
             <div className="form-col">
@@ -632,6 +644,7 @@ const ProductModal = ({
                 )}
               </div>
             </div>
+
             <div className="form-col">
               {formData.itemType === 1 && (
                 <div className="form-group-prod">
@@ -742,6 +755,7 @@ const ProductModal = ({
             </div>
           </div>
         </div>
+
         <div className="modal-footer-prod">
           <button type="button" className="close-btn-prod" onClick={onClose}>
             Cancelar

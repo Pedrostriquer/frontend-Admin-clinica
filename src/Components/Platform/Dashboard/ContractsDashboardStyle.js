@@ -1,7 +1,7 @@
 const styles = {
   dashboardContainer: {
     fontFamily: "'Poppins', sans-serif",
-    padding: "20px",
+    padding: "80px 20px 20px 20px",
     maxWidth: "1600px",
     margin: "0 auto",
     boxSizing: "border-box",

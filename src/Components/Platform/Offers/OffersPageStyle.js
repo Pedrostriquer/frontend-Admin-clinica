@@ -2,7 +2,7 @@ const styles = {
   offersPageContainer: {
     fontFamily: "'Poppins', sans-serif",
     backgroundColor: "#f8fafc",
-    padding: "2rem",
+    padding: "5rem 2rem 2rem 2rem",
     position: "relative",
     width: "100%",
     boxSizing: "border-box",

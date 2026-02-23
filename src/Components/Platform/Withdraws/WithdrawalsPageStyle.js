@@ -1,7 +1,7 @@
 const styles = {
   withdrawalsPageContainer: {
     fontFamily: "'Poppins', sans-serif",
-    padding: "clamp(12px, 4vw, 40px)",
+    padding: "80px 30px 30px 30px",
     boxSizing: "border-box",
     width: "100%",
     backgroundColor: "#f8f9fa",
