@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import "./PopUpModal.css";
 import popUpService from "../../dbServices/popUpService";
 import FormModel from "./Forms/FormModel";
+import EditPopUpModal from "./EditPopUpModal";
 
-const PopUpModal = ({ popUp: initialPopUp, onClose }) => {
+const PopUpModal = ({ popUp: initialPopUp, onClose, onUpdate }) => {
   const [activeTab, setActiveTab] = useState("info");
   const [responses, setResponses] = useState([]);
   const [loadingResp, setLoadingResp] = useState(false);
   const [filterType, setFilterType] = useState("all");
   const [popUp, setPopUp] = useState(initialPopUp);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (activeTab === "responses") loadResponses();
@@ -137,6 +139,14 @@ const PopUpModal = ({ popUp: initialPopUp, onClose }) => {
                   </div>
 
                   <div className="pum-control-section">
+                    <button
+                      className="pum-toggle-status-btn edit"
+                      onClick={() => setIsEditModalOpen(true)}
+                      style={{ marginBottom: "10px" }}
+                    >
+                      <i className="fa-solid fa-pen-to-square"></i> Editar
+                      Campanha
+                    </button>
                     <button
                       className={`pum-toggle-status-btn ${
                         popUp.isActive ? "deactivate" : "activate"
@@ -281,6 +291,16 @@ const PopUpModal = ({ popUp: initialPopUp, onClose }) => {
           )}
         </main>
       </div>
+      {isEditModalOpen && (
+        <EditPopUpModal
+          popUp={popUp}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={() => {
+            setIsEditModalOpen(false);
+            if (onUpdate) onUpdate();
+          }}
+        />
+      )}
     </div>
   );
 };

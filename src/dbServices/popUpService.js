@@ -46,6 +46,11 @@ const popUpService = {
     const response = await api.patch(`PopUp/${id}/toggle-active`);
     return response.data;
   },
+
+  updatePopUp: async (id, payload) => {
+    const response = await api.put(`PopUp/${id}`, payload);
+    return response.data;
+  },
 };
 
 export default popUpService;

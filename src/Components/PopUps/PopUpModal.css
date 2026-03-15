@@ -217,6 +217,11 @@
     color: #166534;
 }
 
+.pum-toggle-status-btn.edit {
+    background: #fef3c7;
+    color: #b45309;
+}
+
 .pum-toggle-status-btn:hover {
     filter: brightness(0.95);
 }

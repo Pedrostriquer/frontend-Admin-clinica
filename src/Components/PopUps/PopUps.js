@@ -21,6 +21,7 @@ const PopUps = () => {
     id: null,
     name: "",
   });
+  const [modalRefresh, setModalRefresh] = useState(0);
 
   const fetchData = useCallback(
     async (isInitial = false) => {
@@ -209,12 +210,25 @@ const PopUps = () => {
                         <button
                           className="pu-action-btn view"
                           onClick={() => handleOpenModal(p)}
+                          title="Visualizar"
                         >
                           <i className="fa-solid fa-eye"></i>
                         </button>
                         <button
+                          className="pu-action-btn edit"
+                          onClick={() => {
+                            setSelectedPopUp(p);
+                            setIsModalOpen(true);
+                            setModalRefresh(prev => prev + 1);
+                          }}
+                          title="Editar"
+                        >
+                          <i className="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button
                           className="pu-action-btn delete"
                           onClick={(e) => openDeleteDialog(e, p)}
+                          title="Deletar"
                         >
                           <i className="fa-solid fa-trash-can"></i>
                         </button>
@@ -290,6 +304,7 @@ const PopUps = () => {
         <PopUpModal
           popUp={selectedPopUp}
           onClose={() => setIsModalOpen(false)}
+          onUpdate={() => fetchData()}
         />
       )}
       {isCreateModalOpen && (
