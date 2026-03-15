@@ -252,6 +252,8 @@ function ExtractData() {
   const [selectedDataType, setSelectedDataType] = useState(null);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [openFormatMenu, setOpenFormatMenu] = useState(false);
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
@@ -312,31 +314,39 @@ function ExtractData() {
     setData([]);
   };
 
-  const handleDownload = async () => {
-    if (!currentConfig?.downloadFunction) {
-      alert("A extração para este tipo de dado ainda não foi implementada.");
+  const handleDownload = async (format = "csv") => {
+    if (!selectedDataType || !data || data.length === 0) {
+      alert("Nenhum dado para exportar. Carregue dados primeiro.");
       return;
     }
+
+    setExportLoading(true);
     try {
-      const response = await currentConfig.downloadFunction(filters);
+      const exportFunction = extractDataServices.getExportFunction(selectedDataType);
+      if (!exportFunction) {
+        alert("A exportação para este tipo de dado ainda não foi implementada.");
+        return;
+      }
+
+      const response = await exportFunction(data, format);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      const contentDisposition = response.headers["content-disposition"];
-      let fileName = `${selectedDataType.toLowerCase()}_export.csv`;
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
-        if (fileNameMatch && fileNameMatch.length === 2)
-          fileName = fileNameMatch[1];
-      }
+
+      const fileExtension = format === "excel" ? "xlsx" : "csv";
+      const fileName = `${selectedDataType.toLowerCase()}_${new Date().toISOString().split("T")[0]}.${fileExtension}`;
+
       link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
+      setOpenFormatMenu(false);
     } catch (error) {
-      console.error("Erro ao gerar o arquivo CSV:", error);
+      console.error("Erro ao gerar o arquivo:", error);
       alert("Não foi possível gerar o arquivo. Tente novamente.");
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -421,10 +431,67 @@ function ExtractData() {
                 </div>
               </>
             )}
-            <div className="extract-button-wrapper">
-              <button className="extract-button" onClick={handleDownload}>
-                <i className="fa-solid fa-download"></i> Extrair Dados (CSV)
+            <div className="extract-button-wrapper" style={{ position: "relative" }}>
+              <button
+                className="extract-button"
+                onClick={() => setOpenFormatMenu(!openFormatMenu)}
+                disabled={exportLoading}
+              >
+                <i className="fa-solid fa-download"></i> Extrair Dados
               </button>
+              {openFormatMenu && (
+                <div style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  zIndex: 1000,
+                  minWidth: "180px",
+                  marginTop: "4px"
+                }}>
+                  <button
+                    onClick={() => handleDownload("csv")}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      textAlign: "left",
+                      border: "none",
+                      backgroundColor: "#ffffff",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      color: "#333",
+                      borderBottom: "1px solid #eee",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f5f5f5"}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = "#ffffff"}
+                  >
+                    📄 CSV (.csv)
+                  </button>
+                  <button
+                    onClick={() => handleDownload("excel")}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      textAlign: "left",
+                      border: "none",
+                      backgroundColor: "#ffffff",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      color: "#333",
+                      borderBottom: "none",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f5f5f5"}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = "#ffffff"}
+                  >
+                    📊 Excel (.xlsx)
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="data-table-card">

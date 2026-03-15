@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  AreaChart,
-  Area,
   BarChart,
   Bar,
   XAxis,
@@ -12,6 +10,7 @@ import {
 } from "recharts";
 import styles from "./ContractsDashboardStyle.js";
 import platformServices from "../../../dbServices/platformServices.js";
+import exportService from "../../../dbServices/exportService.js";
 import { useAuth } from "../../../Context/AuthContext.js";
 import ImageWithLoader from "../ImageWithLoader/ImageWithLoader.js";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +18,7 @@ import { useLoad } from "../../../Context/LoadContext.js";
 
 const RoundedBar = (props) => {
   const { x, y, width, height, fill } = props;
-  const radius = 8;
+  const radius = 4;
   if (!x || !y) return null;
   return (
     <path
@@ -42,6 +41,7 @@ const formatCurrency = (value) => {
 
 const formatCurrencyShort = (value) => {
   if (!value) return "R$ 0";
+  if (value >= 1000000) return `R$ ${(value / 1000000).toFixed(1)}M`;
   if (value >= 1000) return `R$ ${(value / 1000).toFixed(1)}k`;
   return `R$ ${value.toFixed(0)}`;
 };
@@ -52,9 +52,34 @@ const monthNumberToName = (monthNumber) => {
   return date.toLocaleString("pt-BR", { month: "short" });
 };
 
+const getStatusColor = (status) => {
+  switch (status) {
+    case 1:
+      return { bg: "#fef3c7", color: "#92400e", label: "Pendente" };
+    case 2:
+      return { bg: "#d1fae5", color: "#065f46", label: "Pago" };
+    case 3:
+      return { bg: "#fee2e2", color: "#7f1d1d", label: "Cancelado" };
+    default:
+      return { bg: "#f3f4f6", color: "#374151", label: "Desconhecido" };
+  }
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
+};
+
 function ContractsDashboard() {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [salesFilter, setSalesFilter] = useState("all");
+  const [openExportMenu, setOpenExportMenu] = useState(null); // "clients", "sales", "withdrawals"
+  const [exportLoading, setExportLoading] = useState(false);
   const { token } = useAuth();
   const { startLoading, stopLoading } = useLoad();
   const navigate = useNavigate();
@@ -79,40 +104,85 @@ function ContractsDashboard() {
 
   const processedBestClients = useMemo(() => {
     if (!data || !Array.isArray(data.bestClients)) return [];
-
     return [...data.bestClients]
       .map((c) => ({
         ...c,
-        displayAmount: c.amount ?? c.balance ?? 0,
+        displayAmount: c.amount ?? 0,
       }))
       .sort((a, b) => b.displayAmount - a.displayAmount)
-      .slice(0, 5);
+      .slice(0, 4);
   }, [data]);
 
+  const allRecentSales = data?.recentSales || [];
+  const filteredRecentSales = useMemo(() => {
+    if (salesFilter === "pending") {
+      return allRecentSales.filter(sale => sale.status !== 2);
+    }
+    return allRecentSales;
+  }, [allRecentSales, salesFilter]);
+
+  const handleExport = async (type, format) => {
+    setExportLoading(true);
+    try {
+      if (type === "clients") {
+        await exportService.exportBestClients(format);
+      } else if (type === "sales") {
+        await exportService.exportRecentSales(format);
+      } else if (type === "withdrawals") {
+        await exportService.exportRecentWithdrawals(format);
+      }
+      setOpenExportMenu(null);
+    } catch (error) {
+      console.error("Erro ao exportar:", error);
+      alert("Erro ao exportar dados");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const ExportMenu = ({ onExport, isOpen }) => {
+    if (!isOpen) return null;
+    return (
+      <div style={styles.exportMenu}>
+        <div
+          style={styles.exportMenuItem}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f8fafc")}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = "#ffffff")}
+          onClick={() => onExport("excel")}
+        >
+          📊 Excel (.xlsx)
+        </div>
+        <div
+          style={{ ...styles.exportMenuItem, borderBottom: "none" }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f8fafc")}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = "#ffffff")}
+          onClick={() => onExport("csv")}
+        >
+          📄 CSV (.csv)
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) return <div style={styles.loadingState}>Carregando...</div>;
-  if (!data)
-    return <div style={styles.loadingState}>Sem dados disponíveis.</div>;
+  if (!data) return <div style={styles.loadingState}>Sem dados.</div>;
 
   const kpiData = [
     {
       title: "Faturamento Mensal",
       value: formatCurrencyShort(data.actualMonthlyIncome?.value),
-      data: data.lastMonthsIncomes?.map((item) => ({ v: item.value })) || [],
     },
     {
       title: "Contratos Ativos",
       value: data.activeContracts || 0,
-      data: [{ v: 10 }, { v: 20 }, { v: 15 }, { v: 30 }],
-    },
-    {
-      title: "Saques no Mês",
-      value: formatCurrencyShort(data.monthlyWithdraw),
-      data: [{ v: 30 }, { v: 20 }, { v: 40 }, { v: 35 }],
     },
     {
       title: "Ticket Médio",
       value: formatCurrencyShort(data.mediumTicket),
-      data: [{ v: 20 }, { v: 18 }, { v: 25 }, { v: 22 }],
+    },
+    {
+      title: "Saques no Mês",
+      value: formatCurrencyShort(data.monthlyWithdraw),
     },
   ];
 
@@ -124,14 +194,17 @@ function ContractsDashboard() {
     .reverse();
 
   const topValue = processedBestClients[0]?.displayAmount || 1;
+  const recentWithdraws = data.recentWithdraws || [];
 
   return (
     <div style={styles.dashboardContainer}>
+      {/* HEADER */}
       <header style={styles.dashboardHeader}>
         <h1 style={styles.headerH1}>Dashboard</h1>
         <p style={styles.headerP}>Visão geral do desempenho</p>
       </header>
 
+      {/* KPI CARDS */}
       <section style={styles.kpiGrid}>
         {kpiData.map((kpi, index) => (
           <div key={index} style={{ ...styles.cardBase, ...styles.kpiCard }}>
@@ -140,76 +213,130 @@ function ContractsDashboard() {
               <span style={styles.kpiTitle}>{kpi.title}</span>
               <span style={styles.kpiValue}>{kpi.value}</span>
             </div>
-            <div style={styles.kpiChart}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={kpi.data}>
-                  <Area
-                    type="monotone"
-                    dataKey="v"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    fillOpacity={0.1}
-                    fill="#3b82f6"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
           </div>
         ))}
       </section>
 
+      {/* MAIN CONTENT GRID */}
       <section style={styles.mainGrid}>
-        <div style={{ ...styles.cardBase, ...styles.mainChartCard }}>
-          <h3 style={styles.cardTitle}>Faturamento</h3>
+        {/* GRÁFICO DE FATURAMENTO */}
+        <div style={{ ...styles.cardBase, ...styles.chartCard }}>
+          <h3 style={styles.cardTitle}>Faturamento (6 meses)</h3>
           <div style={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={barChartData}
-                margin={{ top: 20, right: 10, left: -20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis
-                  tickFormatter={(val) => `R$${val}k`}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 12 }}
-                />
+              <BarChart data={barChartData} margin={{ top: 15, right: 15, left: -15, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} />
+                <YAxis tick={{ fontSize: 11, fill: "#64748b" }} />
                 <Tooltip
-                  cursor={{ fill: "transparent" }}
+                  cursor={{ fill: "rgba(59, 130, 246, 0.1)" }}
                   formatter={(value) => formatCurrency(value * 1000)}
+                  contentStyle={{
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "6px",
+                  }}
                 />
-                <Bar
-                  dataKey="Faturamento"
-                  shape={<RoundedBar />}
-                  fill="#3b82f6"
-                  barSize={24}
-                />
+                <Bar dataKey="Faturamento" shape={<RoundedBar />} fill="#3b82f6" barSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div style={{ ...styles.cardBase, ...styles.sellersCard }}>
-          <h3 style={styles.cardTitle}>Melhores Clientes</h3>
-          <ul style={styles.sellersList}>
-            {processedBestClients.map((client) => (
+        {/* ÚLTIMOS SAQUES */}
+        <div style={{ ...styles.cardBase, ...styles.withdrawalsCard }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "10px", borderBottom: "2px solid #f1f5f9" }}>
+            <h3 style={styles.cardTitle}>Últimos Saques</h3>
+            <div style={styles.exportMenuContainer}>
+              <button
+                style={styles.exportButton}
+                onClick={() => setOpenExportMenu(openExportMenu === "withdrawals" ? null : "withdrawals")}
+                disabled={exportLoading}
+              >
+                ⬇️ Exportar
+              </button>
+              <ExportMenu
+                isOpen={openExportMenu === "withdrawals"}
+                onExport={(format) => handleExport("withdrawals", format)}
+              />
+            </div>
+          </div>
+          <ul style={styles.withdrawalsList}>
+            {recentWithdraws.length > 0 ? (
+              recentWithdraws.map((withdraw) => {
+                const statusInfo = getStatusColor(withdraw.status);
+                return (
+                  <li key={withdraw.id} style={styles.withdrawalItem}>
+                    <ImageWithLoader
+                      src={
+                        withdraw.clientProfilePicture ||
+                        process.env.REACT_APP_DEFAULT_PROFILE_PICTURE
+                      }
+                      alt={withdraw.clientName}
+                      style={styles.withdrawalAvatar}
+                    />
+                    <div style={styles.withdrawalInfo}>
+                      <h4 style={styles.withdrawalName}>{withdraw.clientName}</h4>
+                      <p style={styles.withdrawalDate}>{formatDate(withdraw.dateCreated)}</p>
+                    </div>
+                    <div style={styles.withdrawalAmount}>
+                      {formatCurrency(withdraw.amount)}
+                    </div>
+                    <div
+                      style={{
+                        ...styles.statusBadge,
+                        backgroundColor: statusInfo.bg,
+                        color: statusInfo.color,
+                      }}
+                    >
+                      {statusInfo.label}
+                    </div>
+                  </li>
+                );
+              })
+            ) : (
+              <div style={{ color: "#64748b", textAlign: "center", padding: "20px" }}>
+                Nenhum saque recente
+              </div>
+            )}
+          </ul>
+        </div>
+      </section>
+
+      {/* BOTTOM GRID */}
+      <section style={styles.bottomGrid}>
+        {/* MELHORES CLIENTES */}
+        <div style={{ ...styles.cardBase, ...styles.clientsCard }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "10px", borderBottom: "2px solid #f1f5f9" }}>
+            <h3 style={styles.cardTitle}>Melhores Clientes</h3>
+            <div style={styles.exportMenuContainer}>
+              <button
+                style={styles.exportButton}
+                onClick={() => setOpenExportMenu(openExportMenu === "clients" ? null : "clients")}
+                disabled={exportLoading}
+              >
+                ⬇️ Exportar
+              </button>
+              <ExportMenu
+                isOpen={openExportMenu === "clients"}
+                onExport={(format) => handleExport("clients", format)}
+              />
+            </div>
+          </div>
+          <ul style={styles.clientsList}>
+            {processedBestClients.map((client, index) => (
               <li
-                onClick={() => navigate(`/platform/clients/${client.id}`)}
                 key={client.id}
-                style={styles.sellerItem}
-                // Adicionando um efeito de hover simples via inline ou classe se preferir
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f8fafc")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
+                style={styles.clientItem}
+                onClick={() => navigate(`/platform/clients/${client.id}`)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f8fafc";
+                  e.currentTarget.style.borderColor = "#cbd5e1";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ffffff";
+                  e.currentTarget.style.borderColor = "#f1f5f9";
+                }}
               >
                 <ImageWithLoader
                   src={
@@ -217,10 +344,17 @@ function ContractsDashboard() {
                     process.env.REACT_APP_DEFAULT_PROFILE_PICTURE
                   }
                   alt={client.name}
-                  style={styles.sellerAvatar}
+                  style={styles.clientAvatar}
                 />
-                <div style={styles.sellerInfo}>
-                  <span style={styles.sellerName}>{client.name}</span>
+                <div style={styles.clientInfo}>
+                  <h4 style={styles.clientName}>{client.name}</h4>
+                  <div style={styles.clientMeta}>
+                    <span>{client.totalContracts} contrato{client.totalContracts !== 1 ? 's' : ''}</span>
+                    <span style={{ fontSize: "0.7rem", color: "#cbd5e1" }}>•</span>
+                    <span style={{ color: "#10b981", fontWeight: 600 }}>
+                      {client.activeContracts} ativo{client.activeContracts !== 1 ? 's' : ''}
+                    </span>
+                  </div>
                   <div style={styles.progressBar}>
                     <div
                       style={{
@@ -230,12 +364,104 @@ function ContractsDashboard() {
                     ></div>
                   </div>
                 </div>
-                {/* ALTERADO AQUI: De formatCurrencyShort para formatCurrency */}
-                <span style={styles.sellerSales}>
-                  {formatCurrency(client.displayAmount)}
-                </span>
+                <span style={styles.clientAmount}>{formatCurrency(client.displayAmount)}</span>
               </li>
             ))}
+          </ul>
+        </div>
+
+        {/* VENDAS RECENTES */}
+        <div style={{ ...styles.cardBase, ...styles.salesCard }}>
+          <div style={styles.salesHeader}>
+            <h3 style={styles.salesTitle}>Vendas Recentes</h3>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <div style={styles.filterTabs}>
+              <button
+                style={{
+                  ...styles.filterTab,
+                  ...(salesFilter === "all" && styles.filterTabActive),
+                }}
+                onClick={() => setSalesFilter("all")}
+              >
+                Todos
+              </button>
+              <button
+                style={{
+                  ...styles.filterTab,
+                  ...(salesFilter === "pending" && styles.filterTabActive),
+                }}
+                onClick={() => setSalesFilter("pending")}
+              >
+                Pendentes
+              </button>
+              </div>
+              <div style={styles.exportMenuContainer}>
+                <button
+                  style={styles.exportButton}
+                  onClick={() => setOpenExportMenu(openExportMenu === "sales" ? null : "sales")}
+                  disabled={exportLoading}
+                >
+                  ⬇️ Exportar
+                </button>
+                <ExportMenu
+                  isOpen={openExportMenu === "sales"}
+                  onExport={(format) => handleExport("sales", format)}
+                />
+              </div>
+            </div>
+          </div>
+          <ul style={styles.salesList}>
+            {filteredRecentSales.length > 0 ? (
+              filteredRecentSales.map((sale) => (
+                <li
+                  key={sale.id}
+                  style={styles.saleItem}
+                  onClick={() => navigate(`/platform/clients/${sale.id}`)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f8fafc";
+                    e.currentTarget.style.borderColor = "#cbd5e1";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                    e.currentTarget.style.borderColor = "#f1f5f9";
+                  }}
+                >
+                  <ImageWithLoader
+                    src={
+                      sale.clientProfilePicture ||
+                      process.env.REACT_APP_DEFAULT_PROFILE_PICTURE
+                    }
+                    alt={sale.clientName}
+                    style={styles.saleAvatar}
+                  />
+                  <div style={styles.saleInfo}>
+                    <h4 style={styles.saleName}>{sale.clientName}</h4>
+                    <div style={styles.saleDetails}>
+                      <span>
+                        {sale.status === 2 ? "✓ Ativo" : "⏳ Pendente"}
+                      </span>
+                      <span style={{ fontSize: "0.7rem", color: "#cbd5e1" }}>
+                        •
+                      </span>
+                      <span>{formatDate(sale.dateCreated)}</span>
+                    </div>
+                  </div>
+                  <span style={styles.saleAmount}>{formatCurrency(sale.amount)}</span>
+                  <span style={styles.saleGain}>+{sale.gainPercentage.toFixed(1)}%</span>
+                </li>
+              ))
+            ) : (
+              <div
+                style={{
+                  color: "#64748b",
+                  textAlign: "center",
+                  padding: "20px",
+                  fontSize: "0.9rem",
+                }}
+              >
+                Nenhuma venda recente
+              </div>
+            )}
           </ul>
         </div>
       </section>
