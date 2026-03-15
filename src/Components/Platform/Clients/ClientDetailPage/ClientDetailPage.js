@@ -246,6 +246,12 @@ function ClientDetailPage() {
         FieldNewValue: editableClient.jobTitle,
       });
     }
+    if (editableClient.howFoundUs !== client.howFoundUs) {
+      updates.push({
+        FieldName: "HowFoundUs",
+        FieldNewValue: editableClient.howFoundUs,
+      });
+    }
     if (updates.length === 0) {
       setIsEditing(false);
       setIsSaving(false);
@@ -326,6 +332,9 @@ function ClientDetailPage() {
           onChange={handleInputChange}
           style={styles.inputField}
         />
+        <p style={{ ...styles.infoValue, color: "#9ca3af" }}>
+          {editableClient.howFoundUs || "Não informado"} (não editável)
+        </p>
       </div>
       <div style={styles.editActions}>
         <button
@@ -361,6 +370,10 @@ function ClientDetailPage() {
       <div>
         <span style={styles.infoLabel}>Profissão</span>
         <p style={styles.infoValue}>{client.jobTitle || "Não informado"}</p>
+      </div>
+      <div>
+        <span style={styles.infoLabel}>Como nos conheceu</span>
+        <p style={styles.infoValue}>{client.howFoundUs || "Não informado"}</p>
       </div>
     </div>
   );
