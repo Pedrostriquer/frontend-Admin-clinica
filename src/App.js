@@ -38,6 +38,7 @@ import ControllerPage from "./Components/Platform/Controller/ControllerPage";
 import ReferralsPage from "./Components/Platform/Indication/ReferralsPage";
 import OffersPage from "./Components/Platform/Offers/OffersPage";
 import Catalog from "./Components/Platform/Catalog/Catalog";
+import BlogGemCapitalPage from "./Components/Platform/BlogGemCapital/BlogGemCapitalPage";
 
 // --- PÁGINAS: E-COMMERCE ---
 import EcommerceDashboard from "./Components/Ecommerce/Dashboard/EcommerceDashboard";
@@ -143,6 +144,7 @@ const AppContent = () => {
             <Route path="platform/catalogo-gemcash" element={<Catalog />} />
             <Route path="clients/create" element={<CreateClientPage />} />
             <Route path="platform/pop-ups" element={<PopUps />} />
+            <Route path="platform/blog-gemcapital" element={<BlogGemCapitalPage />} />
 
             {/* Sub-Roteamento: E-commerce */}
             <Route

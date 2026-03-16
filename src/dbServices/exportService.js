@@ -1,18 +1,13 @@
-import axios from "axios";
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
+import api from "./api/api.js";
 
 const exportService = {
   // Exportar Melhores Clientes
   exportBestClients: async (format = "excel") => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/export/best-clients/${format}`,
+      const response = await api.get(
+        `export/best-clients/${format}`,
         {
           responseType: "blob",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 
@@ -38,13 +33,10 @@ const exportService = {
   // Exportar Vendas Recentes
   exportRecentSales: async (format = "excel") => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/export/recent-sales/${format}`,
+      const response = await api.get(
+        `export/recent-sales/${format}`,
         {
           responseType: "blob",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 
@@ -70,13 +62,10 @@ const exportService = {
   // Exportar Saques Recentes
   exportRecentWithdrawals: async (format = "excel") => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/export/recent-withdrawals/${format}`,
+      const response = await api.get(
+        `export/recent-withdrawals/${format}`,
         {
           responseType: "blob",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 

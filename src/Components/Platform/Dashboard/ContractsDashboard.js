@@ -16,6 +16,29 @@ import ImageWithLoader from "../ImageWithLoader/ImageWithLoader.js";
 import { useNavigate } from "react-router-dom";
 import { useLoad } from "../../../Context/LoadContext.js";
 
+// Hook para detectar tamanho da tela
+const useResponsive = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return {
+    isMobile: windowSize.width < 640,
+    isTablet: windowSize.width >= 640 && windowSize.width < 1024,
+    isDesktop: windowSize.width >= 1024,
+    width: windowSize.width,
+  };
+};
+
 const RoundedBar = (props) => {
   const { x, y, width, height, fill } = props;
   const radius = 4;
@@ -79,10 +102,74 @@ function ContractsDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [salesFilter, setSalesFilter] = useState("all");
   const [openExportMenu, setOpenExportMenu] = useState(null); // "clients", "sales", "withdrawals"
-  const [exportLoading, setExportLoading] = useState(false);
+  const [exportingType, setExportingType] = useState(null); // null, "clients", "sales", "withdrawals"
   const { token } = useAuth();
   const { startLoading, stopLoading } = useLoad();
   const navigate = useNavigate();
+  const responsive = useResponsive();
+
+  // Gera estilos responsivos
+  const getResponsiveStyles = () => {
+    return {
+      dashboardContainer: {
+        ...styles.dashboardContainer,
+        padding: responsive.isMobile ? "70px 12px 12px 12px" : "80px 20px 20px 20px",
+      },
+      kpiGrid: {
+        ...styles.kpiGrid,
+        gridTemplateColumns: responsive.isMobile
+          ? "1fr"
+          : responsive.isTablet
+          ? "repeat(2, 1fr)"
+          : "repeat(auto-fit, minmax(220px, 1fr))",
+        gap: responsive.isMobile ? "12px" : "16px",
+      },
+      mainGrid: {
+        ...styles.mainGrid,
+        gridTemplateColumns: responsive.isMobile ? "1fr" : "1fr 1fr",
+        gap: responsive.isMobile ? "12px" : "16px",
+      },
+      bottomGrid: {
+        ...styles.bottomGrid,
+        gridTemplateColumns: responsive.isMobile ? "1fr" : "1fr 1fr",
+        gap: responsive.isMobile ? "12px" : "16px",
+      },
+      headerH1: {
+        ...styles.headerH1,
+        fontSize: responsive.isMobile ? "1.4rem" : "1.75rem",
+      },
+      kpiCard: {
+        ...styles.kpiCard,
+        padding: responsive.isMobile ? "12px" : "18px",
+      },
+      kpiValue: {
+        ...styles.kpiValue,
+        fontSize: responsive.isMobile ? "1rem" : "1.4rem",
+      },
+      cardTitle: {
+        ...styles.cardTitle,
+        fontSize: responsive.isMobile ? "0.95rem" : "1.05rem",
+        marginBottom: responsive.isMobile ? "12px" : "16px",
+      },
+      chartWrapper: {
+        ...styles.chartWrapper,
+        minHeight: responsive.isMobile ? "150px" : "200px",
+        marginTop: responsive.isMobile ? "8px" : "12px",
+      },
+      salesTitle: {
+        ...styles.salesTitle,
+        fontSize: responsive.isMobile ? "0.95rem" : "1.05rem",
+      },
+      filterAndExportContainer: {
+        display: "flex",
+        gap: responsive.isMobile ? "6px" : "8px",
+        alignItems: "center",
+        flexWrap: responsive.isMobile ? "wrap" : "nowrap",
+      },
+    };
+  };
+
+  const responsiveStyles = getResponsiveStyles();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -122,7 +209,7 @@ function ContractsDashboard() {
   }, [allRecentSales, salesFilter]);
 
   const handleExport = async (type, format) => {
-    setExportLoading(true);
+    setExportingType(type);
     try {
       if (type === "clients") {
         await exportService.exportBestClients(format);
@@ -136,7 +223,7 @@ function ContractsDashboard() {
       console.error("Erro ao exportar:", error);
       alert("Erro ao exportar dados");
     } finally {
-      setExportLoading(false);
+      setExportingType(null);
     }
   };
 
@@ -197,32 +284,32 @@ function ContractsDashboard() {
   const recentWithdraws = data.recentWithdraws || [];
 
   return (
-    <div style={styles.dashboardContainer}>
+    <div style={responsiveStyles.dashboardContainer}>
       {/* HEADER */}
       <header style={styles.dashboardHeader}>
-        <h1 style={styles.headerH1}>Dashboard</h1>
+        <h1 style={responsiveStyles.headerH1}>Dashboard</h1>
         <p style={styles.headerP}>Visão geral do desempenho</p>
       </header>
 
       {/* KPI CARDS */}
-      <section style={styles.kpiGrid}>
+      <section style={responsiveStyles.kpiGrid}>
         {kpiData.map((kpi, index) => (
-          <div key={index} style={{ ...styles.cardBase, ...styles.kpiCard }}>
+          <div key={index} style={{ ...styles.cardBase, ...responsiveStyles.kpiCard }}>
             <div style={styles.kpiBorder}></div>
             <div style={styles.kpiContent}>
               <span style={styles.kpiTitle}>{kpi.title}</span>
-              <span style={styles.kpiValue}>{kpi.value}</span>
+              <span style={responsiveStyles.kpiValue}>{kpi.value}</span>
             </div>
           </div>
         ))}
       </section>
 
       {/* MAIN CONTENT GRID */}
-      <section style={styles.mainGrid}>
+      <section style={responsiveStyles.mainGrid}>
         {/* GRÁFICO DE FATURAMENTO */}
         <div style={{ ...styles.cardBase, ...styles.chartCard }}>
-          <h3 style={styles.cardTitle}>Faturamento (6 meses)</h3>
-          <div style={styles.chartWrapper}>
+          <h3 style={responsiveStyles.cardTitle}>Faturamento (6 meses)</h3>
+          <div style={responsiveStyles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barChartData} margin={{ top: 15, right: 15, left: -15, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
@@ -245,15 +332,15 @@ function ContractsDashboard() {
 
         {/* ÚLTIMOS SAQUES */}
         <div style={{ ...styles.cardBase, ...styles.withdrawalsCard }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "10px", borderBottom: "2px solid #f1f5f9" }}>
-            <h3 style={styles.cardTitle}>Últimos Saques</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: responsive.isMobile ? "12px" : "16px", paddingBottom: responsive.isMobile ? "8px" : "10px", borderBottom: "2px solid #f1f5f9" }}>
+            <h3 style={responsiveStyles.cardTitle}>Últimos Saques</h3>
             <div style={styles.exportMenuContainer}>
               <button
                 style={styles.exportButton}
                 onClick={() => setOpenExportMenu(openExportMenu === "withdrawals" ? null : "withdrawals")}
-                disabled={exportLoading}
+                disabled={exportingType === "withdrawals"}
               >
-                ⬇️ Exportar
+                {exportingType === "withdrawals" ? "⏳ Baixando..." : "⬇️ Exportar"}
               </button>
               <ExportMenu
                 isOpen={openExportMenu === "withdrawals"}
@@ -304,18 +391,18 @@ function ContractsDashboard() {
       </section>
 
       {/* BOTTOM GRID */}
-      <section style={styles.bottomGrid}>
+      <section style={responsiveStyles.bottomGrid}>
         {/* MELHORES CLIENTES */}
         <div style={{ ...styles.cardBase, ...styles.clientsCard }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "10px", borderBottom: "2px solid #f1f5f9" }}>
-            <h3 style={styles.cardTitle}>Melhores Clientes</h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: responsive.isMobile ? "12px" : "16px", paddingBottom: responsive.isMobile ? "8px" : "10px", borderBottom: "2px solid #f1f5f9" }}>
+            <h3 style={responsiveStyles.cardTitle}>Melhores Clientes</h3>
             <div style={styles.exportMenuContainer}>
               <button
                 style={styles.exportButton}
                 onClick={() => setOpenExportMenu(openExportMenu === "clients" ? null : "clients")}
-                disabled={exportLoading}
+                disabled={exportingType === "clients"}
               >
-                ⬇️ Exportar
+                {exportingType === "clients" ? "⏳ Baixando..." : "⬇️ Exportar"}
               </button>
               <ExportMenu
                 isOpen={openExportMenu === "clients"}
@@ -372,9 +459,9 @@ function ContractsDashboard() {
 
         {/* VENDAS RECENTES */}
         <div style={{ ...styles.cardBase, ...styles.salesCard }}>
-          <div style={styles.salesHeader}>
-            <h3 style={styles.salesTitle}>Vendas Recentes</h3>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <div style={{ ...styles.salesHeader, marginBottom: responsive.isMobile ? "12px" : "16px" }}>
+            <h3 style={responsiveStyles.salesTitle}>Vendas Recentes</h3>
+            <div style={responsiveStyles.filterAndExportContainer}>
               <div style={styles.filterTabs}>
               <button
                 style={{
@@ -399,9 +486,9 @@ function ContractsDashboard() {
                 <button
                   style={styles.exportButton}
                   onClick={() => setOpenExportMenu(openExportMenu === "sales" ? null : "sales")}
-                  disabled={exportLoading}
+                  disabled={exportingType === "sales"}
                 >
-                  ⬇️ Exportar
+                  {exportingType === "sales" ? "⏳ Baixando..." : "⬇️ Exportar"}
                 </button>
                 <ExportMenu
                   isOpen={openExportMenu === "sales"}

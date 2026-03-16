@@ -132,6 +132,11 @@ const platformMenu = [
     icon: "fa-solid fa-sliders",
     path: "/platform/controller",
   },
+  {
+    name: "Blog GemCapital",
+    icon: "fa-solid fa-blog",
+    path: "/platform/blog-gemcapital",
+  },
 ];
 
 const ecommerceMenu = [
