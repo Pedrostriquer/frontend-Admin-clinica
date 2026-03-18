@@ -1,3 +1,19 @@
+const getResponsiveTablePadding = (width) => {
+  if (width < 640) return "8px";
+  if (width < 1024) return "12px";
+  return "16px";
+};
+
+const getResponsiveTableFontSize = (width) => {
+  if (width < 640) return "12px";
+  return "14px";
+};
+
+const getResponsiveHeadingSize = (width) => {
+  if (width < 640) return "18px";
+  return "22px";
+};
+
 const styles = {
   container: {
     width: "100%",
@@ -186,4 +202,5 @@ const styles = {
   },
 };
 
+export { getResponsiveTablePadding, getResponsiveTableFontSize, getResponsiveHeadingSize };
 export default styles;

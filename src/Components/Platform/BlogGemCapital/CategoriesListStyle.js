@@ -1,3 +1,15 @@
+const getResponsiveGridColumns = (width) => {
+  if (width < 640) return "1fr";
+  if (width < 1024) return "repeat(2, 1fr)";
+  return "repeat(auto-fill, minmax(300px, 1fr))";
+};
+
+const getResponsiveGap = (width) => {
+  if (width < 640) return "12px";
+  if (width < 1024) return "16px";
+  return "20px";
+};
+
 const styles = {
   container: {
     width: "100%",
@@ -41,17 +53,6 @@ const styles = {
     gap: "20px",
     marginBottom: "20px",
     animation: "fadeIn 0.6s ease",
-    "@media (max-width: 1024px)": {
-      gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-    },
-    "@media (max-width: 768px)": {
-      gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-      gap: "16px",
-    },
-    "@media (max-width: 480px)": {
-      gridTemplateColumns: "1fr",
-      gap: "12px",
-    },
   },
   categoryCard: {
     backgroundColor: "white",
@@ -209,4 +210,5 @@ const styles = {
   },
 };
 
+export { getResponsiveGridColumns, getResponsiveGap };
 export default styles;

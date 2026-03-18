@@ -1,3 +1,15 @@
+const getResponsivePostsGridColumns = (width) => {
+  if (width < 640) return "1fr";
+  if (width < 1024) return "repeat(2, 1fr)";
+  return "repeat(auto-fill, minmax(320px, 1fr))";
+};
+
+const getResponsivePostsGap = (width) => {
+  if (width < 640) return "12px";
+  if (width < 1024) return "16px";
+  return "20px";
+};
+
 const styles = {
   container: {
     width: "100%",
@@ -283,4 +295,5 @@ const styles = {
   },
 };
 
+export { getResponsivePostsGridColumns, getResponsivePostsGap };
 export default styles;

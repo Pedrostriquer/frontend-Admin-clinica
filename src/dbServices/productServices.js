@@ -1,6 +1,24 @@
 import api from "./api/api";
 
 const productServices = {
+  searchActiveProductsForPromotion: async (searchTerm = "", pageNumber = 1, pageSize = 20) => {
+    try {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append("searchTerm", searchTerm);
+      params.append("pageNumber", pageNumber);
+      params.append("pageSize", pageSize);
+
+      const response = await api.get("Product/search-for-promotion", { params });
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Erro ao buscar produtos ativos para promoção:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  },
+
   searchProducts: async (filters, pageNumber = 1, pageSize = 5) => {
     try {
       const params = new URLSearchParams();

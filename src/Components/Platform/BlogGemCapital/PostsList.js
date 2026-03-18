@@ -1,5 +1,23 @@
-import React, { useState } from "react";
-import styles from "./PostsListStyle";
+import React, { useState, useEffect } from "react";
+import styles, { getResponsivePostsGridColumns, getResponsivePostsGap } from "./PostsListStyle";
+
+// Hook para detectar tamanho da tela
+const useResponsive = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize.width;
+};
 
 const PostsList = ({
   posts,
@@ -19,6 +37,7 @@ const PostsList = ({
   const [filterFromDate, setFilterFromDate] = useState("");
   const [filterToDate, setFilterToDate] = useState("");
   const [sortBy, setSortBy] = useState(null);
+  const windowWidth = useResponsive();
   const postsPerPage = 12;
 
   const handleFilterChange = () => {
@@ -153,7 +172,13 @@ const PostsList = ({
       {/* Posts Grid */}
       {paginatedPosts.length > 0 ? (
         <div>
-          <div style={styles.postsGrid}>
+          <div
+            style={{
+              ...styles.postsGrid,
+              gridTemplateColumns: getResponsivePostsGridColumns(windowWidth),
+              gap: getResponsivePostsGap(windowWidth),
+            }}
+          >
             {paginatedPosts.map((post) => (
               <div
                 key={post.id}

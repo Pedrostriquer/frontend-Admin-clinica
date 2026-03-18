@@ -9,12 +9,78 @@ import CreateCategoryModal from "./CreateCategoryModal";
 import CreatePixelModal from "./CreatePixelModal";
 import gemCapitalBlogServices from "../../../dbServices/gemCapitalBlogServices";
 
+// Hook para detectar tamanho da tela
+const useResponsive = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return {
+    isMobile: windowSize.width < 640,
+    isTablet: windowSize.width >= 640 && windowSize.width < 1024,
+    isDesktop: windowSize.width >= 1024,
+    width: windowSize.width,
+  };
+};
+
 const BlogGemCapitalPage = () => {
+  const responsive = useResponsive();
   const [activeTab, setActiveTab] = useState("posts"); // "posts", "categories" ou "pixels"
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [pixels, setPixels] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Gera estilos responsivos
+  const getResponsiveStyles = () => {
+    return {
+      container: {
+        ...styles.container,
+        padding: responsive.isMobile ? "70px 16px 20px 16px" : responsive.isTablet ? "75px 24px 30px 24px" : "80px 40px 40px 40px",
+      },
+      header: {
+        ...styles.header,
+        marginBottom: responsive.isMobile ? "24px" : "40px",
+      },
+      title: {
+        ...styles.title,
+        fontSize: responsive.isMobile ? "24px" : responsive.isTablet ? "28px" : "32px",
+      },
+      subtitle: {
+        ...styles.subtitle,
+        fontSize: responsive.isMobile ? "13px" : "15px",
+      },
+      tabsContainer: {
+        ...styles.tabsContainer,
+        gap: responsive.isMobile ? "8px" : responsive.isTablet ? "12px" : "20px",
+        marginBottom: responsive.isMobile ? "20px" : "30px",
+        overflowX: responsive.isMobile ? "auto" : "visible",
+        paddingBottom: responsive.isMobile ? "8px" : "0px",
+      },
+      tabButton: {
+        ...styles.tabButton,
+        padding: responsive.isMobile ? "10px 14px" : "14px 20px",
+        fontSize: responsive.isMobile ? "12px" : "14px",
+        minWidth: responsive.isMobile ? "auto" : "auto",
+      },
+      contentArea: {
+        ...styles.contentArea,
+        padding: responsive.isMobile ? "16px" : responsive.isTablet ? "20px" : "30px",
+        borderRadius: responsive.isMobile ? "8px" : "12px",
+      },
+    };
+  };
+
+  const responsiveStyles = getResponsiveStyles();
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
   const [showViewPostModal, setShowViewPostModal] = useState(false);
   const [showCreateCategoryModal, setShowCreateCategoryModal] = useState(false);
@@ -314,17 +380,17 @@ const BlogGemCapitalPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.title}>Gerenciador de Blog GemCapital</h1>
-        <p style={styles.subtitle}>Gerencie posts, categorias e conteúdo visual</p>
+    <div style={responsiveStyles.container}>
+      <div style={responsiveStyles.header}>
+        <h1 style={responsiveStyles.title}>Gerenciador de Blog GemCapital</h1>
+        <p style={responsiveStyles.subtitle}>Gerencie posts, categorias e conteúdo visual</p>
       </div>
 
       {/* Tabs */}
-      <div style={styles.tabsContainer}>
+      <div style={responsiveStyles.tabsContainer}>
         <button
           style={{
-            ...styles.tabButton,
+            ...responsiveStyles.tabButton,
             ...(activeTab === "posts" ? styles.tabButtonActive : {}),
           }}
           onClick={() => setActiveTab("posts")}
@@ -333,7 +399,7 @@ const BlogGemCapitalPage = () => {
         </button>
         <button
           style={{
-            ...styles.tabButton,
+            ...responsiveStyles.tabButton,
             ...(activeTab === "categories" ? styles.tabButtonActive : {}),
           }}
           onClick={() => setActiveTab("categories")}
@@ -342,7 +408,7 @@ const BlogGemCapitalPage = () => {
         </button>
         <button
           style={{
-            ...styles.tabButton,
+            ...responsiveStyles.tabButton,
             ...(activeTab === "pixels" ? styles.tabButtonActive : {}),
           }}
           onClick={() => setActiveTab("pixels")}
@@ -352,7 +418,7 @@ const BlogGemCapitalPage = () => {
       </div>
 
       {/* Content */}
-      <div style={styles.contentArea}>
+      <div style={responsiveStyles.contentArea}>
         {activeTab === "posts" && (
           <PostsList
             posts={posts}

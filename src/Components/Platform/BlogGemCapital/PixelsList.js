@@ -1,5 +1,23 @@
-import React, { useState } from "react";
-import styles from "./PixelsListStyle";
+import React, { useState, useEffect } from "react";
+import styles, { getResponsiveTablePadding, getResponsiveTableFontSize, getResponsiveHeadingSize } from "./PixelsListStyle";
+
+// Hook para detectar tamanho da tela
+const useResponsive = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize.width;
+};
 
 const PixelsList = ({
   pixels,
@@ -11,6 +29,7 @@ const PixelsList = ({
   loadingPixelId,
 }) => {
   const [hoveredRow, setHoveredRow] = useState(null);
+  const windowWidth = useResponsive();
 
   if (loading) {
     return (
@@ -25,7 +44,7 @@ const PixelsList = ({
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.listHeader}>
-        <h2 style={styles.heading}>Pixels ({pixels.length})</h2>
+        <h2 style={{ ...styles.heading, fontSize: getResponsiveHeadingSize(windowWidth) }}>Pixels ({pixels.length})</h2>
         <button style={styles.createButton} onClick={onCreatePixel}>
           + Novo Pixel
         </button>
@@ -37,13 +56,13 @@ const PixelsList = ({
           <table style={styles.table}>
             <thead style={styles.tableHeader}>
               <tr>
-                <th style={styles.tableHeaderCell}>Nome</th>
-                <th style={styles.tableHeaderCell}>Tipo</th>
-                <th style={styles.tableHeaderCell}>Código</th>
-                <th style={styles.tableHeaderCell}>Placement</th>
-                <th style={styles.tableHeaderCell}>Prioridade</th>
-                <th style={styles.tableHeaderCell}>Status</th>
-                <th style={styles.tableHeaderCell}>Ações</th>
+                <th style={{ ...styles.tableHeaderCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>Nome</th>
+                <th style={{ ...styles.tableHeaderCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>Tipo</th>
+                <th style={{ ...styles.tableHeaderCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>Código</th>
+                <th style={{ ...styles.tableHeaderCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>Placement</th>
+                <th style={{ ...styles.tableHeaderCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>Prioridade</th>
+                <th style={{ ...styles.tableHeaderCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>Status</th>
+                <th style={{ ...styles.tableHeaderCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -57,7 +76,7 @@ const PixelsList = ({
                   onMouseEnter={() => setHoveredRow(pixel.id)}
                   onMouseLeave={() => setHoveredRow(null)}
                 >
-                  <td style={styles.tableCell}>
+                  <td style={{ ...styles.tableCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>
                     <div style={styles.pixelName}>{pixel.name}</div>
                     {pixel.description && (
                       <div style={{ fontSize: "12px", color: "#8892a0", marginTop: "4px" }}>
@@ -65,12 +84,12 @@ const PixelsList = ({
                       </div>
                     )}
                   </td>
-                  <td style={styles.tableCell}>
+                  <td style={{ ...styles.tableCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>
                     <span style={{ ...styles.badge, ...styles.badgeType }}>
                       {pixel.type}
                     </span>
                   </td>
-                  <td style={styles.tableCell}>
+                  <td style={{ ...styles.tableCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>
                     <code
                       style={{
                         backgroundColor: "#f0f3f8",
@@ -85,7 +104,7 @@ const PixelsList = ({
                       {pixel.code.length > 30 ? "..." : ""}
                     </code>
                   </td>
-                  <td style={styles.tableCell}>
+                  <td style={{ ...styles.tableCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>
                     <span
                       style={{
                         ...styles.badge,
@@ -97,10 +116,10 @@ const PixelsList = ({
                       {pixel.placement === "head" ? "📍 Head" : "📍 Body"}
                     </span>
                   </td>
-                  <td style={styles.tableCell}>
+                  <td style={{ ...styles.tableCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>
                     <span style={styles.priorityBadge}>#{pixel.priority}</span>
                   </td>
-                  <td style={styles.tableCell}>
+                  <td style={{ ...styles.tableCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>
                     <span
                       style={{
                         ...styles.badge,
@@ -110,7 +129,7 @@ const PixelsList = ({
                       {pixel.active ? "✓ Ativo" : "✗ Inativo"}
                     </span>
                   </td>
-                  <td style={styles.tableCell}>
+                  <td style={{ ...styles.tableCell, padding: getResponsiveTablePadding(windowWidth), fontSize: getResponsiveTableFontSize(windowWidth) }}>
                     <div style={styles.actionsContainer}>
                       <button
                         style={{

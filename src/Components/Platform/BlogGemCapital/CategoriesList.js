@@ -1,6 +1,24 @@
-import React, { useState } from "react";
-import styles from "./CategoriesListStyle";
+import React, { useState, useEffect } from "react";
+import styles, { getResponsiveGridColumns, getResponsiveGap } from "./CategoriesListStyle";
 import DeleteCategoryModal from "./DeleteCategoryModal";
+
+// Hook para detectar tamanho da tela
+const useResponsive = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize.width;
+};
 
 const CategoriesList = ({
   categories,
@@ -14,6 +32,7 @@ const CategoriesList = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const windowWidth = useResponsive();
 
   const handleDeleteClick = (category) => {
     setCategoryToDelete(category);
@@ -62,7 +81,13 @@ const CategoriesList = ({
 
       {/* Categories Grid */}
       {categories.length > 0 ? (
-        <div style={styles.categoriesGrid}>
+        <div
+          style={{
+            ...styles.categoriesGrid,
+            gridTemplateColumns: getResponsiveGridColumns(windowWidth),
+            gap: getResponsiveGap(windowWidth),
+          }}
+        >
           {categories.map((category, idx) => (
             <div
               key={category.id}
