@@ -25,8 +25,8 @@ const formatStatus = (status, map) => map[status] || status;
 const DATA_SOURCES = {
   Clientes: {
     // Para Clientes, o searchTerm do filtro é usado diretamente
-    fetchFunction: (filters, page) =>
-      clientServices.getClients(filters.searchTerm, page, 10),
+    fetchFunction: (filters, page, pageSize = 10) =>
+      clientServices.getClients(filters.searchTerm, page, pageSize),
     downloadFunction: (filters) =>
       extractDataServices.downloadClientsCsv(filters.searchTerm),
     columns: [
@@ -44,11 +44,11 @@ const DATA_SOURCES = {
   Consultores: {
     // ✨✨✨ CORREÇÃO APLICADA AQUI ✨✨✨
     // Para Consultores, se o searchTerm não existir, passamos uma string vazia ""
-    fetchFunction: (filters, page) =>
+    fetchFunction: (filters, page, pageSize = 10) =>
       consultantService.getConsultants(
         filters.searchTerm || "",
         page,
-        10
+        pageSize
       ),
     downloadFunction: () =>
       extractDataServices.downloadConsultantsCsv(), // O download não precisa de filtro
@@ -65,8 +65,8 @@ const DATA_SOURCES = {
     ],
   },
   Contratos: {
-    fetchFunction: (filters, page) =>
-      contractServices.getContracts({ status: "Todos" }, page, 10),
+    fetchFunction: (filters, page, pageSize = 10) =>
+      contractServices.getContracts({ status: "Todos" }, page, pageSize),
     downloadFunction: () =>
       extractDataServices.downloadContractsCsv(),
     columns: [
@@ -96,8 +96,8 @@ const DATA_SOURCES = {
     ],
   },
   Saques: {
-    fetchFunction: (filters, page) =>
-      withdrawServices.getWithdrawals({ status: "Todos" }, page, 10),
+    fetchFunction: (filters, page, pageSize = 10) =>
+      withdrawServices.getWithdrawals({ status: "Todos" }, page, pageSize),
     downloadFunction: () =>
       extractDataServices.downloadWithdrawsCsv(),
     columns: [
@@ -123,11 +123,11 @@ const DATA_SOURCES = {
   },
   // O resto das configurações permanece o mesmo
   Produtos: {
-    fetchFunction: (filters, page) =>
+    fetchFunction: (filters, page, pageSize = 10) =>
       productServices.searchProducts(
         { status: "Todos", itemType: "Todos" },
         page,
-        10
+        pageSize
       ),
     columns: [
       { header: "ID", accessor: "id" },
@@ -315,20 +315,53 @@ function ExtractData() {
   };
 
   const handleDownload = async (format = "csv") => {
-    if (!selectedDataType || !data || data.length === 0) {
-      alert("Nenhum dado para exportar. Carregue dados primeiro.");
+    if (!selectedDataType) {
+      alert("Nenhum tipo de dado selecionado.");
       return;
     }
 
     setExportLoading(true);
     try {
+      console.log("========== INICIANDO EXPORTAÇÃO ==========");
+      console.log("Tipo de dado:", selectedDataType);
+      console.log("Formato:", format);
+      console.log("Filtros:", filters);
+
+      const config = DATA_SOURCES[selectedDataType];
+      if (!config) {
+        alert("Tipo de dado não suportado.");
+        return;
+      }
+
+      // Busca TODOS os dados com um pageSize grande (10000) para exportação
+      console.log("🔄 Buscando dados com pageSize=10000...");
+      const allData = await config.fetchFunction(filters, 1, 10000);
+
+      console.log("✅ Dados recebidos do fetchFunction:");
+      console.log("   - Total Count:", allData.totalCount);
+      console.log("   - Page Size:", allData.pageSize);
+      console.log("   - Items recebidos:", allData.items?.length || 0);
+      console.log("   - Primeiros 3 itens:", allData.items?.slice(0, 3));
+
+      if (!allData || !allData.items || allData.items.length === 0) {
+        console.warn("⚠️ Nenhum dado encontrado para exportar!");
+        alert("Nenhum dado para exportar.");
+        return;
+      }
+
       const exportFunction = extractDataServices.getExportFunction(selectedDataType);
       if (!exportFunction) {
         alert("A exportação para este tipo de dado ainda não foi implementada.");
         return;
       }
 
-      const response = await exportFunction(data, format);
+      // Envia TODOS os dados (até 10000) para o backend gerar o arquivo
+      console.log("📤 Enviando", allData.items.length, "itens para o backend...");
+      const response = await exportFunction(allData.items, format);
+
+      console.log("📦 Resposta do backend recebida");
+      console.log("   - Tamanho do arquivo:", response.data?.length || "desconhecido");
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -341,9 +374,14 @@ function ExtractData() {
       link.click();
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
+
+      console.log("✅ Download iniciado:", fileName);
+      console.log("========== EXPORTAÇÃO CONCLUÍDA ==========");
+
       setOpenFormatMenu(false);
     } catch (error) {
-      console.error("Erro ao gerar o arquivo:", error);
+      console.error("❌ Erro ao gerar o arquivo:", error);
+      console.error("   - Detalhes:", error.message);
       alert("Não foi possível gerar o arquivo. Tente novamente.");
     } finally {
       setExportLoading(false);
