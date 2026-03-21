@@ -47,6 +47,48 @@ const leadsService = {
   deleteLead: async (id) => {
     const response = await api.delete(`SimulationRequesters/${id}`);
     return response.data;
+  },
+
+  // ============ PARA EXTRAÇÃO DE DADOS ============
+  getLeads: async (searchTerm = '', pageNumber = 1, pageSize = 10) => {
+    try {
+      const params = new URLSearchParams({ pageNumber, pageSize });
+      if (searchTerm) params.append('name', searchTerm);
+
+      const response = await api.get('SimulationRequesters', { params });
+
+      const paginationHeader = response.headers['x-pagination'] || response.headers['X-Pagination'];
+
+      let pagination = { totalCount: 0, pageSize: pageSize, pageNumber: pageNumber };
+
+      if (paginationHeader) {
+        const meta = JSON.parse(paginationHeader);
+        pagination = {
+          totalCount: meta.TotalCount || 0,
+          pageSize: meta.PageSize || pageSize,
+          pageNumber: meta.PageNumber || pageNumber
+        };
+      } else {
+        // Se não tiver header, assume que pode ter mais dados
+        // Use o pageSize solicitado, não a quantidade de itens retornados
+        pagination = {
+          totalCount: response.data.length >= pageSize ? response.data.length * 2 : response.data.length,
+          pageSize: pageSize,
+          pageNumber: pageNumber
+        };
+      }
+
+      return {
+        items: response.data || [],
+        totalCount: pagination.totalCount,
+        pageSize: pagination.pageSize,
+        pageNumber: pagination.pageNumber
+      };
+
+    } catch (error) {
+      console.error("Erro ao buscar leads:", error);
+      throw error;
+    }
   }
 };
 

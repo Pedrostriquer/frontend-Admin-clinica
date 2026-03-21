@@ -13,6 +13,7 @@ import categoryServices from "../../dbServices/categoryServices";
 import formServices from "../../dbServices/formServices";
 import saleServices from "../../dbServices/saleServices";
 import promotionServices from "../../dbServices/promotionServices";
+import leadsService from "../../dbServices/leadsService";
 import extractDataServices from "../../dbServices/extractDataServices";
 
 const formatCurrency = (value) =>
@@ -21,10 +22,9 @@ const formatDate = (dateString) =>
   dateString ? new Date(dateString).toLocaleDateString("pt-BR") : "N/A";
 const formatStatus = (status, map) => map[status] || status;
 
-// --- Configuração das Fontes de Dados (CORRIGIDA) ---
+
 const DATA_SOURCES = {
   Clientes: {
-    // Para Clientes, o searchTerm do filtro é usado diretamente
     fetchFunction: (filters, page, pageSize = 10) =>
       clientServices.getClients(filters.searchTerm, page, pageSize),
     downloadFunction: (filters) =>
@@ -42,16 +42,14 @@ const DATA_SOURCES = {
     ],
   },
   Consultores: {
-    // ✨✨✨ CORREÇÃO APLICADA AQUI ✨✨✨
-    // Para Consultores, se o searchTerm não existir, passamos uma string vazia ""
+
     fetchFunction: (filters, page, pageSize = 10) =>
       consultantService.getConsultants(
         filters.searchTerm || "",
         page,
         pageSize
       ),
-    downloadFunction: () =>
-      extractDataServices.downloadConsultantsCsv(), // O download não precisa de filtro
+    downloadFunction: () => extractDataServices.downloadConsultantsCsv(), // O download não precisa de filtro
     columns: [
       { header: "ID", accessor: "id" },
       { header: "Nome", accessor: "name" },
@@ -67,8 +65,7 @@ const DATA_SOURCES = {
   Contratos: {
     fetchFunction: (filters, page, pageSize = 10) =>
       contractServices.getContracts({ status: "Todos" }, page, pageSize),
-    downloadFunction: () =>
-      extractDataServices.downloadContractsCsv(),
+    downloadFunction: () => extractDataServices.downloadContractsCsv(),
     columns: [
       { header: "ID", accessor: "id" },
       { header: "Cliente", accessor: "client.name" },
@@ -98,8 +95,7 @@ const DATA_SOURCES = {
   Saques: {
     fetchFunction: (filters, page, pageSize = 10) =>
       withdrawServices.getWithdrawals({ status: "Todos" }, page, pageSize),
-    downloadFunction: () =>
-      extractDataServices.downloadWithdrawsCsv(),
+    downloadFunction: () => extractDataServices.downloadWithdrawsCsv(),
     columns: [
       { header: "ID", accessor: "id" },
       { header: "Cliente", accessor: "client.name" },
@@ -118,6 +114,39 @@ const DATA_SOURCES = {
         accessor: "status",
         render: (val) =>
           formatStatus(val, { 1: "Pendente", 2: "Pago", 3: "Cancelado" }),
+      },
+    ],
+  },
+  "Leads Simulação": {
+    fetchFunction: (filters, page, pageSize = 10) =>
+      leadsService.getLeads(filters.searchTerm || "", page, pageSize),
+    downloadFunction: () => extractDataServices.downloadLeadsSimulationCsv(),
+    columns: [
+      { header: "ID", accessor: "id" },
+      { header: "Nome", accessor: "name" },
+      { header: "Email", accessor: "email" },
+      { header: "Telefone", accessor: "phone" },
+      { header: "Cidade", accessor: "fromCity" },
+      {
+        header: "Valor Simulado",
+        accessor: "simulatedAmount",
+        render: (val) => formatCurrency(val),
+      },
+      { header: "Meses", accessor: "simulatedMonths" },
+      {
+        header: "Com Gema Física",
+        accessor: "withPhysicalGem",
+        render: (val) => (val ? "Sim" : "Não"),
+      },
+      {
+        header: "Contatado",
+        accessor: "contacted",
+        render: (val) => (val ? "Sim" : "Não"),
+      },
+      {
+        header: "Data Criação",
+        accessor: "dateCreated",
+        render: (val) => formatDate(val),
       },
     ],
   },
@@ -192,8 +221,7 @@ const DATA_SOURCES = {
     ],
   },
   Pedidos: {
-    fetchFunction: (filters, page) =>
-      saleServices.getAllSales({}, page, 10),
+    fetchFunction: (filters, page) => saleServices.getAllSales({}, page, 10),
     columns: [
       { header: "ID", accessor: "id" },
       { header: "Cliente", accessor: "client.name" },
@@ -228,6 +256,11 @@ const DATA_OPTIONS = [
         icon: "fa-solid fa-file-signature",
       },
       { key: "Saques", label: "Saques", icon: "fa-solid fa-money-bill-wave" },
+      {
+        key: "Leads Simulação",
+        label: "Leads Simulação",
+        icon: "fa-solid fa-chart-line",
+      },
     ],
   },
   {
@@ -349,25 +382,37 @@ function ExtractData() {
         return;
       }
 
-      const exportFunction = extractDataServices.getExportFunction(selectedDataType);
+      const exportFunction =
+        extractDataServices.getExportFunction(selectedDataType);
       if (!exportFunction) {
-        alert("A exportação para este tipo de dado ainda não foi implementada.");
+        alert(
+          "A exportação para este tipo de dado ainda não foi implementada."
+        );
         return;
       }
 
       // Envia TODOS os dados (até 10000) para o backend gerar o arquivo
-      console.log("📤 Enviando", allData.items.length, "itens para o backend...");
+      console.log(
+        "📤 Enviando",
+        allData.items.length,
+        "itens para o backend..."
+      );
       const response = await exportFunction(allData.items, format);
 
       console.log("📦 Resposta do backend recebida");
-      console.log("   - Tamanho do arquivo:", response.data?.length || "desconhecido");
+      console.log(
+        "   - Tamanho do arquivo:",
+        response.data?.length || "desconhecido"
+      );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
 
       const fileExtension = format === "excel" ? "xlsx" : "csv";
-      const fileName = `${selectedDataType.toLowerCase()}_${new Date().toISOString().split("T")[0]}.${fileExtension}`;
+      const fileName = `${selectedDataType.toLowerCase()}_${
+        new Date().toISOString().split("T")[0]
+      }.${fileExtension}`;
 
       link.setAttribute("download", fileName);
       document.body.appendChild(link);
@@ -469,7 +514,10 @@ function ExtractData() {
                 </div>
               </>
             )}
-            <div className="extract-button-wrapper" style={{ position: "relative" }}>
+            <div
+              className="extract-button-wrapper"
+              style={{ position: "relative" }}
+            >
               <button
                 className="extract-button"
                 onClick={() => setOpenFormatMenu(!openFormatMenu)}
@@ -478,18 +526,20 @@ function ExtractData() {
                 <i className="fa-solid fa-download"></i> Extrair Dados
               </button>
               {openFormatMenu && (
-                <div style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #ddd",
-                  borderRadius: "6px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  zIndex: 1000,
-                  minWidth: "180px",
-                  marginTop: "4px"
-                }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #ddd",
+                    borderRadius: "6px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    zIndex: 1000,
+                    minWidth: "180px",
+                    marginTop: "4px",
+                  }}
+                >
                   <button
                     onClick={() => handleDownload("csv")}
                     style={{
@@ -502,10 +552,14 @@ function ExtractData() {
                       fontSize: "14px",
                       color: "#333",
                       borderBottom: "1px solid #eee",
-                      transition: "all 0.2s ease"
+                      transition: "all 0.2s ease",
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f5f5f5"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "#ffffff"}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#f5f5f5")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#ffffff")
+                    }
                   >
                     📄 CSV (.csv)
                   </button>
@@ -521,10 +575,14 @@ function ExtractData() {
                       fontSize: "14px",
                       color: "#333",
                       borderBottom: "none",
-                      transition: "all 0.2s ease"
+                      transition: "all 0.2s ease",
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f5f5f5"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "#ffffff"}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#f5f5f5")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#ffffff")
+                    }
                   >
                     📊 Excel (.xlsx)
                   </button>

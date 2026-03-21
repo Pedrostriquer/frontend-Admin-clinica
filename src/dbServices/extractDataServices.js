@@ -118,6 +118,19 @@ const extractDataServices = {
     }
   },
 
+  // ============ LEADS SIMULAÇÃO ============
+  downloadLeadsSimulationCsv: async (data, format = "csv") => {
+    try {
+      const response = await api.post(`export/leads-simulation/${format}`, data || [], {
+        responseType: "blob",
+      });
+      return response;
+    } catch (error) {
+      console.error("Erro ao baixar arquivo de leads simulação:", error);
+      throw error;
+    }
+  },
+
   // ============ MAPEAMENTO DE TIPOS DE DADOS ============
   getExportFunction: (dataType) => {
     const exportMap = {
@@ -130,6 +143,7 @@ const extractDataServices = {
       Formulários: extractDataServices.downloadFormsFile,
       Promoções: extractDataServices.downloadPromotionsFile,
       Pedidos: extractDataServices.downloadOrdersFile,
+      "Leads Simulação": extractDataServices.downloadLeadsSimulationCsv,
     };
     return exportMap[dataType];
   },
