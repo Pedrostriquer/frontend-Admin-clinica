@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styles, { getResponsivePostsGridColumns, getResponsivePostsGap } from "./PostsListStyle";
 
 // Hook para detectar tamanho da tela
@@ -22,14 +23,12 @@ const useResponsive = () => {
 const PostsList = ({
   posts,
   loading,
-  onCreatePost,
-  onEditPost,
-  onViewPost,
   onDeletePost,
   categories,
   loadingPostId,
   onFilterChange,
 }) => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -93,7 +92,10 @@ const PostsList = ({
             onBlur={(e) => (e.target.style.borderColor = "#e0e6ed")}
           />
         </div>
-        <button style={styles.createButton} onClick={onCreatePost}>
+        <button
+          style={styles.createButton}
+          onClick={() => navigate("/platform/blog-gemcapital/posts/edit/novo-post")}
+        >
           + Novo Post
         </button>
       </div>
@@ -245,7 +247,7 @@ const PostsList = ({
                           opacity: loadingPostId === post.id ? 0.6 : 1,
                           cursor: loadingPostId === post.id ? "not-allowed" : "pointer",
                         }}
-                        onClick={() => onViewPost(post)}
+                        onClick={() => navigate(`/platform/blog-gemcapital/posts/${post.id}`)}
                         title="Visualizar"
                         disabled={loadingPostId === post.id}
                       >
@@ -257,7 +259,7 @@ const PostsList = ({
                           opacity: loadingPostId === post.id ? 0.6 : 1,
                           cursor: loadingPostId === post.id ? "not-allowed" : "pointer",
                         }}
-                        onClick={() => onEditPost(post)}
+                        onClick={() => navigate(`/platform/blog-gemcapital/posts/edit/${post.id}`)}
                         title="Editar"
                         disabled={loadingPostId === post.id}
                       >
@@ -342,7 +344,10 @@ const PostsList = ({
               ? `Nenhum post corresponde a "${searchTerm}"`
               : "Comece criando seu primeiro post!"}
           </p>
-          <button style={styles.createButton} onClick={onCreatePost}>
+          <button
+            style={styles.createButton}
+            onClick={() => navigate("/platform/blog-gemcapital/posts/edit/novo-post")}
+          >
             + Criar Primeiro Post
           </button>
         </div>

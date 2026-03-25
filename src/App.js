@@ -39,6 +39,17 @@ import ReferralsPage from "./Components/Platform/Indication/ReferralsPage";
 import OffersPage from "./Components/Platform/Offers/OffersPage";
 import Catalog from "./Components/Platform/Catalog/Catalog";
 import BlogGemCapitalPage from "./Components/Platform/BlogGemCapital/BlogGemCapitalPage";
+import BlogGemPostsPage from "./Components/Platform/BlogGemCapital/PostsPage";
+import BlogGemCategoriesPage from "./Components/Platform/BlogGemCapital/CategoriesPage";
+import BlogGemPixelsPage from "./Components/Platform/BlogGemCapital/PixelsPage";
+import BlogGemQuizzesPage from "./Components/Platform/BlogGemCapital/QuizzesPage";
+import QuizzesIndexPage from "./Components/Platform/BlogGemCapital/QuizzesIndexPage";
+import QuizzesManagePage from "./Components/Platform/BlogGemCapital/QuizzesManagePage";
+import QuizzesResponsesPage from "./Components/Platform/BlogGemCapital/QuizzesResponsesPage";
+import QuizDetailPage from "./Components/Platform/BlogGemCapital/QuizDetailPage";
+import CreateQuizPage from "./Components/Platform/BlogGemCapital/CreateQuizPage";
+import PostDetailPage from "./Components/Platform/BlogGemCapital/Post/PostDetailPage";
+import PostEditPage from "./Components/Platform/BlogGemCapital/Post/PostEditPage";
 
 // --- PÁGINAS: E-COMMERCE ---
 import EcommerceDashboard from "./Components/Ecommerce/Dashboard/EcommerceDashboard";
@@ -144,7 +155,19 @@ const AppContent = () => {
             <Route path="platform/catalogo-gemcash" element={<Catalog />} />
             <Route path="clients/create" element={<CreateClientPage />} />
             <Route path="platform/pop-ups" element={<PopUps />} />
-            <Route path="platform/blog-gemcapital" element={<BlogGemCapitalPage />} />
+            {/* Blog GemCapital - Rota raiz redireciona para Posts */}
+            <Route path="platform/blog-gemcapital" element={<Navigate to="/platform/blog-gemcapital/posts" />} />
+            <Route path="platform/blog-gemcapital/posts" element={<BlogGemPostsPage />} />
+            <Route path="platform/blog-gemcapital/posts/edit/:postId" element={<PostEditPage />} />
+            <Route path="platform/blog-gemcapital/posts/:postId" element={<PostDetailPage />} />
+            <Route path="platform/blog-gemcapital/categorias" element={<BlogGemCategoriesPage />} />
+            <Route path="platform/blog-gemcapital/pixels" element={<BlogGemPixelsPage />} />
+            {/* Blog GemCapital - Quizzes com sub-rotas */}
+            <Route path="platform/blog-gemcapital/quizzes" element={<QuizzesIndexPage />} />
+            <Route path="platform/blog-gemcapital/quizzes/gerenciar" element={<QuizzesManagePage />} />
+            <Route path="platform/blog-gemcapital/quizzes/gerenciar/novo-quiz" element={<CreateQuizPage />} />
+            <Route path="platform/blog-gemcapital/quizzes/gerenciar/:quizId" element={<QuizDetailPage />} />
+            <Route path="platform/blog-gemcapital/quizzes/respostas" element={<QuizzesResponsesPage />} />
 
             {/* Sub-Roteamento: E-commerce */}
             <Route

@@ -7,7 +7,14 @@ import CreatePostModal from "./CreatePostModal";
 import ViewPostModal from "./ViewPostModal";
 import CreateCategoryModal from "./CreateCategoryModal";
 import CreatePixelModal from "./CreatePixelModal";
+import {
+  QuizList,
+  CreateQuizModal,
+  QuizResponsesModal,
+  AllQuizResponsesView,
+} from "./Quiz";
 import gemCapitalBlogServices from "../../../dbServices/gemCapitalBlogServices";
+import quizServices from "../../../dbServices/quizServices";
 
 // Hook para detectar tamanho da tela
 const useResponsive = () => {
@@ -34,11 +41,31 @@ const useResponsive = () => {
 
 const BlogGemCapitalPage = () => {
   const responsive = useResponsive();
-  const [activeTab, setActiveTab] = useState("posts"); // "posts", "categories" ou "pixels"
+  const [activeTab, setActiveTabState] = useState("posts"); // "posts", "categories", "pixels" ou "quizzes"
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [pixels, setPixels] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [quizSubTab, setQuizSubTab] = useState("manage"); // "manage" ou "responses"
+
+  // Função para setar tab e atualizar URL
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    const params = new URLSearchParams(window.location.search);
+    params.set("session", tab);
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+  };
+
+  // Ler query string na montagem do componente
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionParam = params.get("session");
+
+    if (sessionParam && ["posts", "categories", "pixels", "quizzes"].includes(sessionParam)) {
+      setActiveTabState(sessionParam);
+    }
+  }, []);
 
   // Gera estilos responsivos
   const getResponsiveStyles = () => {
@@ -85,16 +112,22 @@ const BlogGemCapitalPage = () => {
   const [showViewPostModal, setShowViewPostModal] = useState(false);
   const [showCreateCategoryModal, setShowCreateCategoryModal] = useState(false);
   const [showCreatePixelModal, setShowCreatePixelModal] = useState(false);
+  const [showCreateQuizModal, setShowCreateQuizModal] = useState(false);
+  const [showQuizResponsesModal, setShowQuizResponsesModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [editingQuiz, setEditingQuiz] = useState(null);
   const [editingPixel, setEditingPixel] = useState(null);
   const [isLoadingPost, setIsLoadingPost] = useState(false);
   const [isLoadingCategory, setIsLoadingCategory] = useState(false);
+  const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [isLoadingPixel, setIsLoadingPixel] = useState(false);
   const [loadingPostId, setLoadingPostId] = useState(null);
   const [loadingCategoryId, setLoadingCategoryId] = useState(null);
+  const [loadingQuizId, setLoadingQuizId] = useState(null);
   const [loadingPixelId, setLoadingPixelId] = useState(null);
   const [filters, setFilters] = useState({
     active: null,
@@ -163,11 +196,12 @@ const BlogGemCapitalPage = () => {
     }
   }, []);
 
-  // Buscar posts, categorias e pixels ao carregar
+  // Buscar posts, categorias, pixels e quizzes ao carregar
   useEffect(() => {
     fetchPosts();
     fetchCategories();
     fetchPixels();
+    fetchQuizzes();
   }, []);
 
   const fetchPosts = async () => {
@@ -198,6 +232,15 @@ const BlogGemCapitalPage = () => {
       setPixels(data || []);
     } catch (error) {
       console.error("Erro ao buscar pixels:", error);
+    }
+  };
+
+  const fetchQuizzes = async () => {
+    try {
+      const data = await quizServices.getAllQuizzes();
+      setQuizzes(data);
+    } catch (error) {
+      console.error("Erro ao buscar quizzes:", error);
     }
   };
 
@@ -356,6 +399,71 @@ const BlogGemCapitalPage = () => {
     }
   };
 
+  // Handlers para Quizzes
+  const handleCreateQuiz = () => {
+    setEditingQuiz(null);
+    setShowCreateQuizModal(true);
+  };
+
+  const handleEditQuiz = (quiz) => {
+    setEditingQuiz(quiz);
+    setShowCreateQuizModal(true);
+  };
+
+  const handleViewQuizResponses = (quiz) => {
+    setSelectedQuiz(quiz);
+    setShowQuizResponsesModal(true);
+  };
+
+  const handleDeleteQuiz = async (quizId) => {
+    if (!window.confirm("Tem certeza que deseja deletar este quiz?")) return;
+
+    setLoadingQuizId(quizId);
+    try {
+      await quizServices.deleteQuiz(quizId);
+      await fetchQuizzes();
+      alert("Quiz deletado com sucesso!");
+    } catch (error) {
+      console.error("Erro:", error);
+      alert("Erro ao deletar quiz");
+    } finally {
+      setLoadingQuizId(null);
+    }
+  };
+
+  const handleActivateQuiz = async (quizId) => {
+    setLoadingQuizId(quizId);
+    try {
+      await quizServices.activateQuiz(quizId);
+      await fetchQuizzes();
+      alert("Quiz ativado com sucesso!");
+    } catch (error) {
+      console.error("Erro:", error);
+      alert("Erro ao ativar quiz");
+    } finally {
+      setLoadingQuizId(null);
+    }
+  };
+
+  const handleSaveQuiz = async (quizData) => {
+    setIsLoadingQuiz(true);
+    try {
+      if (editingQuiz) {
+        await quizServices.updateQuiz(editingQuiz.id, quizData);
+      } else {
+        await quizServices.createQuiz(quizData);
+      }
+      setShowCreateQuizModal(false);
+      await fetchQuizzes();
+      alert(editingQuiz ? "Quiz atualizado!" : "Quiz criado com sucesso!");
+    } catch (error) {
+      console.error("Erro:", error);
+      alert("Erro ao salvar quiz");
+    } finally {
+      setIsLoadingQuiz(false);
+    }
+  };
+
   const handleFilterChange = async (newFilters) => {
     setFilters(newFilters);
     setLoading(true);
@@ -415,6 +523,15 @@ const BlogGemCapitalPage = () => {
         >
           🎯 Pixels ({pixels.length})
         </button>
+        <button
+          style={{
+            ...responsiveStyles.tabButton,
+            ...(activeTab === "quizzes" ? styles.tabButtonActive : {}),
+          }}
+          onClick={() => setActiveTab("quizzes")}
+        >
+          📋 Quizzes ({quizzes.length})
+        </button>
       </div>
 
       {/* Content */}
@@ -455,6 +572,50 @@ const BlogGemCapitalPage = () => {
             loadingPixelId={loadingPixelId}
           />
         )}
+
+        {activeTab === "quizzes" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {/* Sub-tabs para quizzes */}
+            <div style={responsiveStyles.tabsContainer}>
+              <button
+                style={{
+                  ...responsiveStyles.tabButton,
+                  ...(quizSubTab === "manage" ? styles.tabButtonActive : {}),
+                }}
+                onClick={() => setQuizSubTab("manage")}
+              >
+                📝 Gerenciar Quizzes
+              </button>
+              <button
+                style={{
+                  ...responsiveStyles.tabButton,
+                  ...(quizSubTab === "responses" ? styles.tabButtonActive : {}),
+                }}
+                onClick={() => setQuizSubTab("responses")}
+              >
+                📊 Todas as Respostas
+              </button>
+            </div>
+
+            {/* Content dos sub-tabs */}
+            {quizSubTab === "manage" && (
+              <QuizList
+                quizzes={quizzes}
+                loading={loading}
+                onCreateClick={handleCreateQuiz}
+                onEditClick={handleEditQuiz}
+                onViewClick={handleViewQuizResponses}
+                onDeleteClick={handleDeleteQuiz}
+                onActivateClick={handleActivateQuiz}
+                loadingId={loadingQuizId}
+              />
+            )}
+
+            {quizSubTab === "responses" && (
+              <AllQuizResponsesView loading={loading} />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modals */}
@@ -489,6 +650,47 @@ const BlogGemCapitalPage = () => {
           onClose={() => setShowCreatePixelModal(false)}
           onSave={handleSavePixel}
           isLoading={isLoadingPixel}
+        />
+      )}
+
+      {showCreateQuizModal && (
+        <CreateQuizModal
+          isOpen={showCreateQuizModal}
+          onClose={() => setShowCreateQuizModal(false)}
+          onSubmit={handleSaveQuiz}
+          editingQuiz={editingQuiz}
+          loading={isLoadingQuiz}
+        />
+      )}
+
+      {showQuizResponsesModal && selectedQuiz && (
+        <QuizResponsesModal
+          isOpen={showQuizResponsesModal}
+          onClose={() => {
+            setShowQuizResponsesModal(false);
+            setSelectedQuiz(null);
+          }}
+          quiz={selectedQuiz}
+          loading={loading}
+          onFetchResponses={async (quizId) => {
+            return await quizServices.getQuizResponses(quizId);
+          }}
+          onMarkAsContacted={async (responseId) => {
+            try {
+              await quizServices.markAsContacted(responseId);
+              alert("Marcado como contactado!");
+            } catch (error) {
+              alert("Erro: " + error.message);
+            }
+          }}
+          onUpdateObservations={async (responseId, observations) => {
+            try {
+              await quizServices.updateObservations(responseId, observations);
+              alert("Observações salvas!");
+            } catch (error) {
+              alert("Erro: " + error.message);
+            }
+          }}
         />
       )}
     </div>

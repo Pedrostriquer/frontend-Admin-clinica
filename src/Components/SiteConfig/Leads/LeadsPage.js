@@ -149,13 +149,49 @@ function LeadsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [sortBy, setSortBy] = useState("date_desc");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedLead, setSelectedLead] = useState(null);
+  const [metrics, setMetrics] = useState({
+    totalLeads: 0,
+    uncontactedLeads: 0,
+    contactedLeads: 0,
+    totalSimulatedAmount: 0
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  const fetchMetrics = useCallback(
+    async () => {
+      try {
+        console.log("🔍 [fetchMetrics] Iniciando busca de métricas com filtros:", {
+          searchTerm: debouncedSearch,
+          status: statusFilter,
+          startDate,
+          endDate
+        });
+
+        const data = await leadsService.getMetrics({
+          searchTerm: debouncedSearch,
+          status: statusFilter,
+          startDate,
+          endDate
+        });
+
+        console.log("✅ [fetchMetrics] Dados recebidos da API:", data);
+        setMetrics(data);
+        console.log("📊 [fetchMetrics] Métricas atualizadas no estado:", data);
+      } catch (error) {
+        console.error("❌ [fetchMetrics] Falha ao buscar métricas:", error);
+      }
+    },
+    [debouncedSearch, statusFilter, startDate, endDate]
+  );
 
   const fetchLeads = useCallback(
     async (pageNumber = 1) => {
@@ -165,6 +201,9 @@ function LeadsPage() {
           pageNumber,
           searchTerm: debouncedSearch,
           status: statusFilter,
+          startDate,
+          endDate,
+          sortBy
         });
         setLeads(response.data);
         setMeta((prev) => ({ ...prev, ...response.meta }));
@@ -174,12 +213,17 @@ function LeadsPage() {
         setIsLoading(false);
       }
     },
-    [debouncedSearch, statusFilter]
+    [debouncedSearch, statusFilter, startDate, endDate, sortBy]
   );
 
   useEffect(() => {
+    console.log("⚡ [useEffect] Chamando fetchMetrics...");
+    fetchMetrics();
+  }, [fetchMetrics]);
+
+  useEffect(() => {
     fetchLeads(1);
-  }, [debouncedSearch, statusFilter, fetchLeads]);
+  }, [debouncedSearch, statusFilter, startDate, endDate, sortBy, fetchLeads]);
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
@@ -215,6 +259,14 @@ function LeadsPage() {
     }
   };
 
+  const hasActiveFilters = () => {
+    return debouncedSearch || statusFilter || startDate || endDate ||
+           (sortBy !== 'date_desc');
+  };
+
+  // Log do estado das métricas no render
+  console.log("🎯 [LeadsPage] Estado atual das métricas:", metrics);
+
   return (
     <div className="LeadsPage-container">
       {selectedLead && (
@@ -228,6 +280,33 @@ function LeadsPage() {
 
       <div className="LeadsPage-header">
         <h1>Leads da Simulação</h1>
+        {hasActiveFilters() && (
+          <span className="LeadsPage-filter-indicator">🔍 Filtro Aplicado</span>
+        )}
+      </div>
+
+      <div className="LeadsPage-metrics-container">
+        <div className="LeadsPage-metric-card">
+          <div className="metric-label">Total de Leads</div>
+          <div className="metric-value">{metrics.totalLeads}</div>
+        </div>
+        <div className="LeadsPage-metric-card">
+          <div className="metric-label">Pendentes de Contato</div>
+          <div className="metric-value">{metrics.uncontactedLeads}</div>
+        </div>
+        <div className="LeadsPage-metric-card">
+          <div className="metric-label">Contactados</div>
+          <div className="metric-value">{metrics.contactedLeads}</div>
+        </div>
+        <div className="LeadsPage-metric-card highlight">
+          <div className="metric-label">Valor Total Simulado</div>
+          <div className="metric-value">
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(metrics.totalSimulatedAmount)}
+          </div>
+        </div>
       </div>
 
       <div className="LeadsPage-filters-container">
@@ -245,6 +324,37 @@ function LeadsPage() {
         >
           <option value="">Todos os Status</option>
           <option value="uncontacted">Não Contactado</option>
+        </select>
+        <input
+          type="date"
+          className="LeadsPage-date-input"
+          placeholder="Data inicial"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          title="Filtrar a partir desta data"
+        />
+        <input
+          type="date"
+          className="LeadsPage-date-input"
+          placeholder="Data final"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          title="Filtrar até esta data"
+        />
+        <select
+          className="LeadsPage-sort-select"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          title="Ordenar por..."
+        >
+          <optgroup label="Valor Simulado">
+            <option value="amount_asc">💰 Menor para Maior</option>
+            <option value="amount_desc">💰 Maior para Menor</option>
+          </optgroup>
+          <optgroup label="Data">
+            <option value="date_desc">📅 Mais Recentes</option>
+            <option value="date_asc">📅 Mais Antigos</option>
+          </optgroup>
         </select>
       </div>
 

@@ -360,3 +360,115 @@
     width: 16px;
     text-align: center;
 }
+
+/* ===== NOVOS ESTILOS PARA MÉTRICAS E FILTROS ===== */
+
+.LeadsPage-metrics-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #f0f4f8 100%);
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.LeadsPage-metric-card {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #6c757d;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.LeadsPage-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.LeadsPage-metric-card.highlight {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, #f8fff9 0%, #f0fdf4 100%);
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+.LeadsPage-metric-card.highlight .metric-value {
+    color: #28a745;
+}
+
+.LeadsPage-filter-indicator {
+    display: inline-block;
+    margin-left: 1rem;
+    padding: 0.4rem 0.8rem;
+    background: #ffc107;
+    color: #212529;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.LeadsPage-date-input,
+.LeadsPage-sort-select {
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    outline: none;
+    background-color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.LeadsPage-date-input:focus,
+.LeadsPage-sort-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+@media (max-width: 768px) {
+    .LeadsPage-filters-container {
+        flex-wrap: wrap;
+    }
+
+    .LeadsPage-search-input {
+        width: 100%;
+        flex-grow: 0;
+    }
+
+    .LeadsPage-metrics-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+    }
+
+    .LeadsPage-metric-card {
+        padding: 1rem;
+    }
+}
