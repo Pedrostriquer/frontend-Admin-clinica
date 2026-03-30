@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FileText, FolderOpen, Eye, BarChart3 } from "lucide-react";
+import { FileText, FolderOpen, Eye, BarChart3, TrendingUp, Users } from "lucide-react";
 import styles from "./BlogGemCapitalStyle";
 
 // Hook para detectar tamanho da tela
@@ -34,6 +34,7 @@ const BlogGemCapitalContainer = ({ children, counts = {} }) => {
   // Detectar qual tab está ativo pela rota
   const getCurrentTab = () => {
     const path = location.pathname;
+    if (path.includes("/planejador")) return "planejador";
     if (path.includes("/posts")) return "posts";
     if (path.includes("/categorias")) return "categories";
     if (path.includes("/pixels")) return "pixels";
@@ -91,19 +92,23 @@ const BlogGemCapitalContainer = ({ children, counts = {} }) => {
 
   const handleTabClick = (tab) => {
     const routes = {
+      planejador: "/platform/blog-gemcapital/planejador",
       posts: "/platform/blog-gemcapital/posts",
       categories: "/platform/blog-gemcapital/categorias",
       pixels: "/platform/blog-gemcapital/pixels",
       quizzes: "/platform/blog-gemcapital/quizzes",
+      affiliates: "/platform/blog-gemcapital/affiliates",
     };
     navigate(routes[tab]);
   };
 
   const tabIcons = {
+    planejador: <TrendingUp size={18} />,
     posts: <FileText size={18} />,
     categories: <FolderOpen size={18} />,
     pixels: <Eye size={18} />,
     quizzes: <BarChart3 size={18} />,
+    affiliates: <Users size={18} />,
   };
 
   const tabs = [
@@ -111,6 +116,8 @@ const BlogGemCapitalContainer = ({ children, counts = {} }) => {
     { id: "categories", label: "Categorias" },
     { id: "pixels", label: "Pixels" },
     { id: "quizzes", label: "Quizzes" },
+    { id: "planejador", label: "Planejador" },
+    { id: "affiliates", label: "Afiliados" },
   ];
 
   return (

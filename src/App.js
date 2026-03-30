@@ -50,6 +50,9 @@ import QuizDetailPage from "./Components/Platform/BlogGemCapital/QuizDetailPage"
 import CreateQuizPage from "./Components/Platform/BlogGemCapital/CreateQuizPage";
 import PostDetailPage from "./Components/Platform/BlogGemCapital/Post/PostDetailPage";
 import PostEditPage from "./Components/Platform/BlogGemCapital/Post/PostEditPage";
+import PlanejadorLeadsPage from "./Components/Platform/BlogGemCapital/PlanejadorLeadsPage";
+import PlanejadorLeadsAnalysisPage from "./Components/Platform/BlogGemCapital/PlanejadorLeadsAnalysisPage";
+import PlanejadorLeadDetailPage from "./Components/Platform/BlogGemCapital/Planejador/PlanejadorLeadDetailPage";
 
 // --- PÁGINAS: E-COMMERCE ---
 import EcommerceDashboard from "./Components/Ecommerce/Dashboard/EcommerceDashboard";
@@ -82,6 +85,8 @@ import TestePopUp from "./Components/PopUps/TestePopUp";
 import SimulateAdd from "./Components/Ecommerce/BlogAdminPage/SimulateAdd";
 import EmailModelsPage from "./Components/EmailSender/Models/EmailModelsPage";
 import EmailCampaignsPage from "./Components/EmailSender/Campaigns/EmailCampaignsPage";
+import Affiliates from "./Components/Platform/BlogGemCapital/Affiliates/Affiliates";
+import AffiliateDetailPage from "./Components/Platform/BlogGemCapital/Affiliates/AffiliateDetailPage";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
 
 const AppContent = () => {
@@ -168,6 +173,13 @@ const AppContent = () => {
             <Route path="platform/blog-gemcapital/quizzes/gerenciar/novo-quiz" element={<CreateQuizPage />} />
             <Route path="platform/blog-gemcapital/quizzes/gerenciar/:quizId" element={<QuizDetailPage />} />
             <Route path="platform/blog-gemcapital/quizzes/respostas" element={<QuizzesResponsesPage />} />
+            {/* Blog GemCapital - Leads do Planejador */}
+            <Route path="platform/blog-gemcapital/planejador" element={<PlanejadorLeadsPage />} />
+            <Route path="platform/blog-gemcapital/planejador/analise" element={<PlanejadorLeadsAnalysisPage />} />
+            <Route path="platform/blog-gemcapital/planejador/:id" element={<PlanejadorLeadDetailPage />} />
+            {/* Blog GemCapital - Afiliados */}
+            <Route path="platform/blog-gemcapital/affiliates" element={<Affiliates />} />
+            <Route path="platform/blog-gemcapital/affiliates/:id" element={<AffiliateDetailPage />} />
 
             {/* Sub-Roteamento: E-commerce */}
             <Route

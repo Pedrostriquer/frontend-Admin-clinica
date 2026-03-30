@@ -1,0 +1,173 @@
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "24px",
+    width: "100%",
+    padding: "100px 30px 30px 30px",
+    boxSizing: "border-box",
+    animation: "fadeIn 0.5s ease-out",
+  },
+  // Seção de Cabeçalho/Estatísticas
+  statsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "20px",
+    marginBottom: "8px",
+  },
+  statCard: {
+    backgroundColor: "#ffffff",
+    padding: "24px",
+    borderRadius: "12px",
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  },
+  statIcon: {
+    width: "48px",
+    height: "48px",
+    borderRadius: "10px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statInfo: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  statValue: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#111827",
+  },
+  statLabel: {
+    fontSize: "14px",
+    color: "#6b7280",
+    fontWeight: "500",
+  },
+  // Filtros
+  filterSection: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "24px",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+  },
+  filterTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: "20px",
+  },
+  filterRow: {
+    display: "flex",
+    gap: "16px",
+    flexWrap: "wrap",
+    alignItems: "flex-end",
+  },
+  filterGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    flex: "1 1 200px",
+  },
+  label: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#374151",
+  },
+  input: {
+    padding: "10px 12px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    fontSize: "14px",
+    outline: "none",
+    transition: "border-color 0.2s",
+  },
+  select: {
+    padding: "10px 12px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    fontSize: "14px",
+    backgroundColor: "#fff",
+    cursor: "pointer",
+  },
+  clearButton: {
+    padding: "10px 20px",
+    backgroundColor: "#f3f4f6",
+    color: "#374151",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+    transition: "background 0.2s",
+  },
+  // Tabela
+  tableContainer: {
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    border: "1px solid #e5e7eb",
+    overflow: "hidden",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    textAlign: "left",
+  },
+  tableHeader: {
+    backgroundColor: "#f9fafb",
+    padding: "12px 16px",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#6b7280",
+    textTransform: "uppercase",
+    borderBottom: "1px solid #e5e7eb",
+  },
+  tableCell: {
+    padding: "16px",
+    fontSize: "14px",
+    color: "#111827",
+    borderBottom: "1px solid #f3f4f6",
+  },
+  badge: {
+    padding: "4px 8px",
+    borderRadius: "6px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+  // Ações
+  actionButtons: {
+    display: "flex",
+    gap: "8px",
+  },
+  // Estados
+  loadingContainer: {
+    padding: "100px",
+    textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "16px",
+  },
+  spinner: {
+    width: "40px",
+    height: "40px",
+    border: "4px solid #f3f4f6",
+    borderTop: "4px solid #6366f1",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+  },
+  pagination: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "16px 24px",
+    backgroundColor: "#f9fafb",
+  },
+};
+
+export default styles;
