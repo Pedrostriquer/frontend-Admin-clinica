@@ -39,6 +39,7 @@ const BlogGemCapitalContainer = ({ children, counts = {} }) => {
     if (path.includes("/categorias")) return "categories";
     if (path.includes("/pixels")) return "pixels";
     if (path.includes("/quizzes")) return "quizzes";
+    if (path.includes("/affiliates")) return "affiliates";
     return "posts";
   };
 

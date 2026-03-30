@@ -4,7 +4,6 @@ const styles = {
     flexDirection: "column",
     gap: "24px",
     width: "100%",
-    padding: "100px 30px 30px 30px",
     boxSizing: "border-box",
     animation: "fadeIn 0.5s ease-out",
   },

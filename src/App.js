@@ -85,7 +85,7 @@ import TestePopUp from "./Components/PopUps/TestePopUp";
 import SimulateAdd from "./Components/Ecommerce/BlogAdminPage/SimulateAdd";
 import EmailModelsPage from "./Components/EmailSender/Models/EmailModelsPage";
 import EmailCampaignsPage from "./Components/EmailSender/Campaigns/EmailCampaignsPage";
-import Affiliates from "./Components/Platform/BlogGemCapital/Affiliates/Affiliates";
+import AffiliatesPage from "./Components/Platform/BlogGemCapital/AffiliatesPage";
 import AffiliateDetailPage from "./Components/Platform/BlogGemCapital/Affiliates/AffiliateDetailPage";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
 
@@ -178,7 +178,7 @@ const AppContent = () => {
             <Route path="platform/blog-gemcapital/planejador/analise" element={<PlanejadorLeadsAnalysisPage />} />
             <Route path="platform/blog-gemcapital/planejador/:id" element={<PlanejadorLeadDetailPage />} />
             {/* Blog GemCapital - Afiliados */}
-            <Route path="platform/blog-gemcapital/affiliates" element={<Affiliates />} />
+            <Route path="platform/blog-gemcapital/affiliates" element={<AffiliatesPage />} />
             <Route path="platform/blog-gemcapital/affiliates/:id" element={<AffiliateDetailPage />} />
 
             {/* Sub-Roteamento: E-commerce */}
