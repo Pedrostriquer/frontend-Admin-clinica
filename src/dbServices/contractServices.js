@@ -25,6 +25,18 @@ const contractServices = {
     }
   },
 
+  extendContract: async (contractId, extraMonths) => {
+    try {
+      const response = await api.post(`contract/${contractId}/extend`, {
+        extraMonths,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao estender duração do contrato:", error);
+      throw error.response?.data || error;
+    }
+  },
+
   atualizarAutoReinvestimentoCliente: async (
     contractId,
     autoReinvestState,

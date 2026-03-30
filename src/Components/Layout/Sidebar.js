@@ -132,11 +132,6 @@ const platformMenu = [
     icon: "fa-solid fa-sliders",
     path: "/platform/controller",
   },
-  {
-    name: "Blog GemCapital",
-    icon: "fa-solid fa-blog",
-    path: "/platform/blog-gemcapital",
-  },
 ];
 
 const ecommerceMenu = [
@@ -238,6 +233,49 @@ const emailSenderMenu = [
   },
 ];
 
+const bloggemcapitalMenu = [
+  {
+    name: "Posts",
+    icon: "fa-solid fa-file-text",
+    path: "/platform/blog-gemcapital/posts",
+  },
+  {
+    name: "Categorias",
+    icon: "fa-solid fa-folder-open",
+    path: "/platform/blog-gemcapital/categorias",
+  },
+  {
+    name: "Pixels",
+    icon: "fa-solid fa-eye",
+    path: "/platform/blog-gemcapital/pixels",
+  },
+  {
+    name: "Quizzes",
+    icon: "fa-solid fa-chart-bar",
+    path: "/platform/blog-gemcapital/quizzes",
+  },
+  {
+    name: "Planejador",
+    icon: "fa-solid fa-calendar",
+    path: "/platform/blog-gemcapital/planejador",
+  },
+  {
+    name: "Afiliados",
+    icon: "fa-solid fa-users",
+    path: "/platform/blog-gemcapital/affiliates",
+  },
+  {
+    name: "Conf. Envio",
+    icon: "fa-solid fa-gear",
+    path: "/platform/blog-gemcapital/configuracoes-campanha",
+  },
+  {
+    name: "Campanha", // Novo item
+    icon: "fa-solid fa-paper-plane",
+    path: "/platform/blog-gemcapital/capaign",
+  },
+];
+
 function Sidebar({
   activeContext,
   onContextChange,
@@ -278,6 +316,8 @@ function Sidebar({
         return gemvalueMenu;
       case "emailsender":
         return emailSenderMenu;
+      case "bloggemcapital":
+        return bloggemcapitalMenu;
       default:
         return [];
     }

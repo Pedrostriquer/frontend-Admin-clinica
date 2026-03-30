@@ -36,6 +36,7 @@ export default function Navbar({ activeContext, onContextChange }) {
     { id: "site", label: "Site", icon: "globe" },
     { id: "gemvalue", label: "Site GemValue", icon: "gem" },
     { id: "emailsender", label: "Email Sender", icon: "envelope" },
+    { id: "bloggemcapital", label: "Blog GemCapital", icon: "blog" },
   ];
 
   return (

@@ -94,6 +94,7 @@ export default function MainLayout() {
     if (path.startsWith("/gemvalue")) return "gemvalue";
     if (path.startsWith("/support")) return "support";
     if (path.startsWith("/emailsender")) return "emailsender";
+    if (path.startsWith("/platform/blog-gemcapital")) return "bloggemcapital";
     return "platform";
   };
 
@@ -106,6 +107,7 @@ export default function MainLayout() {
     else if (context === "gemvalue") newPath = "/gemvalue/hero";
     else if (context === "support") newPath = "/support";
     else if (context === "emailsender") newPath = "/emailsender/models";
+    else if (context === "bloggemcapital") newPath = "/platform/blog-gemcapital/posts";
 
     navigate(newPath);
     if (isMobile) {

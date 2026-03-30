@@ -347,6 +347,9 @@ function ContractDetailPage() {
 
   const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
   const [isReleasing, setIsReleasing] = useState(false);
+  const [isExtending, setIsExtending] = useState(false);
+  const [timelinePage, setTimelinePage] = useState(1);
+  const eventsPerPage = 4;
 
   // Refs
   const mediaInputRef = useRef(null);
@@ -558,8 +561,38 @@ function ContractDetailPage() {
     }
   };
 
-  const handleExtendContract = () =>
-    alert(`Funcionalidade de extensão ainda não implementada.`);
+  const handleExtendContract = async () => {
+    // Validação
+    if (!addMonths || parseInt(addMonths) <= 0) {
+      alert("Por favor, insira uma quantidade de meses válida.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Deseja estender a duração deste contrato em mais ${addMonths} meses?`
+    );
+
+    if (!confirmed) return;
+
+    setIsExtending(true);
+    startLoading();
+
+    try {
+      // Chama o service que criamos anteriormente
+      await contractServices.extendContract(contractId, parseInt(addMonths));
+
+      alert("Contrato estendido com sucesso!");
+      setAddMonths(1); // Reseta o input
+      await fetchContract(); // Recarrega os dados (Timeline, EndDate, etc)
+    } catch (err) {
+      console.error(err);
+      const msg = err?.message || "Erro ao estender contrato.";
+      alert(msg);
+    } finally {
+      setIsExtending(false);
+      stopLoading();
+    }
+  };
 
   const handleOpenCancelModal = () => setIsCancelModalOpen(true);
 
@@ -1161,6 +1194,159 @@ function ContractDetailPage() {
                 )}
               </div>
             </div>
+
+            {contract.timeline && contract.timeline.length > 0 && (
+              <div style={styles.infoCard}>
+                <h3 style={styles.infoCardTitle}>
+                  <i className="fa-solid fa-clock-rotate-left"></i> Histórico do
+                  Contrato
+                </h3>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "15px",
+                    marginTop: "15px",
+                    minHeight: "200px",
+                  }}
+                >
+                  {contract.timeline
+                    .slice()
+                    .reverse() // Do mais novo para o mais antigo
+                    .slice(
+                      (timelinePage - 1) * eventsPerPage,
+                      timelinePage * eventsPerPage
+                    )
+                    .map((event, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          borderLeft: "3px solid #3b82f6",
+                          paddingLeft: "15px",
+                          position: "relative",
+                          paddingBottom: "5px",
+                        }}
+                      >
+                        {/* Bolinha na linha do tempo */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            left: "-6px",
+                            top: "0",
+                            width: "9px",
+                            height: "9px",
+                            borderRadius: "50%",
+                            backgroundColor: "#3b82f6",
+                          }}
+                        ></div>
+
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "#64748b",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {new Date(event.date).toLocaleString("pt-BR")}
+                        </div>
+                        <div
+                          style={{
+                            fontWeight: "700",
+                            color: "#1e293b",
+                            fontSize: "14px",
+                          }}
+                        >
+                          {event.title}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#475569",
+                            lineHeight: "1.4",
+                          }}
+                        >
+                          {event.description}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Controles de Paginação */}
+                {contract.timeline.length > eventsPerPage && (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: "15px",
+                      marginTop: "20px",
+                      paddingTop: "15px",
+                      borderTop: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <button
+                      onClick={() =>
+                        setTimelinePage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={timelinePage === 1}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: timelinePage === 1 ? "default" : "pointer",
+                        color: timelinePage === 1 ? "#cbd5e1" : "#3b82f6",
+                        fontSize: "18px",
+                      }}
+                    >
+                      <i className="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "600",
+                        color: "#64748b",
+                      }}
+                    >
+                      Página {timelinePage} de{" "}
+                      {Math.ceil(contract.timeline.length / eventsPerPage)}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        setTimelinePage((prev) =>
+                          Math.min(
+                            prev + 1,
+                            Math.ceil(contract.timeline.length / eventsPerPage)
+                          )
+                        )
+                      }
+                      disabled={
+                        timelinePage >=
+                        Math.ceil(contract.timeline.length / eventsPerPage)
+                      }
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor:
+                          timelinePage >=
+                          Math.ceil(contract.timeline.length / eventsPerPage)
+                            ? "default"
+                            : "pointer",
+                        color:
+                          timelinePage >=
+                          Math.ceil(contract.timeline.length / eventsPerPage)
+                            ? "#cbd5e1"
+                            : "#3b82f6",
+                        fontSize: "18px",
+                      }}
+                    >
+                      <i className="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <aside style={styles.actionPanel}>
@@ -1307,6 +1493,7 @@ function ContractDetailPage() {
                   onChange={(e) => setAddMonths(e.target.value)}
                   style={styles.actionCardInput}
                   placeholder="Meses"
+                  disabled={isExtending} // Adicionado
                 />
                 <button
                   onClick={handleExtendContract}
@@ -1314,8 +1501,13 @@ function ContractDetailPage() {
                     ...styles.actionCardButton,
                     ...styles.buttonPrimary,
                   }}
+                  disabled={isExtending} // Adicionado
                 >
-                  Adicionar
+                  {isExtending ? (
+                    <div style={styles.buttonSpinner}></div> // Spinner de carregamento
+                  ) : (
+                    "Adicionar"
+                  )}
                 </button>
               </div>
             </div>
