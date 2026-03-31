@@ -45,6 +45,31 @@ const gemCapitalBlogCampaignService = {
       throw error;
     }
   },
+
+  // Get campaign configuration
+  getCampaignConfig: async () => {
+    try {
+      const response = await api.get("/GemCapitalBlogCampaign/campaign-config");
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar configuração da campanha:", error);
+      throw error;
+    }
+  },
+
+  // Update campaign configuration
+  updateCampaignConfig: async (config) => {
+    try {
+      const response = await api.put(
+        "/GemCapitalBlogCampaign/campaign-config",
+        config
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar configuração da campanha:", error);
+      throw error;
+    }
+  },
 };
 
 export default gemCapitalBlogCampaignService;

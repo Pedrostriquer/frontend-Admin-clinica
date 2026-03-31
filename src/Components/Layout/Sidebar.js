@@ -272,7 +272,7 @@ const bloggemcapitalMenu = [
   {
     name: "Campanha", // Novo item
     icon: "fa-solid fa-paper-plane",
-    path: "/platform/blog-gemcapital/capaign",
+    path: "/platform/blog-gemcapital/campaign",
   },
 ];
 

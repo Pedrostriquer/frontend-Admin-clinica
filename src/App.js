@@ -89,7 +89,7 @@ import EmailCampaignsPage from "./Components/EmailSender/Campaigns/EmailCampaign
 import AffiliatesPage from "./Components/Platform/BlogGemCapital/AffiliatesPage";
 import AffiliateDetailPage from "./Components/Platform/BlogGemCapital/Affiliates/AffiliateDetailPage";
 import BlogGemCapitalSettingsPage from "./Components/Platform/BlogGemCapital/Settings/BlogGemCapitalSettingsPage";
-import BlogGemCapitalCampaign from "./Components/Platform/BlogGemCapital/TimelineCronJob/BlogGemCapitalCampaign";
+import BlogGemCapitalCampaign from "./Components/Platform/BlogGemCapital/BlogGemCapitalCampaign/BlogGemCapitalCampaign";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
 
 const AppContent = () => {
@@ -235,7 +235,7 @@ const AppContent = () => {
               path="platform/blog-gemcapital/configuracoes-campanha"
               element={<BlogGemCapitalSettingsPage />}
             />
-            <Route path="platform/blog-gemcapital/capaign" element={<BlogGemCapitalCampaign />} />
+            <Route path="platform/blog-gemcapital/campaign" element={<BlogGemCapitalCampaign />} />
 
             {/* Sub-Roteamento: E-commerce */}
             <Route

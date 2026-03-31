@@ -135,6 +135,33 @@ export const styles = {
     color: "#1e293b",
     outline: "none",
     cursor: "pointer",
+    flex: 1,
+  },
+  fieldWithButton: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "center",
+  },
+  btnBuscar: {
+    padding: "10px 12px",
+    borderRadius: "8px",
+    border: "1px solid #cbd5e1",
+    background: "#f8fafc",
+    color: "#6366f1",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "14px",
+    transition: "all 0.2s ease",
+    flexShrink: 0,
+  },
+  selectedText: {
+    display: "block",
+    marginTop: "4px",
+    fontSize: "12px",
+    color: "#10b981",
+    fontWeight: "500",
   },
   actions: {
     display: "flex",
@@ -319,10 +346,27 @@ export const emailPreviewStyles = `
   }
   .email-footer {
     background: #0f172a;
-    padding: 30px;
+    padding: 40px 30px;
     color: #94a3b8;
     text-align: center;
     font-size: 11px;
+  }
+  .email-footer img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+  }
+  .email-footer p {
+    margin: 8px 0;
+    line-height: 1.6;
+  }
+  .email-footer a {
+    color: #C9A96E;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .email-footer a:hover {
+    text-decoration: underline;
   }
 `;
 
