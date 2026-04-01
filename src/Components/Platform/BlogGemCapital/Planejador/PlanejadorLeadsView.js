@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import gemCapitalBlogLeadsPlanejadorService from "../../../../dbServices/gemCapitalBlogLeadsPlanejadorService";
 import styles from "./PlanejadorLeadsViewStyle";
-import {
-  Eye,
-  CheckCircle,
-  Circle,
-  Trash2,
-  MessageCircle,
-} from "lucide-react";
+import { Eye, CheckCircle, Circle, Trash2, MessageCircle } from "lucide-react";
 import ActionButton from "./ActionButton";
 import ConfirmContactModal from "./ConfirmContactModal";
 import QualitySelector from "./QualitySelector";
@@ -15,8 +10,8 @@ import QualitySelector from "./QualitySelector";
 const PlanejadorLeadsView = ({ onRefresh }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchTermInput, setSearchTermInput] = useState(""); // Input do usuário
-  const [searchTerm, setSearchTerm] = useState(""); // Termo usado para busca (com debounce)
+  const [searchTermInput, setSearchTermInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [contactedFilter, setContactedFilter] = useState(null);
   const [qualityFilter, setQualityFilter] = useState(null);
   const [startDate, setStartDate] = useState("");
@@ -24,7 +19,6 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Inicializar simulationType da URL na primeira carga
   const [simulationType, setSimulationType] = useState(() => {
     const type = searchParams.get("simulationType");
     return type !== null ? parseInt(type) : 0;
@@ -41,41 +35,27 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
 
   const searchTimeoutRef = useRef(null);
 
-  // Adicionar simulationType à URL na primeira carga se não estiver presente
   useEffect(() => {
     if (!searchParams.has("simulationType")) {
-      setSearchParams(prev => {
-        prev.set('simulationType', '0');
+      setSearchParams((prev) => {
+        prev.set("simulationType", "0");
         return prev;
       });
     }
   }, []);
 
-  // Injetar CSS para animações
   useEffect(() => {
     if (!document.getElementById("planejador-leads-animations")) {
       const styleTag = document.createElement("style");
       styleTag.id = "planejador-leads-animations";
       styleTag.innerHTML = `
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `;
       document.head.appendChild(styleTag);
     }
   }, []);
 
-  // Debounce para a pesquisa (500ms)
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -83,7 +63,7 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
 
     searchTimeoutRef.current = setTimeout(() => {
       setSearchTerm(searchTermInput);
-      setPageNumber(1); // Resetar para página 1 ao pesquisar
+      setPageNumber(1);
     }, 500);
 
     return () => {
@@ -93,41 +73,37 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
     };
   }, [searchTermInput]);
 
-  // Buscar dados filtrados do backend
   useEffect(() => {
     fetchFilteredLeads();
-  }, [searchTerm, contactedFilter, qualityFilter, startDate, endDate, pageNumber, pageSize, simulationType]);
+  }, [
+    searchTerm,
+    contactedFilter,
+    qualityFilter,
+    startDate,
+    endDate,
+    pageNumber,
+    pageSize,
+    simulationType,
+  ]);
 
   const fetchFilteredLeads = async () => {
     try {
       setLoading(true);
+      const data = await gemCapitalBlogLeadsPlanejadorService.getLeadsFiltered({
+        searchTerm,
+        contacted: contactedFilter,
+        leadQuality: qualityFilter,
+        startDate,
+        endDate,
+        simulationType,
+        pageNumber,
+        pageSize,
+      });
 
-      // Construir query string
-      const queryParams = new URLSearchParams();
-
-      if (searchTerm) queryParams.append("searchTerm", searchTerm);
-      if (contactedFilter !== null) queryParams.append("contacted", contactedFilter);
-      if (qualityFilter !== null) queryParams.append("leadQuality", qualityFilter);
-      if (startDate) queryParams.append("startDate", startDate);
-      if (endDate) queryParams.append("endDate", endDate);
-      queryParams.append("planejadorType", simulationType);
-      queryParams.append("pageNumber", pageNumber);
-      queryParams.append("pageSize", pageSize);
-
-      const response = await fetch(
-        `http://localhost:5097/api/PlanejadorLeads/search?${queryParams.toString()}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Erro ao buscar leads");
-      }
-
-      const data = await response.json();
       setFilteredLeads(data.data || []);
       setTotalCount(data.totalCount || 0);
       setTotalPages(data.totalPages || 0);
     } catch (error) {
-      console.error("Erro ao buscar leads filtrados:", error);
       setFilteredLeads([]);
       setTotalCount(0);
     } finally {
@@ -148,8 +124,8 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
   const handleChangeSimulationType = (type) => {
     setSimulationType(type);
     setPageNumber(1);
-    setSearchParams(prev => {
-      prev.set('simulationType', type.toString());
+    setSearchParams((prev) => {
+      prev.set("simulationType", type.toString());
       return prev;
     });
   };
@@ -166,20 +142,10 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
 
   const handleDeleteLead = async (leadId) => {
     if (!window.confirm("Tem certeza que deseja excluir este lead?")) return;
-
     try {
-      const response = await fetch(
-        `http://localhost:5097/api/PlanejadorLeads/${leadId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) throw new Error("Erro ao excluir lead");
-      alert("Lead excluído com sucesso!");
+      await gemCapitalBlogLeadsPlanejadorService.deleteLead(leadId);
       fetchFilteredLeads();
     } catch (error) {
-      console.error("Erro:", error);
       alert("Erro ao excluir lead");
     }
   };
@@ -192,60 +158,31 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
 
   const handleConfirmContact = async () => {
     if (!selectedLeadForContact) return;
-
     try {
-      const response = await fetch(
-        `http://localhost:5097/api/PlanejadorLeads/${selectedLeadForContact.id}/marcar-contactado`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      await gemCapitalBlogLeadsPlanejadorService.markAsContacted(
+        selectedLeadForContact.id
       );
-
-      if (!response.ok) throw new Error("Erro ao atualizar status");
       setModalOpen(false);
       setSelectedLeadForContact(null);
       fetchFilteredLeads();
     } catch (error) {
-      console.error("Erro:", error);
       alert("Erro ao atualizar status");
     }
   };
 
   const handleSaveQuality = async (leadId, quality) => {
     try {
-      const response = await fetch(
-        `http://localhost:5097/api/PlanejadorLeads/${leadId}/qualidade`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            leadQuality: quality,
-          }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Erro ao salvar qualidade");
+      await gemCapitalBlogLeadsPlanejadorService.updateQuality(leadId, quality);
       fetchFilteredLeads();
     } catch (error) {
-      console.error("Erro:", error);
       alert("Erro ao salvar qualidade do lead");
     }
   };
 
-  console.log(filteredLeads);
-  
   return (
     <div style={styles.container}>
-      {/* Seção de Filtros */}
       <div style={styles.filterSection}>
         <div style={styles.filterTitle}>Filtros</div>
-
-        {/* Linha 1: Pesquisa e Status */}
         <div style={styles.filterRow}>
           <div style={styles.filterGroup}>
             <label style={styles.label}>Pesquisar por Nome/Email</label>
@@ -301,7 +238,6 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
           </div>
         </div>
 
-        {/* Linha 2: Datas */}
         <div style={styles.filterRow}>
           <div style={styles.filterGroup}>
             <label style={styles.label}>Data Inicial</label>
@@ -324,79 +260,55 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
           </div>
 
           <div style={styles.filterGroup}>
-            <button
-              onClick={handleClearFilters}
-              style={styles.clearButton}
-            >
+            <button onClick={handleClearFilters} style={styles.clearButton}>
               Limpar Filtros
             </button>
           </div>
         </div>
       </div>
 
-      {/* Seletores de Tipo de Simulação */}
       <div style={{ ...styles.filterSection, marginTop: "20px" }}>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <label style={{ fontWeight: "600", color: "#374151" }}>Tipo de Simulação:</label>
-          <button
-            onClick={() => handleChangeSimulationType(0)}
-            style={{
-              ...styles.select,
-              backgroundColor: simulationType === 0 ? "#4F46E5" : "#F3F4F6",
-              color: simulationType === 0 ? "white" : "#374151",
-              border: simulationType === 0 ? "1px solid #4F46E5" : "1px solid #D1D5DB",
-              padding: "8px 16px",
-              cursor: "pointer",
-              borderRadius: "6px",
-              fontWeight: "500",
-              transition: "all 0.2s",
-            }}
-          >
-            Definir Meta
-          </button>
-          <button
-            onClick={() => handleChangeSimulationType(1)}
-            style={{
-              ...styles.select,
-              backgroundColor: simulationType === 1 ? "#4F46E5" : "#F3F4F6",
-              color: simulationType === 1 ? "white" : "#374151",
-              border: simulationType === 1 ? "1px solid #4F46E5" : "1px solid #D1D5DB",
-              padding: "8px 16px",
-              cursor: "pointer",
-              borderRadius: "6px",
-              fontWeight: "500",
-              transition: "all 0.2s",
-            }}
-          >
-            Definir Prazo
-          </button>
-          <button
-            onClick={() => handleChangeSimulationType(2)}
-            style={{
-              ...styles.select,
-              backgroundColor: simulationType === 2 ? "#4F46E5" : "#F3F4F6",
-              color: simulationType === 2 ? "white" : "#374151",
-              border: simulationType === 2 ? "1px solid #4F46E5" : "1px solid #D1D5DB",
-              padding: "8px 16px",
-              cursor: "pointer",
-              borderRadius: "6px",
-              fontWeight: "500",
-              transition: "all 0.2s",
-            }}
-          >
-            Calcular Rendimento
-          </button>
+          <label style={{ fontWeight: "600", color: "#374151" }}>
+            Tipo de Simulação:
+          </label>
+          {[0, 1, 2].map((type) => (
+            <button
+              key={type}
+              onClick={() => handleChangeSimulationType(type)}
+              style={{
+                ...styles.select,
+                backgroundColor:
+                  simulationType === type ? "#4F46E5" : "#F3F4F6",
+                color: simulationType === type ? "white" : "#374151",
+                border:
+                  simulationType === type
+                    ? "1px solid #4F46E5"
+                    : "1px solid #D1D5DB",
+                padding: "8px 16px",
+                cursor: "pointer",
+                borderRadius: "6px",
+                fontWeight: "500",
+                transition: "all 0.2s",
+              }}
+            >
+              {type === 0
+                ? "Definir Meta"
+                : type === 1
+                ? "Definir Prazo"
+                : "Calcular Rendimento"}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Resultado da Pesquisa */}
       <div style={styles.resultInfo}>
         <span>
-          Exibindo {filteredLeads.length} de {totalCount} leads | Página {pageNumber} de {totalPages}
+          Exibindo {filteredLeads.length} de {totalCount} leads | Página{" "}
+          {pageNumber} de {totalPages}
         </span>
       </div>
 
-      {/* Tabela de Leads */}
       {loading ? (
         <div style={styles.loadingContainer}>
           <div style={styles.loadingSpinner}></div>
@@ -414,26 +326,44 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
                 <th style={{ ...styles.tableHeader, width: "60px" }}>ID</th>
                 <th style={{ ...styles.tableHeader, width: "200px" }}>Nome</th>
                 <th style={{ ...styles.tableHeader, width: "200px" }}>Email</th>
-                <th style={{ ...styles.tableHeader, width: "150px" }}>Telefone</th>
+                <th style={{ ...styles.tableHeader, width: "150px" }}>
+                  Telefone
+                </th>
                 {simulationType !== 2 && (
-                  <th style={{ ...styles.tableHeader, width: "120px" }}>Meta (R$)</th>
+                  <th style={{ ...styles.tableHeader, width: "120px" }}>
+                    Meta (R$)
+                  </th>
                 )}
                 {simulationType === 0 && (
-                  <th style={{ ...styles.tableHeader, width: "100px" }}>Prazo (meses)</th>
+                  <th style={{ ...styles.tableHeader, width: "100px" }}>
+                    Prazo (m)
+                  </th>
                 )}
                 {simulationType === 1 && (
-                  <th style={{ ...styles.tableHeader, width: "130px" }}>Aporte Mensal (R$)</th>
+                  <th style={{ ...styles.tableHeader, width: "130px" }}>
+                    Aporte (R$)
+                  </th>
                 )}
                 {simulationType === 2 && (
                   <>
-                    <th style={{ ...styles.tableHeader, width: "130px" }}>Aporte Mensal (R$)</th>
-                    <th style={{ ...styles.tableHeader, width: "100px" }}>Período (meses)</th>
+                    <th style={{ ...styles.tableHeader, width: "130px" }}>
+                      Aporte (R$)
+                    </th>
+                    <th style={{ ...styles.tableHeader, width: "100px" }}>
+                      Período (m)
+                    </th>
                   </>
                 )}
-                <th style={{ ...styles.tableHeader, width: "130px" }}>Capital Inicial</th>
-                <th style={{ ...styles.tableHeader, width: "100px" }}>Contactado</th>
-                <th style={{ ...styles.tableHeader, width: "160px" }}>Qualidade</th>
-                <th style={{ ...styles.tableHeader, width: "150px" }}>Data Criação</th>
+                <th style={{ ...styles.tableHeader, width: "130px" }}>
+                  Cap. Inicial
+                </th>
+                <th style={{ ...styles.tableHeader, width: "100px" }}>
+                  Status
+                </th>
+                <th style={{ ...styles.tableHeader, width: "160px" }}>
+                  Qualidade
+                </th>
+                <th style={{ ...styles.tableHeader, width: "150px" }}>Data</th>
                 <th style={{ ...styles.tableHeader, width: "250px" }}>Ações</th>
               </tr>
             </thead>
@@ -447,10 +377,10 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
                   {simulationType !== 2 && (
                     <td style={styles.tableCell}>
                       {lead.targetValue
-                        ? `R$ ${parseFloat(lead.targetValue).toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}`
+                        ? `R$ ${parseFloat(lead.targetValue).toLocaleString(
+                            "pt-BR",
+                            { minimumFractionDigits: 2 }
+                          )}`
                         : "-"}
                     </td>
                   )}
@@ -460,10 +390,10 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
                   {simulationType === 1 && (
                     <td style={styles.tableCell}>
                       {lead.monthlyAport
-                        ? `R$ ${parseFloat(lead.monthlyAport).toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}`
+                        ? `R$ ${parseFloat(lead.monthlyAport).toLocaleString(
+                            "pt-BR",
+                            { minimumFractionDigits: 2 }
+                          )}`
                         : "-"}
                     </td>
                   )}
@@ -471,21 +401,23 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
                     <>
                       <td style={styles.tableCell}>
                         {lead.monthlyAport
-                          ? `R$ ${parseFloat(lead.monthlyAport).toLocaleString("pt-BR", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}`
+                          ? `R$ ${parseFloat(lead.monthlyAport).toLocaleString(
+                              "pt-BR",
+                              { minimumFractionDigits: 2 }
+                            )}`
                           : "-"}
                       </td>
-                      <td style={styles.tableCell}>{lead.periodMonths || "-"}</td>
+                      <td style={styles.tableCell}>
+                        {lead.periodMonths || "-"}
+                      </td>
                     </>
                   )}
                   <td style={styles.tableCell}>
                     {lead.initialCapital
-                      ? `R$ ${parseFloat(lead.initialCapital).toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}`
+                      ? `R$ ${parseFloat(lead.initialCapital).toLocaleString(
+                          "pt-BR",
+                          { minimumFractionDigits: 2 }
+                        )}`
                       : "-"}
                   </td>
                   <td style={styles.tableCell}>
@@ -507,10 +439,10 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
                       inline={true}
                     />
                   </td>
-                  <td style={styles.tableCell}>
-                    {formatDate(lead.createdAt)}
-                  </td>
-                  <td style={{ ...styles.tableCell, display: "flex", gap: "4px" }}>
+                  <td style={styles.tableCell}>{formatDate(lead.createdAt)}</td>
+                  <td
+                    style={{ ...styles.tableCell, display: "flex", gap: "4px" }}
+                  >
                     <ActionButton
                       icon={Eye}
                       onClick={() =>
@@ -520,41 +452,31 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
                       }
                       title="Ver detalhes"
                       color="#6366f1"
-                      hoverColor="#6366f1"
                     />
                     <ActionButton
                       icon={lead.contacted ? CheckCircle : Circle}
                       onClick={() => handleOpenContactModal(lead)}
-                      title={
-                        lead.contacted
-                          ? "Desmarcar como contactado"
-                          : "Marcar como contactado"
-                      }
                       color={lead.contacted ? "#10b981" : "#94a3b8"}
-                      hoverColor={lead.contacted ? "#10b981" : "#94a3b8"}
                     />
                     <ActionButton
                       icon={MessageCircle}
-                      onClick={() => {
-                        const phoneNumber = lead.phone
-                          .replace("+", "");
-                        const message = `Olá ${lead.name}, gostaria de conversar sobre o seu planejamento financeiro.`;
-                        const encodedMessage = encodeURIComponent(message);
+                      onClick={() =>
                         window.open(
-                          `https://wa.me/${phoneNumber}?text=${encodedMessage}`,
+                          `https://wa.me/${lead.phone.replace(
+                            "+",
+                            ""
+                          )}?text=${encodeURIComponent(
+                            `Olá ${lead.name}, gostaria de conversar sobre o seu planejamento.`
+                          )}`,
                           "_blank"
-                        );
-                      }}
-                      title="Enviar WhatsApp"
+                        )
+                      }
                       color="#25D366"
-                      hoverColor="#25D366"
                     />
                     <ActionButton
                       icon={Trash2}
                       onClick={() => handleDeleteLead(lead.id)}
-                      title="Excluir"
                       color="#ef4444"
-                      hoverColor="#ef4444"
                     />
                   </td>
                 </tr>
@@ -562,7 +484,6 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
             </tbody>
           </table>
 
-          {/* Paginação */}
           <div style={styles.paginationContainer}>
             <button
               onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
@@ -570,28 +491,25 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
               style={{
                 ...styles.paginationButton,
                 opacity: pageNumber === 1 ? 0.5 : 1,
-                cursor: pageNumber === 1 ? "not-allowed" : "pointer",
               }}
             >
               ← Anterior
             </button>
-
             <div style={styles.pageInfo}>
               {pageNumber} / {totalPages || 1}
             </div>
-
             <button
-              onClick={() => setPageNumber(Math.min(totalPages || 1, pageNumber + 1))}
+              onClick={() =>
+                setPageNumber(Math.min(totalPages || 1, pageNumber + 1))
+              }
               disabled={pageNumber >= totalPages}
               style={{
                 ...styles.paginationButton,
                 opacity: pageNumber >= totalPages ? 0.5 : 1,
-                cursor: pageNumber >= totalPages ? "not-allowed" : "pointer",
               }}
             >
               Próxima →
             </button>
-
             <select
               value={pageSize}
               onChange={(e) => {
@@ -609,7 +527,6 @@ const PlanejadorLeadsView = ({ onRefresh }) => {
         </div>
       )}
 
-      {/* Modal de Confirmação */}
       <ConfirmContactModal
         isOpen={modalOpen}
         onConfirm={handleConfirmContact}
