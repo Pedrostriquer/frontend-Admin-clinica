@@ -54,6 +54,7 @@ import PostEditPage from "./Components/Platform/BlogGemCapital/Post/PostEditPage
 import PlanejadorLeadsPage from "./Components/Platform/BlogGemCapital/PlanejadorLeadsPage";
 import PlanejadorLeadsAnalysisPage from "./Components/Platform/BlogGemCapital/PlanejadorLeadsAnalysisPage";
 import PlanejadorLeadDetailPage from "./Components/Platform/BlogGemCapital/Planejador/PlanejadorLeadDetailPage";
+import SubscribersPage from "./Components/Platform/BlogGemCapital/Subscribers/SubscribersPage";
 
 // --- PÁGINAS: E-COMMERCE ---
 import EcommerceDashboard from "./Components/Ecommerce/Dashboard/EcommerceDashboard";
@@ -90,7 +91,10 @@ import AffiliatesPage from "./Components/Platform/BlogGemCapital/AffiliatesPage"
 import AffiliateDetailPage from "./Components/Platform/BlogGemCapital/Affiliates/AffiliateDetailPage";
 import BlogGemCapitalSettingsPage from "./Components/Platform/BlogGemCapital/Settings/BlogGemCapitalSettingsPage";
 import BlogGemCapitalCampaign from "./Components/Platform/BlogGemCapital/BlogGemCapitalCampaign/BlogGemCapitalCampaign";
+import BlogGemCapitalExecutionDetailPage from "./Components/Platform/BlogGemCapital/ExecutionDetail/BlogGemCapitalExecutionDetailPage";
+import BlogGemCapitalDashboard from "./Components/Platform/BlogGemCapital/Dashboard/BlogGemCapitalDashboard";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
+import SubscriberDetailPage from "./Components/Platform/BlogGemCapital/Subscribers/SubscriberDetailPage"; // ADICIONE ESTE
 
 const AppContent = () => {
   const { loadState } = useLoad();
@@ -230,12 +234,23 @@ const AppContent = () => {
               path="platform/blog-gemcapital/affiliates/:id"
               element={<AffiliateDetailPage />}
             />
+            {/* Blog GemCapital - KPI e Métricas */}
+            <Route
+              path="platform/blog-gemcapital/kpi-metricas"
+              element={<BlogGemCapitalDashboard />}
+            />
             {/* Blog GemCapital - Configurações */}
             <Route
               path="platform/blog-gemcapital/configuracoes-campanha"
               element={<BlogGemCapitalSettingsPage />}
             />
+            <Route
+              path="platform/blog-gemcapital/execution/:executionId"
+              element={<BlogGemCapitalExecutionDetailPage />}
+            />
             <Route path="platform/blog-gemcapital/campaign" element={<BlogGemCapitalCampaign />} />
+            <Route path="platform/blog-gemcapital/subscribers" element={<SubscribersPage />} />
+            <Route path="platform/blog-gemcapital/subscribers/:id" element={<SubscriberDetailPage />} />
 
             {/* Sub-Roteamento: E-commerce */}
             <Route

@@ -46,6 +46,18 @@ const gemCapitalBlogCampaignService = {
     }
   },
 
+  getExecutionDetail: async (executionId) => {
+    try {
+      const response = await api.get(
+        `/GemCapitalBlogCampaign/execution/${executionId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar detalhes da execução:", error);
+      throw error;
+    }
+  },
+
   // Get campaign configuration
   getCampaignConfig: async () => {
     try {

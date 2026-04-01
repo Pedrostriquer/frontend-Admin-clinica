@@ -1,0 +1,302 @@
+const styles = {
+  pageContainer: {
+    padding: "80px 40px 40px 40px",
+    backgroundColor: "#f8fafc",
+    minHeight: "100vh",
+  },
+  pageHeader: {
+    marginBottom: "40px",
+  },
+  pageTitle: {
+    fontSize: "32px",
+    fontWeight: "700",
+    color: "#1e293b",
+    marginBottom: "8px",
+  },
+  pageSubtitle: {
+    fontSize: "15px",
+    color: "#64748b",
+  },
+  statsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "16px",
+    marginBottom: "30px",
+  },
+  statCard: {
+    backgroundColor: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "20px",
+    textAlign: "center",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+  },
+  statLabel: {
+    fontSize: "12px",
+    color: "#64748b",
+    textTransform: "uppercase",
+    fontWeight: "600",
+    letterSpacing: "0.5px",
+    marginBottom: "10px",
+  },
+  statValue: {
+    fontSize: "32px",
+    fontWeight: "700",
+    color: "#1e293b",
+  },
+  loadingPulse: {
+    opacity: 0.4,
+    animation: "pulse 1.5s infinite ease-in-out",
+  },
+  comparisonSection: {
+    backgroundColor: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "24px",
+    marginBottom: "30px",
+    minHeight: "200px",
+  },
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#1e293b",
+    marginBottom: "20px",
+  },
+  comparisonCards: {
+    display: "grid",
+    gridTemplateColumns: "1fr auto 1fr",
+    gap: "20px",
+    marginBottom: "30px",
+    alignItems: "center",
+  },
+  comparisonCard: {
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    borderRadius: "8px",
+    padding: "20px",
+    textAlign: "center",
+  },
+  monthLabel: {
+    fontSize: "12px",
+    color: "#64748b",
+    textTransform: "uppercase",
+    fontWeight: "600",
+    marginBottom: "8px",
+  },
+  monthValue: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "#1e293b",
+  },
+  changeIndicator: {
+    backgroundColor: "#f8fafc",
+    border: "2px solid #6366f1",
+    borderRadius: "8px",
+    padding: "20px",
+    textAlign: "center",
+  },
+  changeValue: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#6366f1",
+    marginBottom: "5px",
+  },
+  changeLabel: {
+    fontSize: "12px",
+    color: "#64748b",
+    fontWeight: "600",
+  },
+  chartContainer: {
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    borderRadius: "8px",
+    padding: "20px",
+    marginTop: "20px",
+  },
+  loadingContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "200px",
+    color: "#64748b",
+    fontSize: "14px",
+    fontStyle: "italic",
+  },
+  tableSection: {
+    backgroundColor: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "24px",
+  },
+  tableHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+    gap: "16px",
+    flexWrap: "wrap",
+  },
+  searchInput: {
+    padding: "10px 16px",
+    border: "1px solid #e2e8f0",
+    borderRadius: "8px",
+    fontSize: "14px",
+    minWidth: "250px",
+    outlineColor: "#6366f1",
+  },
+  tableWrapper: {
+    overflowX: "auto",
+    marginBottom: "20px",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: "14px",
+  },
+  tableHeaderRow: {
+    backgroundColor: "#f8fafc",
+    borderBottom: "2px solid #e2e8f0",
+  },
+  tableCell: {
+    padding: "12px 16px",
+    textAlign: "left",
+    color: "#475569",
+  },
+  tableRow: {
+    borderBottom: "1px solid #e2e8f0",
+    transition: "background-color 0.2s ease",
+  },
+  statusBadge: {
+    display: "inline-block",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    fontSize: "12px",
+    fontWeight: "600",
+    textAlign: "center",
+    minWidth: "80px",
+  },
+  actionButton: {
+    backgroundColor: "#f1f5f9",
+    border: "none",
+    borderRadius: "8px",
+    padding: "8px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
+  },
+  emptyCell: {
+    textAlign: "center",
+    padding: "20px",
+    color: "#94a3b8",
+  },
+  loading: {
+    textAlign: "center",
+    padding: "40px 20px",
+    color: "#64748b",
+  },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "16px",
+    marginTop: "20px",
+    paddingTop: "20px",
+    borderTop: "1px solid #e2e8f0",
+  },
+  paginationButton: {
+    padding: "10px 16px",
+    backgroundColor: "#6366f1",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+  },
+  pageInfo: {
+    fontSize: "14px",
+    color: "#475569",
+    minWidth: "150px",
+    textAlign: "center",
+  },
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+    backdropFilter: "blur(4px)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: "30px",
+    borderRadius: "16px",
+    width: "100%",
+    maxWidth: "400px",
+    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+    textAlign: "center",
+  },
+  modalHeader: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "12px",
+    marginBottom: "16px",
+  },
+  modalTitle: {
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#1e293b",
+  },
+  modalBody: {
+    color: "#64748b",
+    fontSize: "15px",
+    lineHeight: "1.5",
+    marginBottom: "24px",
+  },
+  modalFooter: {
+    display: "flex",
+    gap: "12px",
+    justifyContent: "center",
+  },
+  cancelButton: {
+    padding: "10px 20px",
+    backgroundColor: "#f1f5f9",
+    color: "#475569",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "background 0.2s",
+  },
+  confirmDeleteButton: {
+    padding: "10px 20px",
+    backgroundColor: "#ef4444",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "background 0.2s",
+  },
+};
+
+if (typeof document !== "undefined") {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = `
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+      100% { opacity: 0.4; }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
+
+export default styles;

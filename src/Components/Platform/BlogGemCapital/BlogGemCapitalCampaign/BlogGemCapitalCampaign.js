@@ -73,32 +73,19 @@ export default function BlogGemCapitalCampaign() {
         emailSubject: config.emailSubject || "",
         previewText: config.previewText || "",
         isAutomatic: config.isAutomatic || false,
-        featuredPostId: config.featuredPostId || null,
-        secondaryPost1Id: config.secondaryPost1Id || null,
-        secondaryPost2Id: config.secondaryPost2Id || null,
-        secondaryPost3Id: config.secondaryPost3Id || null,
+        featuredPostId: config.featuredPost?.id || null,
+        secondaryPost1Id: config.secondaryPost1?.id || null,
+        secondaryPost2Id: config.secondaryPost2?.id || null,
+        secondaryPost3Id: config.secondaryPost3?.id || null,
       });
 
-      // Carrega os dados reais dos posts se houver IDs salvos
-      const postsToLoad = {
-        artigoDestaque: config.featuredPostId,
-        artigoSecundario1: config.secondaryPost1Id,
-        artigoSecundario2: config.secondaryPost2Id,
-        artigoSecundario3: config.secondaryPost3Id,
+      // Usa os posts já carregados pelo backend (sem requisições extras!)
+      const newPostsReais = {
+        artigoDestaque: config.featuredPost || null,
+        artigoSecundario1: config.secondaryPost1 || null,
+        artigoSecundario2: config.secondaryPost2 || null,
+        artigoSecundario3: config.secondaryPost3 || null,
       };
-
-      const newPostsReais = { ...postsReais };
-      for (const [key, postId] of Object.entries(postsToLoad)) {
-        if (postId) {
-          try {
-            const postData = await gemCapitalBlogServices.getPostById(postId);
-            newPostsReais[key] = postData;
-          } catch (error) {
-            console.error(`Erro ao carregar post ${key}:`, error);
-            newPostsReais[key] = null;
-          }
-        }
-      }
       setPostsReais(newPostsReais);
 
       // Atualiza o modo de seleção baseado na configuração
@@ -244,11 +231,31 @@ export default function BlogGemCapitalCampaign() {
               </div>
               <button
                 style={styles.btnToggle}
-                onClick={() =>
-                  setModoSelecao(
-                    modoSelecao === "automatico" ? "manual" : "automatico"
-                  )
-                }
+                onClick={() => {
+                  const novoModo = modoSelecao === "automatico" ? "manual" : "automatico";
+                  setModoSelecao(novoModo);
+
+                  // Se mudando para automático, recarrega os posts automáticos do backend
+                  if (novoModo === "automatico") {
+                    fetchCampaignConfig();
+                  } else {
+                    // Se mudando para manual, limpa todos os posts selecionados
+                    setFormData((prev) => ({
+                      ...prev,
+                      featuredPostId: null,
+                      secondaryPost1Id: null,
+                      secondaryPost2Id: null,
+                      secondaryPost3Id: null,
+                    }));
+                    setPostsReais((prev) => ({
+                      ...prev,
+                      artigoDestaque: null,
+                      artigoSecundario1: null,
+                      artigoSecundario2: null,
+                      artigoSecundario3: null,
+                    }));
+                  }
+                }}
               >
                 <i
                   className={`fa-solid ${
@@ -264,10 +271,83 @@ export default function BlogGemCapitalCampaign() {
             </div>
 
             {modoSelecao === "automatico" ? (
-              <div style={styles.autoBadge}>
-                <i className="fa-solid fa-circle-info"></i>
-                Hero sugerido: Bitcoin em Queda Livre: O Que Está Por Trás do
-                Recuo...
+              <div style={styles.manualSelectionArea}>
+                <div style={{...styles.autoBadge, marginBottom: "20px"}}>
+                  <i className="fa-solid fa-circle-info"></i>
+                  Modo automático selecionará os 4 últimos posts ativos (visualização apenas).
+                </div>
+
+                <div style={styles.manualField}>
+                  <label style={styles.manualLabel}>Artigo destaque</label>
+                  <div style={styles.fieldWithButton}>
+                    <input
+                      type="text"
+                      style={styles.select}
+                      value={postsReais.artigoDestaque?.title || "Nenhum post selecionado"}
+                      readOnly
+                      placeholder="Nenhum post selecionado"
+                    />
+                  </div>
+                  {postsReais.artigoDestaque && (
+                    <small style={styles.selectedText}>
+                      ✓ {postsReais.artigoDestaque.title}
+                    </small>
+                  )}
+                </div>
+
+                <div style={styles.manualField}>
+                  <label style={styles.manualLabel}>Artigo secundário 1</label>
+                  <div style={styles.fieldWithButton}>
+                    <input
+                      type="text"
+                      style={styles.select}
+                      value={postsReais.artigoSecundario1?.title || "Nenhum post selecionado"}
+                      readOnly
+                      placeholder="Nenhum post selecionado"
+                    />
+                  </div>
+                  {postsReais.artigoSecundario1 && (
+                    <small style={styles.selectedText}>
+                      ✓ {postsReais.artigoSecundario1.title}
+                    </small>
+                  )}
+                </div>
+
+                <div style={styles.manualField}>
+                  <label style={styles.manualLabel}>Artigo secundário 2</label>
+                  <div style={styles.fieldWithButton}>
+                    <input
+                      type="text"
+                      style={styles.select}
+                      value={postsReais.artigoSecundario2?.title || "Nenhum post selecionado"}
+                      readOnly
+                      placeholder="Nenhum post selecionado"
+                    />
+                  </div>
+                  {postsReais.artigoSecundario2 && (
+                    <small style={styles.selectedText}>
+                      ✓ {postsReais.artigoSecundario2.title}
+                    </small>
+                  )}
+                </div>
+
+                <div style={styles.manualField}>
+                  <label style={styles.manualLabel}>Artigo secundário 3</label>
+                  <div style={styles.fieldWithButton}>
+                    <input
+                      type="text"
+                      style={styles.select}
+                      value={postsReais.artigoSecundario3?.title || "Nenhum post selecionado"}
+                      readOnly
+                      placeholder="Nenhum post selecionado"
+                    />
+                  </div>
+                  {postsReais.artigoSecundario3 && (
+                    <small style={styles.selectedText}>
+                      ✓ {postsReais.artigoSecundario3.title}
+                    </small>
+                  )}
+                </div>
               </div>
             ) : (
               <div style={styles.manualSelectionArea}>

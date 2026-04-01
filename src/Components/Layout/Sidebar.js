@@ -270,9 +270,19 @@ const bloggemcapitalMenu = [
     path: "/platform/blog-gemcapital/configuracoes-campanha",
   },
   {
-    name: "Campanha", // Novo item
+    name: "Campanha",
     icon: "fa-solid fa-paper-plane",
     path: "/platform/blog-gemcapital/campaign",
+  },
+  {
+    name: "Assinantes",
+    icon: "fa-solid fa-users",
+    path: "/platform/blog-gemcapital/subscribers",
+  },
+  {
+    name: "KPI e Métricas",
+    icon: "fa-solid fa-chart-line",
+    path: "/platform/blog-gemcapital/kpi-metricas",
   },
 ];
 

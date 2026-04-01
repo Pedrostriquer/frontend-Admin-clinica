@@ -3,6 +3,31 @@
 import api from "./api/api";
 
 const gemCapitalBlogServices = {
+  // ===== UPLOAD DE IMAGENS =====
+
+  /**
+   * Fazer upload de imagem para o Firebase
+   * @param {File} file - Arquivo de imagem
+   * @returns {Promise<string>} - URL da imagem no Firebase
+   */
+  uploadPostImage: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.post("blog-gemcapital/posts/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data.url;
+    } catch (error) {
+      console.error("Erro ao fazer upload de imagem:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   // ===== POSTS =====
 
   /**

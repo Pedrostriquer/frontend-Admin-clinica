@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "../CreatePostModalStyle";
 import HtmlPreview from "../HtmlPreview";
+import gemCapitalBlogServices from "../../../../dbServices/gemCapitalBlogServices";
 
 const PostForm = ({ post, categories, onSave, isLoading = false, posts = [] }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,8 @@ const PostForm = ({ post, categories, onSave, isLoading = false, posts = [] }) =
 
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState(null);
 
   // Calcular posições de carousel já ocupadas
   const carouselPositions = posts
@@ -80,6 +83,55 @@ const PostForm = ({ post, categories, onSave, isLoading = false, posts = [] }) =
         delete newErrors.categoryIds;
         return newErrors;
       });
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setImageError("Tipo de arquivo não permitido. Use: JPEG, PNG, GIF ou WebP");
+      return;
+    }
+
+    // Validar tamanho (máx 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setImageError("Arquivo muito grande. Máximo: 5MB");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setImageError(null);
+
+    try {
+      // Upload usando o serviço
+      const imageUrl = await gemCapitalBlogServices.uploadPostImage(file);
+
+      // Preencher campo com URL retornada
+      setFormData((prev) => ({
+        ...prev,
+        featuredImage: imageUrl,
+      }));
+
+      // Limpar erro do campo se houver
+      if (errors.featuredImage) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.featuredImage;
+          return newErrors;
+        });
+      }
+
+      console.log("[PostForm] Upload bem-sucedido:", imageUrl);
+    } catch (error) {
+      console.error("[PostForm] Erro ao fazer upload:", error);
+      setImageError(error.response?.data?.error || error.message || "Erro ao fazer upload da imagem");
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -156,31 +208,106 @@ const PostForm = ({ post, categories, onSave, isLoading = false, posts = [] }) =
 
         {/* Imagem Destaque */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>URL da Imagem Destaque *</label>
-          <input
-            type="text"
-            name="featuredImage"
-            value={formData.featuredImage}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              borderColor: errors.featuredImage ? "#ff4444" : undefined,
-            }}
-            placeholder="https://..."
-            disabled={isLoading}
-          />
-          {formData.featuredImage && (
-            <img
-              src={formData.featuredImage}
-              alt="Preview"
-              style={styles.imagePreview}
-              onError={(e) => {
-                e.target.style.display = "none";
+          <label style={styles.label}>Imagem Destaque *</label>
+          <div style={{
+            border: "2px dashed #C9A96E",
+            borderRadius: "6px",
+            padding: "16px",
+            backgroundColor: "#f9f8f6",
+            cursor: isLoading || isUploadingImage ? "not-allowed" : "pointer",
+            transition: "all 0.3s ease",
+            opacity: isLoading || isUploadingImage ? 0.6 : 1,
+          }}>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleImageUpload}
+              disabled={isLoading || isUploadingImage}
+              style={{
+                cursor: "pointer",
+                width: "100%",
               }}
             />
+            <small style={{...styles.helperText, display: "block", marginTop: "8px" }}>
+              Tipos permitidos: JPEG, PNG, GIF, WebP | Máximo: 5MB
+            </small>
+          </div>
+
+          {/* Status de upload */}
+          {isUploadingImage && (
+            <div style={{
+              marginTop: "12px",
+              padding: "8px",
+              backgroundColor: "#e3f2fd",
+              borderRadius: "4px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}>
+              <span style={{
+                display: "inline-block",
+                width: "14px",
+                height: "14px",
+                border: "2px solid rgba(51,110,204,0.3)",
+                borderTop: "2px solid #336ecc",
+                borderRadius: "50%",
+                animation: "spin 0.8s linear infinite",
+              }} />
+              <span style={{ color: "#336ecc", fontSize: "13px" }}>
+                Enviando imagem...
+              </span>
+            </div>
           )}
+
+          {/* Erro no upload */}
+          {imageError && (
+            <span style={{
+              ...styles.errorText,
+              display: "block",
+              marginTop: "8px",
+            }}>
+              ❌ {imageError}
+            </span>
+          )}
+
+          {/* Preview da imagem */}
+          {formData.featuredImage && !isUploadingImage && (
+            <div style={{ marginTop: "12px" }}>
+              <img
+                src={formData.featuredImage}
+                alt="Preview"
+                style={styles.imagePreview}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  setImageError("Erro ao carregar preview da imagem");
+                }}
+              />
+            </div>
+          )}
+
+          {/* URL para manual edit (se necessário) */}
+          {formData.featuredImage && (
+            <div style={{
+              marginTop: "12px",
+              padding: "8px",
+              backgroundColor: "#f0f0f0",
+              borderRadius: "4px",
+              wordBreak: "break-all",
+              fontSize: "12px",
+              color: "#666",
+            }}>
+              <strong>URL:</strong> {formData.featuredImage}
+            </div>
+          )}
+
           {errors.featuredImage && (
-            <span style={styles.errorText}>{errors.featuredImage}</span>
+            <span style={{
+              ...styles.errorText,
+              display: "block",
+              marginTop: "8px",
+            }}>
+              {errors.featuredImage}
+            </span>
           )}
         </div>
 

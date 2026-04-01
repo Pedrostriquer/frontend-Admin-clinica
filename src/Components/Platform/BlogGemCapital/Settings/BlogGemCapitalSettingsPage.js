@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLoad } from "../../../../Context/LoadContext";
 import { useToast } from "../../../../Components/Toast/ToastContainer";
 import gemCapitalBlogCampaignService from "../../../../dbServices/gemCapitalBlogCampaignService";
@@ -19,6 +20,7 @@ const days = [
 ];
 
 export default function BlogGemCapitalSettingsPage() {
+  const navigate = useNavigate();
   const { startLoading, stopLoading } = useLoad();
   const toast = useToast();
 
@@ -59,7 +61,9 @@ export default function BlogGemCapitalSettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
   const [buttonHover, setButtonHover] = useState(false);
+  const [actionButtonHover, setActionButtonHover] = useState(null);
 
   useEffect(() => {
     const styleSheet = document.createElement("style");
@@ -70,6 +74,7 @@ export default function BlogGemCapitalSettingsPage() {
 
   const fetchTimeline = useCallback(async (currentFilters) => {
     try {
+      setFilterLoading(true);
       const response = await gemCapitalBlogCampaignService.getExecutionTimeline(
         currentFilters
       );
@@ -78,8 +83,11 @@ export default function BlogGemCapitalSettingsPage() {
       setPagination(response.pagination);
     } catch (error) {
       console.error("Erro ao carregar timeline:", error);
+      toast.error("Erro ao carregar histórico");
+    } finally {
+      setFilterLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   const fetchInitialData = async () => {
     try {
@@ -145,6 +153,12 @@ export default function BlogGemCapitalSettingsPage() {
 
   const handleChange = (field, value) => {
     setConfig({ ...config, [field]: value });
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "--";
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? "--" : date.toLocaleString("pt-BR");
   };
 
   if (loading) {
@@ -366,6 +380,34 @@ export default function BlogGemCapitalSettingsPage() {
             </strong>
           </div>
         </div>
+        <div style={styles.summaryCard}>
+          <div style={styles.summaryIconContainer}>
+            <i
+              className="fa-solid fa-eye"
+              style={{ color: "#8b5cf6" }}
+            ></i>
+          </div>
+          <div style={styles.summaryContent}>
+            <span style={styles.summaryLabel}>Total de Visualizações</span>
+            <strong style={{ ...styles.summaryValue, color: "#8b5cf6" }}>
+              {summary.totalViews || 0}
+            </strong>
+          </div>
+        </div>
+        <div style={styles.summaryCard}>
+          <div style={styles.summaryIconContainer}>
+            <i
+              className="fa-solid fa-computer-mouse"
+              style={{ color: "#ec4899" }}
+            ></i>
+          </div>
+          <div style={styles.summaryContent}>
+            <span style={styles.summaryLabel}>Total de Cliques</span>
+            <strong style={{ ...styles.summaryValue, color: "#ec4899" }}>
+              {summary.totalClicks || 0}
+            </strong>
+          </div>
+        </div>
       </div>
 
       {summary.isFilteredByDate && (
@@ -460,21 +502,34 @@ export default function BlogGemCapitalSettingsPage() {
           </div>
         </div>
 
-        <div style={{ padding: "0 20px" }}>
+        <div style={{ padding: "0 20px", position: "relative" }}>
+          {filterLoading && (
+            <div style={styles.tableLoadingOverlay}>
+              <div style={styles.miniSpinner}></div>
+              <p>Pesquisando...</p>
+            </div>
+          )}
           <table style={styles.table}>
             <thead>
               <tr>
+                <th style={styles.th}>ID</th>
                 <th style={styles.th}>Data/Hora</th>
                 <th style={styles.th}>Status</th>
                 <th style={styles.th}>Mensagem</th>
+                <th style={styles.th}>Visualizações</th>
+                <th style={styles.th}>Cliques</th>
+                <th style={styles.th}>Ações</th>
               </tr>
             </thead>
             <tbody>
               {timeline.length > 0 ? (
                 timeline.map((item) => (
                   <tr key={item.id} style={styles.tr}>
+                      <td style={styles.td}>
+                      #{item.id}
+                    </td>
                     <td style={styles.td}>
-                      {new Date(item.executed_at).toLocaleString("pt-BR")}
+                      {formatDate(item.executedAt)}
                     </td>
                     <td style={styles.td}>
                       <span
@@ -488,11 +543,47 @@ export default function BlogGemCapitalSettingsPage() {
                       </span>
                     </td>
                     <td style={styles.td}>{item.message}</td>
+                    <td style={styles.td}>
+                      <div style={styles.metricsCell}>
+                        <i
+                          className="fa-solid fa-eye"
+                          style={{ color: "#8b5cf6" }}
+                        ></i>
+                        <span>{item.email_opens || 0}</span>
+                      </div>
+                    </td>
+                    <td style={styles.td}>
+                      <div style={styles.metricsCell}>
+                        <i
+                          className="fa-solid fa-computer-mouse"
+                          style={{ color: "#ec4899" }}
+                        ></i>
+                        <span>{item.link_clicks || 0}</span>
+                      </div>
+                    </td>
+                    <td style={styles.td}>
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/platform/blog-gemcapital/execution/${item.id}`
+                          )
+                        }
+                        onMouseEnter={() => setActionButtonHover(item.id)}
+                        onMouseLeave={() => setActionButtonHover(null)}
+                        style={mergeStyles(
+                          styles.actionButton,
+                          actionButtonHover === item.id &&
+                            styles.actionButtonHover
+                        )}
+                      >
+                        <i className="fa-solid fa-eye"></i> Detalhes
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" style={styles.tdEmpty}>
+                  <td colSpan="6" style={styles.tdEmpty}>
                     Nenhum registro.
                   </td>
                 </tr>
