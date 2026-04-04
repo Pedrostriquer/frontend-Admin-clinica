@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLoad } from "../../../../Context/LoadContext";
 import { useToast } from "../../../../Components/Toast/ToastContainer";
 import gemCapitalBlogCampaignService from "../../../../dbServices/gemCapitalBlogCampaignService";
+import LastExecutionWarningCard from "./LastExecutionWarningCard";
 import {
   styles,
   spinnerStyles,
@@ -29,6 +30,7 @@ export default function BlogGemCapitalSettingsPage() {
     hour: 9,
     minute: 0,
     is_automatic: false,
+    last_executed_date: null,
   });
 
   const [timeline, setTimeline] = useState([]);
@@ -64,6 +66,10 @@ export default function BlogGemCapitalSettingsPage() {
   const [filterLoading, setFilterLoading] = useState(false);
   const [buttonHover, setButtonHover] = useState(false);
   const [actionButtonHover, setActionButtonHover] = useState(null);
+  const [clearing, setClearing] = useState(false);
+  const [showManualSendModal, setShowManualSendModal] = useState(false);
+  const [manualSendConfirmed, setManualSendConfirmed] = useState(false);
+  const [sendingManually, setSendingManually] = useState(false);
 
   useEffect(() => {
     const styleSheet = document.createElement("style");
@@ -94,6 +100,7 @@ export default function BlogGemCapitalSettingsPage() {
       startLoading();
       setLoading(true);
       const configData = await gemCapitalBlogCampaignService.getCronConfig();
+      console.log(configData)
       setConfig(configData);
       await fetchTimeline(filters);
     } catch (error) {
@@ -107,6 +114,45 @@ export default function BlogGemCapitalSettingsPage() {
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  const handleClearLastExecutedDate = async () => {
+    try {
+      setClearing(true);
+      await gemCapitalBlogCampaignService.clearLastExecutedDate();
+      toast.success("Trava de segurança removida com sucesso!");
+      // Recarregar tudo para refletir a mudança
+      await fetchInitialData();
+    } catch (error) {
+      toast.error("Erro ao remover trava");
+      console.error("Erro:", error);
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  const handleSendCampaignManual = async () => {
+    if (!manualSendConfirmed) {
+      toast.error("Confirme o envio marcando a checkbox");
+      return;
+    }
+
+    try {
+      setSendingManually(true);
+      startLoading();
+      await gemCapitalBlogCampaignService.sendCampaignAdminForce(true);
+      toast.success("Campanha disparada com sucesso!");
+      setShowManualSendModal(false);
+      setManualSendConfirmed(false);
+      // Recarregar tudo para refletir a mudança
+      await fetchInitialData();
+    } catch (error) {
+      toast.error("Erro ao disparar campanha");
+      console.error("Erro:", error);
+    } finally {
+      setSendingManually(false);
+      stopLoading();
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -170,8 +216,27 @@ export default function BlogGemCapitalSettingsPage() {
     );
   }
 
+
   return (
     <div style={styles.settingsContainer}>
+      {/* BOTÃO DE DISPARO MANUAL */}
+      <div style={styles.manualSendButtonContainer}>
+        <button
+          onClick={() => setShowManualSendModal(true)}
+          disabled={sendingManually}
+          onMouseEnter={() => setActionButtonHover("manualSend")}
+          onMouseLeave={() => setActionButtonHover(null)}
+          style={mergeStyles(
+            styles.buttonManualSend,
+            actionButtonHover === "manualSend" && styles.buttonManualSendHover,
+            sendingManually && styles.buttonManualSendDisabled
+          )}
+        >
+          <i className="fa-solid fa-rocket"></i>
+          {sendingManually ? "Enviando..." : "Enviar Campanha Manualmente"}
+        </button>
+      </div>
+
       {/* SEÇÃO 1: CONFIGURAÇÕES */}
       <div style={styles.settingsCard}>
         <div style={styles.settingsHeader}>
@@ -317,6 +382,14 @@ export default function BlogGemCapitalSettingsPage() {
           </button>
         </div>
       </div>
+
+      {/* 🆕 NOVO: Warning de Última Execução */}
+      <LastExecutionWarningCard
+        lastExecutedDate={config.last_executed_date}
+        onClear={handleClearLastExecutedDate}
+        isLoading={clearing}
+        styles={styles}
+      />
 
       {/* SEÇÃO 2: SUMÁRIO E TIMELINE */}
       <div style={styles.summaryGrid}>
@@ -620,6 +693,77 @@ export default function BlogGemCapitalSettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* MODAL DE CONFIRMAÇÃO DE ENVIO MANUAL */}
+      {showManualSendModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>
+                <i className="fa-solid fa-triangle-exclamation"></i> Enviar
+                Campanha Manualmente
+              </h3>
+              <button
+                onClick={() => {
+                  setShowManualSendModal(false);
+                  setManualSendConfirmed(false);
+                }}
+                style={styles.modalCloseBtn}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={styles.modalContent}>
+              <p style={styles.modalMessage}>
+                Você está prestes a enviar a campanha para todos os subscribers
+                ativos, <strong>ignorando a trava de segurança diária</strong>.
+              </p>
+              <p style={styles.modalSubMessage}>
+                A trava será reativada após o envio, impedindo novos disparos
+                nas próximas 24 horas.
+              </p>
+
+              <div style={styles.modalCheckbox}>
+                <input
+                  type="checkbox"
+                  id="confirmManualSend"
+                  checked={manualSendConfirmed}
+                  onChange={(e) => setManualSendConfirmed(e.target.checked)}
+                  style={styles.checkboxInput}
+                />
+                <label htmlFor="confirmManualSend" style={styles.checkboxLabel}>
+                  Confirmo que desejo enviar a campanha manualmente
+                </label>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button
+                onClick={() => {
+                  setShowManualSendModal(false);
+                  setManualSendConfirmed(false);
+                }}
+                style={styles.buttonCancel}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSendCampaignManual}
+                disabled={!manualSendConfirmed || sendingManually}
+                style={mergeStyles(
+                  styles.buttonConfirmSend,
+                  (!manualSendConfirmed || sendingManually) &&
+                    styles.buttonConfirmSendDisabled
+                )}
+              >
+                <i className="fa-solid fa-paper-plane"></i>{" "}
+                {sendingManually ? "Enviando..." : "Confirmar e Enviar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

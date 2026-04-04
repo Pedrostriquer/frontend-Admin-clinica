@@ -235,11 +235,8 @@ export default function BlogGemCapitalCampaign() {
                   const novoModo = modoSelecao === "automatico" ? "manual" : "automatico";
                   setModoSelecao(novoModo);
 
-                  // Se mudando para automático, recarrega os posts automáticos do backend
-                  if (novoModo === "automatico") {
-                    fetchCampaignConfig();
-                  } else {
-                    // Se mudando para manual, limpa todos os posts selecionados
+                  // Se mudando para manual, limpa todos os posts selecionados
+                  if (novoModo === "manual") {
                     setFormData((prev) => ({
                       ...prev,
                       featuredPostId: null,
@@ -255,6 +252,7 @@ export default function BlogGemCapitalCampaign() {
                       artigoSecundario3: null,
                     }));
                   }
+                  // Não chama fetchCampaignConfig() aqui - deixa o usuário salvar para sincronizar
                 }}
               >
                 <i

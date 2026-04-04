@@ -82,6 +82,35 @@ const gemCapitalBlogCampaignService = {
       throw error;
     }
   },
+
+  // Clear last executed date (remove lock)
+  clearLastExecutedDate: async () => {
+    try {
+      const response = await api.post(
+        "/GemCapitalBlogCampaign/cron-config/clear-execution-date"
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao limpar data de execução:", error);
+      throw error;
+    }
+  },
+
+  // Send campaign manually (admin force)
+  sendCampaignAdminForce: async (updateExecutionLock = true) => {
+    try {
+      const response = await api.post(
+        "/GemCapitalBlogCampaign/send-campaign-admin-force",
+        {
+          update_execution_lock: updateExecutionLock,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao disparar campanha manualmente:", error);
+      throw error;
+    }
+  },
 };
 
 export default gemCapitalBlogCampaignService;
