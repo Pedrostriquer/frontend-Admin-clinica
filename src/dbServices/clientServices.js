@@ -58,19 +58,21 @@ const clientServices = {
     searchFilter,
     pageNumber = 1,
     pageSize = 10,
-    sortBy = "id", // Parâmetro de ordenação
-    sortDirection = "desc" // Parâmetro de direção
+    sortBy = "id",
+    sortDirection = "desc",
+    referralCode = null
   ) => {
     try {
       const normalizedFilter = normalizeSearchString(searchFilter);
-      // Usando 'params' para uma URL mais limpa e adicionando ordenação
+      
       const response = await api.get("client/search", {
         params: {
           searchFilter: normalizedFilter,
           pageNumber,
           pageSize,
-          sortBy, // Enviando o campo de ordenação
-          order: sortDirection, // Enviando a direção (conforme seu swagger)
+          sortBy,
+          order: sortDirection,
+          referralCode: referralCode // Repassando para o backend
         },
       });
       return response.data;

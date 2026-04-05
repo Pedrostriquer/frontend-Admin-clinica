@@ -9,6 +9,15 @@ import { useLoad } from "../../../Context/LoadContext";
 const formatCurrency = (value) =>
   (value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const formatReferrerDisplay = (name, code) => {
+  if (!name) return "—";
+  const parts = name.trim().split(" ");
+  const firstName = parts[0] || "";
+  const lastInitial = parts.length > 1 ? ` ${parts[parts.length - 1][0]}.` : "";
+  const formattedName = `${firstName}${lastInitial}`.toUpperCase();
+  return code ? `${code} / ${formattedName}` : formattedName;
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return "—";
   const date = new Date(dateString);
@@ -54,33 +63,38 @@ function ClientsPage() {
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const { startLoading, stopLoading } = useLoad();
 
-  // 1. Novo estado para guardar o total de clientes
   const [totalClients, setTotalClients] = useState(0);
 
   const [sortBy] = useState("id");
   const [sortDirection, setSortDirection] = useState("desc");
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedReferralCode = useDebounce(referralCode, 500);
 
   const fetchClients = useCallback(
-    async (page, search, sortBy, sortDirection) => {
+    async (page, search, refCode, sortBy, sortDirection) => {
       if (!token) return;
       setIsLoading(true);
       startLoading();
       try {
+        const cleanRefCode = refCode ? refCode.trim().toUpperCase() : null;
+
         const data = await clientServices.getClients(
           search,
           page,
           ITEMS_PER_PAGE,
           sortBy,
-          sortDirection
+          sortDirection,
+          cleanRefCode
         );
+
         setClients(data.items || []);
         setTotalPages(Math.ceil(data.totalCount / ITEMS_PER_PAGE));
         // 2. Atualiza o estado com o total de clientes
@@ -99,12 +113,26 @@ function ClientsPage() {
   );
 
   useEffect(() => {
-    fetchClients(currentPage, debouncedSearchTerm, sortBy, sortDirection);
-  }, [debouncedSearchTerm, currentPage, sortBy, sortDirection, fetchClients]);
+    // Adicione 'debouncedReferralCode' na chamada:
+    fetchClients(
+      currentPage,
+      debouncedSearchTerm,
+      debouncedReferralCode,
+      sortBy,
+      sortDirection
+    );
+  }, [
+    debouncedSearchTerm,
+    debouncedReferralCode,
+    currentPage,
+    sortBy,
+    sortDirection,
+    fetchClients,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchTerm, sortDirection]);
+  }, [debouncedSearchTerm, debouncedReferralCode, sortDirection]);
 
   return (
     <div style={styles.clientsPageContainer}>
@@ -135,6 +163,17 @@ function ClientsPage() {
               placeholder="Buscar por nome, CPF ou telefone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              style={styles.searchInput}
+            />
+          </div>
+
+          <div style={styles.searchBox}>
+            <i className="fa-solid fa-ticket" style={styles.searchBoxIcon}></i>
+            <input
+              type="text"
+              placeholder="Código do Indicador..."
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value)}
               style={styles.searchInput}
             />
           </div>
@@ -188,6 +227,7 @@ function ClientsPage() {
               <th style={styles.tableCell}>Email</th>
               <th style={styles.tableCell}>Celular</th>
               <th style={styles.tableCell}>Data de Criação</th>
+              <th style={styles.tableCell}>Indicado Por</th>
               <th style={styles.tableCell}>Saque</th>
               <th style={styles.tableCell}>Saldo em Conta</th>
             </tr>
@@ -233,6 +273,30 @@ function ClientsPage() {
                   <td style={styles.tableCell}>{client.phoneNumber}</td>
                   <td style={styles.tableCell}>
                     {formatDateTime(client.dateCreated)}
+                  </td>
+                  <td style={styles.tableCell}>
+                    {client.referrerName ? (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (client.referrerId)
+                            navigate(`/platform/clients/${client.referrerId}`);
+                        }}
+                        style={{
+                          color: "#122C4F",
+                          fontWeight: "bold",
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {formatReferrerDisplay(
+                          client.referrerName,
+                          client.referrerCode
+                        )}
+                      </span>
+                    ) : (
+                      <span style={{ color: "#9ca3af" }}>—</span>
+                    )}
                   </td>
                   <td style={styles.tableCell}>
                     {client.canWithdrawAnytime ? (

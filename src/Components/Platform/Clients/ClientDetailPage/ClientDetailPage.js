@@ -228,6 +228,7 @@ function ClientDetailPage() {
   const handleSaveChanges = async () => {
     setIsSaving(true);
     const updates = [];
+
     if (editableClient.name !== client.name) {
       updates.push({ FieldName: "Name", FieldNewValue: editableClient.name });
     }
@@ -246,17 +247,25 @@ function ClientDetailPage() {
         FieldNewValue: editableClient.jobTitle,
       });
     }
+    if (editableClient.referralCode !== client.referralCode) {
+      updates.push({
+        FieldName: "ReferralCode",
+        FieldNewValue: editableClient.referralCode?.trim().toUpperCase(),
+      });
+    }
     if (editableClient.howFoundUs !== client.howFoundUs) {
       updates.push({
         FieldName: "HowFoundUs",
         FieldNewValue: editableClient.howFoundUs,
       });
     }
+
     if (updates.length === 0) {
       setIsEditing(false);
       setIsSaving(false);
       return;
     }
+
     try {
       startLoading();
       await clientServices.updateClientPartial(clientId, updates);
@@ -265,9 +274,10 @@ function ClientDetailPage() {
       await fetchClientData();
     } catch (error) {
       console.error("Erro ao atualizar cliente:", error);
-      alert(
-        "Falha ao atualizar o cliente. Verifique os dados e tente novamente."
-      );
+      const errorMessage = typeof error === 'string' 
+        ? error 
+        : (error.message || "Falha ao atualizar o cliente. Verifique os dados e tente novamente.");
+      alert(errorMessage);
     } finally {
       setIsSaving(false);
       stopLoading();
@@ -289,6 +299,20 @@ function ClientDetailPage() {
     }
   };
 
+  const formatReferrerDisplay = (name, code) => {
+    if (!name) return "Não informado";
+
+    const parts = name.trim().split(" ");
+    const firstName = parts[0] || "";
+    const lastInitial =
+      parts.length > 1 ? ` ${parts[parts.length - 1][0]}.` : "";
+
+    const formattedName = `${firstName}${lastInitial}`.toUpperCase();
+    const displayCode = code ? `${code} / ` : "";
+
+    return `${displayCode}${formattedName}`;
+  };
+
   if (isLoading) {
     return (
       <div style={styles.loadingContainer}>Carregando perfil do cliente...</div>
@@ -301,39 +325,70 @@ function ClientDetailPage() {
   const personalInfoContent = isEditing ? (
     <>
       <div style={styles.infoGrid}>
+        {/* Nome - Editável */}
         <input
           name="name"
           value={editableClient.name || ""}
           onChange={handleInputChange}
           style={styles.inputField}
+          placeholder="Nome"
         />
+        {/* Email - Editável */}
         <input
           name="email"
           type="email"
           value={editableClient.email || ""}
           onChange={handleInputChange}
           style={styles.inputField}
+          placeholder="Email"
         />
+        {/* CPF - Fixo */}
         <p style={{ ...styles.infoValue, color: "#9ca3af" }}>
-          {client.cpfCnpj} (não editável)
+          {client.cpfCnpj} (CPF não editável)
         </p>
+        {/* Telefone - Editável */}
         <input
           name="phoneNumber"
           value={editableClient.phoneNumber || ""}
           onChange={handleInputChange}
           style={styles.inputField}
+          placeholder="Telefone"
         />
+        {/* Nascimento - Fixo */}
         <p style={{ ...styles.infoValue, color: "#9ca3af" }}>
-          {formatDate(client.birthDate)} (não editável)
+          {formatDate(client.birthDate)} (Nasc. não editável)
         </p>
+        {/* Profissão - Editável */}
         <input
           name="jobTitle"
           value={editableClient.jobTitle || ""}
           onChange={handleInputChange}
           style={styles.inputField}
+          placeholder="Profissão"
         />
+        
+        {/* CÓDIGO DE CONVITE (DELE) - EDITÁVEL */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '10px', color: '#3b82f6', fontWeight: 'bold', marginBottom: '4px' }}>CÓDIGO DE CONVITE (DELE)</span>
+          <input
+            name="referralCode"
+            value={editableClient.referralCode || ""}
+            onChange={handleInputChange}
+            style={{ ...styles.inputField, borderColor: '#3b82f6', fontWeight: 'bold' }}
+            placeholder="Código de Convite"
+          />
+        </div>
+  
+        {/* INDICADO POR (REFERRER) - NÃO EDITÁVEL */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '10px', color: '#9ca3af', fontWeight: 'bold', marginBottom: '4px' }}>INDICADO POR (NÃO EDITÁVEL)</span>
+          <p style={{ ...styles.infoValue, color: "#9ca3af", margin: 0 }}>
+            {client.referrerName ? formatReferrerDisplay(client.referrerName, client.referrerCode) : "Nenhum"}
+          </p>
+        </div>
+  
         <p style={{ ...styles.infoValue, color: "#9ca3af" }}>
-          {editableClient.howFoundUs || "Não informado"} (não editável)
+          {editableClient.howFoundUs || "Não informado"} (Origem não editável)
         </p>
       </div>
       <div style={styles.editActions}>
@@ -372,8 +427,37 @@ function ClientDetailPage() {
         <p style={styles.infoValue}>{client.jobTitle || "Não informado"}</p>
       </div>
       <div>
+        <span style={styles.infoLabel}>Código de Convite (Dele)</span>
+        <p style={{ ...styles.infoValue, fontWeight: "bold", color: "#3b82f6" }}>
+          {client.referralCode || "Não gerado"}
+        </p>
+      </div>
+      <div>
         <span style={styles.infoLabel}>Como nos conheceu</span>
         <p style={styles.infoValue}>{client.howFoundUs || "Não informado"}</p>
+      </div>
+      <div>
+        <span style={styles.infoLabel}>Indicado Por</span>
+        {client.referrerName && client.referrerId ? (
+          <p
+            onClick={() => navigate(`/platform/clients/${client.referrerId}`)}
+            style={{
+              ...styles.infoValue,
+              color: "#122C4F",
+              fontWeight: "bold",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+          >
+            {formatReferrerDisplay(client.referrerName, client.referrerCode)}
+          </p>
+        ) : (
+          <p style={styles.infoValue}>
+            {client.referrerName
+              ? formatReferrerDisplay(client.referrerName, client.referrerCode)
+              : "Não informado"}
+          </p>
+        )}
       </div>
     </div>
   );

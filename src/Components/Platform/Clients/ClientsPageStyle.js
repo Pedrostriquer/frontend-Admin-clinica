@@ -508,6 +508,15 @@ const styles = {
     fontWeight: 500,
     cursor: "pointer",
   },
+
+  searchBox: {
+    display: "flex",
+    alignItems: "center",
+    position: "relative",
+    flexGrow: 1, // Faz com que os inputs dividam o espaço
+    minWidth: "200px",
+    maxWidth: "350px", // Limita para não ficar gigante em telas ultra-wide
+  },
 };
 
 export default styles;
