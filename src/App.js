@@ -95,6 +95,9 @@ import BlogGemCapitalExecutionDetailPage from "./Components/Platform/BlogGemCapi
 import BlogGemCapitalDashboard from "./Components/Platform/BlogGemCapital/Dashboard/BlogGemCapitalDashboard";
 // import WhatsAppManager from "./Components/GemValueConfig/WhatsApp/WhatsAppManager";
 import SubscriberDetailPage from "./Components/Platform/BlogGemCapital/Subscribers/SubscriberDetailPage"; // ADICIONE ESTE
+import Downloads from "./Components/Platform/BlogGemCapital/Downloads/Downloads";
+import DownloadsEdit from "./Components/Platform/BlogGemCapital/Downloads/DownloadsEdit";
+import DownloadDetails from "./Components/Platform/BlogGemCapital/Downloads/DownloadDetails";
 
 const AppContent = () => {
   const { loadState } = useLoad();
@@ -233,6 +236,19 @@ const AppContent = () => {
             <Route
               path="platform/blog-gemcapital/affiliates/:id"
               element={<AffiliateDetailPage />}
+            />
+            {/* Blog GemCapital - Downloads */}
+            <Route
+              path="platform/blog-gemcapital/downloads"
+              element={<Downloads />}
+            />
+            <Route
+              path="platform/blog-gemcapital/downloads/:id/leads"
+              element={<DownloadDetails />}
+            />
+            <Route
+              path="platform/blog-gemcapital/downloads/:id"
+              element={<DownloadsEdit />}
             />
             {/* Blog GemCapital - KPI e Métricas */}
             <Route

@@ -265,6 +265,11 @@ const bloggemcapitalMenu = [
     path: "/platform/blog-gemcapital/affiliates",
   },
   {
+    name: "Downloads",
+    icon: "fa-solid fa-download",
+    path: "/platform/blog-gemcapital/downloads",
+  },
+  {
     name: "Conf. Envio",
     icon: "fa-solid fa-gear",
     path: "/platform/blog-gemcapital/configuracoes-campanha",
