@@ -1,5 +1,4 @@
 // src: /components/Platform/Contracts/ContractDetailPage/ContractDetailPage.js
-// Conteúdo completo do arquivo com a adição do indicador de gema.
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -12,8 +11,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useLoad } from "../../../../Context/LoadContext";
 import ReleaseContributionModal from "./ReleaseContributionModal";
-
-// --- Funções Auxiliares e Mapeamentos ---
+import AddAttachmentModal from "./AddAttachmentModal";
+import ViewAttachmentModal from "./ViewAttachmentModal";
 
 const formatCurrency = (v) =>
   (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -350,6 +349,75 @@ function ContractDetailPage() {
   const [isExtending, setIsExtending] = useState(false);
   const [timelinePage, setTimelinePage] = useState(1);
   const eventsPerPage = 4;
+
+  const [isAddAttachmentModalOpen, setIsAddAttachmentModalOpen] =
+    useState(false);
+  const [isViewAttachmentModalOpen, setIsViewAttachmentModalOpen] =
+    useState(false);
+  const [selectedAttachment, setSelectedAttachment] = useState(null);
+  const [isAttachmentLoading, setIsAttachmentLoading] = useState(false);
+
+  const handleAddAttachment = async (name, description, file) => {
+    setIsAttachmentLoading(true);
+    startLoading();
+    try {
+      await contractServices.addAttachment(contractId, name, description, file);
+      alert("Anexo adicionado com sucesso!");
+      await fetchContract();
+      setIsAddAttachmentModalOpen(false);
+    } catch (err) {
+      alert(err?.message || "Erro ao adicionar anexo.");
+    } finally {
+      setIsAttachmentLoading(false);
+      stopLoading();
+    }
+  };
+
+  // Handler para Editar Anexo
+  const handleUpdateAttachment = async (attachmentId, name, description) => {
+    setIsAttachmentLoading(true);
+    startLoading();
+    try {
+      await contractServices.updateAttachment(
+        contractId,
+        attachmentId,
+        name,
+        description
+      );
+      alert("Anexo atualizado!");
+      await fetchContract();
+      setIsViewAttachmentModalOpen(false);
+    } catch (err) {
+      alert(err?.message || "Erro ao atualizar anexo.");
+    } finally {
+      setIsAttachmentLoading(false);
+      stopLoading();
+    }
+  };
+
+  // Handler para Excluir Anexo
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (
+      !window.confirm(
+        "Tem certeza que deseja excluir este anexo permanentemente?"
+      )
+    )
+      return;
+
+    setIsAttachmentLoading(true);
+    startLoading();
+    try {
+      await contractServices.deleteAttachment(contractId, attachmentId);
+      alert("Anexo removido.");
+      await fetchContract();
+      setIsViewAttachmentModalOpen(false);
+    } catch (err) {
+      alert(err?.message || "Erro ao excluir anexo.");
+    } finally {
+      setIsAttachmentLoading(false);
+      stopLoading();
+    }
+  };
 
   // Refs
   const mediaInputRef = useRef(null);
@@ -1347,6 +1415,114 @@ function ContractDetailPage() {
                 )}
               </div>
             )}
+            {/* --- SEÇÃO DE ANEXOS PERSONALIZADOS --- */}
+            <div style={styles.infoCard}>
+              <div style={styles.cardHeaderAction}>
+                <h3 style={styles.infoCardTitle}>
+                  <i className="fa-solid fa-paperclip"></i> Anexos Adicionais
+                </h3>
+                <button
+                  style={{
+                    ...styles.buttonPrimary,
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                  }}
+                  onClick={() => setIsAddAttachmentModalOpen(true)}
+                >
+                  <i className="fa-solid fa-plus"></i> Novo Anexo
+                </button>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  marginTop: "15px",
+                }}
+              >
+                {contract.attachments && contract.attachments.length > 0 ? (
+                  contract.attachments.map((file) => (
+                    <div
+                      key={file.id}
+                      onClick={() => {
+                        setSelectedAttachment(file);
+                        setIsViewAttachmentModalOpen(true);
+                      }}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "12px 16px",
+                        background: "#fff",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "12px",
+                        cursor: "pointer",
+                        transition: "0.2s all",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "8px",
+                            backgroundColor: "#eff6ff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#3b82f6",
+                          }}
+                        >
+                          <i
+                            className="fa-solid fa-file-lines"
+                            style={{ fontSize: "1.2rem" }}
+                          ></i>
+                        </div>
+                        <div>
+                          <div
+                            style={{
+                              fontWeight: "600",
+                              color: "#1e293b",
+                              fontSize: "14px",
+                            }}
+                          >
+                            {file.name}
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#64748b" }}>
+                            Adicionado em {formatDate(file.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                      <i
+                        className="fa-solid fa-chevron-right"
+                        style={{ color: "#cbd5e1", fontSize: "12px" }}
+                      ></i>
+                    </div>
+                  ))
+                ) : (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#94a3b8",
+                      fontSize: "13px",
+                      border: "1px dashed #e2e8f0",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    Nenhum anexo personalizado encontrado.
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* --- FIM DA SEÇÃO DE ANEXOS --- */}
           </div>
 
           <aside style={styles.actionPanel}>
@@ -1660,6 +1836,22 @@ function ContractDetailPage() {
           isReleasing={isReleasing}
         />
       )}
+
+      <AddAttachmentModal
+        isOpen={isAddAttachmentModalOpen}
+        onClose={() => setIsAddAttachmentModalOpen(false)}
+        onSubmit={handleAddAttachment}
+        isLoading={isAttachmentLoading}
+      />
+
+      <ViewAttachmentModal
+        isOpen={isViewAttachmentModalOpen}
+        onClose={() => setIsViewAttachmentModalOpen(false)}
+        attachment={selectedAttachment}
+        onUpdate={handleUpdateAttachment}
+        onDelete={handleDeleteAttachment}
+        isLoading={isAttachmentLoading}
+      />
     </>
   );
 }

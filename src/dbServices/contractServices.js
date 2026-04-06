@@ -375,6 +375,52 @@ const contractServices = {
       throw error.response?.data || error;
     }
   },
+
+  addAttachment: async (contractId, name, description, file) => {
+    const formData = new FormData();
+    formData.append("name", name);
+    if (description) formData.append("description", description);
+    formData.append("file", file);
+
+    try {
+      const response = await api.post(
+        `contract/${contractId}/attachments`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao adicionar anexo:", error);
+      throw error.response?.data || error;
+    }
+  },
+
+  updateAttachment: async (contractId, attachmentId, name, description) => {
+    try {
+      const response = await api.patch(
+        `contract/${contractId}/attachments/${attachmentId}`,
+        { name, description }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar anexo:", error);
+      throw error.response?.data || error;
+    }
+  },
+
+  deleteAttachment: async (contractId, attachmentId) => {
+    try {
+      const response = await api.delete(
+        `contract/${contractId}/attachments/${attachmentId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao deletar anexo:", error);
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default contractServices;

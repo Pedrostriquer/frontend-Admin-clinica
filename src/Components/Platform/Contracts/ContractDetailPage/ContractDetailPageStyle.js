@@ -575,6 +575,55 @@ const styles = {
     color: "#fff",
   },
 
+  // --- NOVOS ESTILOS PARA ANEXOS PERSONALIZADOS ---
+  attachmentItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 16px",
+    background: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    cursor: "pointer",
+    transition: "0.2s all ease",
+  },
+  attachmentIconBox: {
+    width: "40px",
+    height: "40px",
+    borderRadius: "8px",
+    backgroundColor: "#eff6ff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#3b82f6",
+  },
+  attachmentEmptyState: {
+    textAlign: "center",
+    padding: "20px",
+    color: "#94a3b8",
+    fontSize: "13px",
+    border: "1px dashed #e2e8f0",
+    borderRadius: "12px",
+  },
+  // Botão de excluir dentro do modal de visualização
+  buttonDangerSmall: {
+    backgroundColor: "#fee2e2",
+    color: "#ef4444",
+    border: "1px solid #fecaca",
+    borderRadius: "8px",
+    width: "50px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s",
+  },
+  // Para garantir que o Modal de Ver Anexo tenha scroll se a descrição for grande
+  modalContentScroll: {
+    maxHeight: "90vh",
+    overflowY: "auto",
+  },
+
   // --- NOVO ESTILO ADICIONADO AQUI ---
   appreciateBtn: {
     width: "100%",
