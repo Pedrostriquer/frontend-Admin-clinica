@@ -36,6 +36,7 @@ import WithdrawalsPage from "./Components/Platform/Withdraws/WithdrawalsPage";
 import WithdrawDetailPage from "./Components/Platform/Withdraws/WithdrawDetailPage/WithdrawDetailPage";
 import CreateWithdrawalPage from "./Components/Platform/Withdraws/CreateWithdrawalPage/CreateWithdrawalPage";
 import ControllerPage from "./Components/Platform/Controller/ControllerPage";
+import ConfiguracaoDeContrato from "./Components/Platform/ConfiguracaoDeContrato/ConfiguracaoDeContrato";
 import ReferralsPage from "./Components/Platform/Indication/ReferralsPage";
 import OffersPage from "./Components/Platform/Offers/OffersPage";
 import Catalog from "./Components/Platform/Catalog/Catalog";
@@ -162,6 +163,10 @@ const AppContent = () => {
               element={<WithdrawDetailPage />}
             />
             <Route path="platform/controller" element={<ControllerPage />} />
+            <Route
+              path="platform/configuracao-de-contrato-pdf"
+              element={<ConfiguracaoDeContrato />}
+            />
             <Route path="platform/indication" element={<ReferralsPage />} />
             <Route path="platform/offers" element={<OffersPage />} />
             <Route path="platform/messages" element={<MessagesPage />} />

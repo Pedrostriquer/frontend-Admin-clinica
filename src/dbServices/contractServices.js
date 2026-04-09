@@ -421,6 +421,28 @@ const contractServices = {
       throw error.response?.data || error;
     }
   },
+
+  getContractTemplate: async () => {
+    try {
+      const response = await api.get("contractsettings/template");
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao obter template do contrato:", error);
+      throw error.response?.data || error;
+    }
+  },
+
+  updateContractTemplate: async (htmlContent) => {
+    try {
+      const response = await api.put("contractsettings/template", {
+        html: htmlContent,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar template do contrato:", error);
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default contractServices;

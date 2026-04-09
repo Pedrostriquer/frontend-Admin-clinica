@@ -132,6 +132,11 @@ const platformMenu = [
     icon: "fa-solid fa-sliders",
     path: "/platform/controller",
   },
+  {
+    name: "Conf. Contrato",
+    icon: "fa-solid fa-file-pdf",
+    path: "/platform/configuracao-de-contrato-pdf",
+  },
 ];
 
 const ecommerceMenu = [
