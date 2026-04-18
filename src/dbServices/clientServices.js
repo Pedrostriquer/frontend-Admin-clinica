@@ -201,6 +201,19 @@ const clientServices = {
     }
   },
 
+  changeEmailByAdmin: async (clientId, newEmail) => {
+    try {
+      const response = await api.post(
+        `client/${clientId}/change-email-admin`,
+        { newEmail }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao alterar email:", error.response?.data || error);
+      throw error.response?.data || error;
+    }
+  },
+
   associateConsultant: async (clientId, consultantId) => {
     try {
       const response = await api.post(

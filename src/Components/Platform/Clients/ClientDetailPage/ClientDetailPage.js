@@ -7,6 +7,7 @@ import contractServices from "../../../../dbServices/contractServices";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import AddBalanceModal from "./AddBalanceModal/AddBalanceModal";
 import ChangePasswordModal from "./ChangePasswordModal/ChangePasswordModal";
+import ChangeEmailModal from "./ChangeEmailModal/ChangeEmailModal";
 import AssociateConsultantModal from "./AssociateConsultantModal/AssociateConsultantModal";
 import ImageWithLoader from "../../ImageWithLoader/ImageWithLoader";
 import { useLoad } from "../../../../Context/LoadContext";
@@ -58,6 +59,7 @@ function ClientDetailPage() {
   const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isAssociateModalOpen, setIsAssociateModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editableClient, setEditableClient] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -128,6 +130,19 @@ function ClientDetailPage() {
       fetchClientData();
     } catch (error) {
       alert(`Erro: ${error.message || "Não foi possível adicionar o saldo."}`);
+    } finally {
+      stopLoading();
+    }
+  };
+  const handleChangeEmail = async ({ email }) => {
+    try {
+      startLoading();
+      await clientServices.changeEmailByAdmin(clientId, email);
+      alert("Email alterado com sucesso!");
+      setIsEmailModalOpen(false);
+      fetchClientData();
+    } catch (error) {
+      alert(`Erro: ${error.message || "Não foi possível alterar o email."}`);
     } finally {
       stopLoading();
     }
@@ -516,7 +531,7 @@ function ClientDetailPage() {
                 </div>
                 <p style={styles.clientEmail}>{client.email}</p>
               </div>{" "}
-              <p style={styles.clientEmail}>{client.email}</p>
+              {/* <p style={styles.clientEmail}>{client.email}</p> */}
             </div>
           </div>
           <div style={styles.headerActions}>
@@ -572,6 +587,12 @@ function ClientDetailPage() {
               style={styles.actionButton}
             >
               <i className="fa-solid fa-key"></i> Alterar Senha
+            </button>
+            <button
+              onClick={() => setIsEmailModalOpen(true)}
+              style={styles.actionButton}
+            >
+              <i className="fa-solid fa-envelope"></i> Alterar Email
             </button>
             <button
               onClick={handleLoginAsClient}
@@ -826,6 +847,13 @@ function ClientDetailPage() {
           client={client}
           onClose={() => setIsPasswordModalOpen(false)}
           onSave={handleChangePassword}
+        />
+      )}
+      {isEmailModalOpen && (
+        <ChangeEmailModal
+          client={client}
+          onClose={() => setIsEmailModalOpen(false)}
+          onSave={handleChangeEmail}
         />
       )}
       <AssociateConsultantModal
