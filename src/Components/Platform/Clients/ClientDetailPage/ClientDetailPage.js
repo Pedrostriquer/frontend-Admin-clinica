@@ -244,6 +244,12 @@ function ClientDetailPage() {
     setIsSaving(true);
     const updates = [];
 
+    if (editableClient.cpfCnpj !== client.cpfCnpj) {
+      updates.push({
+        FieldName: "cpfcnpj", // Deve bater com o case do switch no seu Backend
+        FieldNewValue: editableClient.cpfCnpj,
+      });
+    }
     if (editableClient.name !== client.name) {
       updates.push({ FieldName: "Name", FieldNewValue: editableClient.name });
     }
@@ -358,9 +364,16 @@ function ClientDetailPage() {
           placeholder="Email"
         />
         {/* CPF - Fixo */}
-        <p style={{ ...styles.infoValue, color: "#9ca3af" }}>
-          {client.cpfCnpj} (CPF não editável)
-        </p>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <span style={{ fontSize: '10px', color: '#3b82f6', fontWeight: 'bold', marginBottom: '4px' }}>CPF/CNPJ</span>
+        <input
+          name="cpfCnpj"
+          value={editableClient.cpfCnpj || ""}
+          onChange={handleInputChange}
+          style={{ ...styles.inputField, borderColor: '#3b82f6' }}
+          placeholder="CPF ou CNPJ"
+        />
+      </div>
         {/* Telefone - Editável */}
         <input
           name="phoneNumber"
