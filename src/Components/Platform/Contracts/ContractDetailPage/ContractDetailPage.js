@@ -13,6 +13,8 @@ import { useLoad } from "../../../../Context/LoadContext";
 import ReleaseContributionModal from "./ReleaseContributionModal";
 import AddAttachmentModal from "./AddAttachmentModal";
 import ViewAttachmentModal from "./ViewAttachmentModal";
+import ModalAlterarTaxa from "./ModalAlterarTaxa";
+import ModalAdicionarAporte from "./ModalAdicionarAporte";
 
 const formatCurrency = (v) =>
   (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -350,12 +352,49 @@ function ContractDetailPage() {
   const [timelinePage, setTimelinePage] = useState(1);
   const eventsPerPage = 4;
 
+  const [isRateModalOpen, setIsRateModalOpen] = useState(false);
+  const [isExtraContributionModalOpen, setIsExtraContributionModalOpen] =
+    useState(false);
+  const [isProcessingAdminAction, setIsProcessingAdminAction] = useState(false);
+
   const [isAddAttachmentModalOpen, setIsAddAttachmentModalOpen] =
     useState(false);
   const [isViewAttachmentModalOpen, setIsViewAttachmentModalOpen] =
     useState(false);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [isAttachmentLoading, setIsAttachmentLoading] = useState(false);
+
+  const handleUpdateGainPercentage = async (newPercentage) => {
+    setIsProcessingAdminAction(true);
+    startLoading();
+    try {
+      await contractServices.updateGainPercentage(contractId, newPercentage);
+      alert("Taxa de ganho atualizada com sucesso!");
+      await fetchContract();
+      setIsRateModalOpen(false);
+    } catch (err) {
+      alert(err?.message || "Erro ao atualizar taxa.");
+    } finally {
+      setIsProcessingAdminAction(false);
+      stopLoading();
+    }
+  };
+
+  const handleAddExtraContribution = async (amount) => {
+    setIsProcessingAdminAction(true);
+    startLoading();
+    try {
+      await contractServices.addExtraContribution(contractId, amount);
+      alert("Aporte extra adicionado com sucesso!");
+      await fetchContract();
+      setIsExtraContributionModalOpen(false);
+    } catch (err) {
+      alert(err?.message || "Erro ao adicionar aporte.");
+    } finally {
+      setIsProcessingAdminAction(false);
+      stopLoading();
+    }
+  };
 
   const handleAddAttachment = async (name, description, file) => {
     setIsAttachmentLoading(true);
@@ -1631,28 +1670,59 @@ function ContractDetailPage() {
             </div>
 
             {/* --- NOVO CARD E BOTÃO AQUI --- */}
-            {contract.status === 2 && ( // Só mostra para contratos em valorização
+            {contract.status === 2 && (
               <div style={styles.actionCard}>
                 <h3 style={styles.actionCardTitle}>
                   <i className="fa-solid fa-gears"></i> Ações Administrativas
                 </h3>
-                <button
-                  onClick={handleAppreciateDay}
+                <div
                   style={{
-                    ...styles.actionCardButton,
-                    ...styles.appreciateBtn,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
                   }}
-                  disabled={isAppreciating}
                 >
-                  {isAppreciating ? (
-                    <div style={styles.buttonSpinner}></div>
-                  ) : (
-                    <i className="fa-solid fa-angles-up"></i>
-                  )}
-                  {isAppreciating
-                    ? "Valorizando..."
-                    : "Rodar Valorização Diária"}
-                </button>
+                  <button
+                    onClick={handleAppreciateDay}
+                    style={{
+                      ...styles.actionCardButton,
+                      ...styles.appreciateBtn,
+                    }}
+                    disabled={isAppreciating}
+                  >
+                    {isAppreciating ? (
+                      <div style={styles.buttonSpinner}></div>
+                    ) : (
+                      <i className="fa-solid fa-angles-up"></i>
+                    )}
+                    {isAppreciating
+                      ? "Valorizando..."
+                      : "Rodar Valorização Diária"}
+                  </button>
+
+                  <button
+                    onClick={() => setIsRateModalOpen(true)}
+                    style={{
+                      ...styles.actionCardButton,
+                      ...styles.buttonPrimary,
+                      backgroundColor: "#3b82f6",
+                    }}
+                  >
+                    <i className="fa-solid fa-percent"></i> Alterar Taxa Mensal
+                  </button>
+
+                  <button
+                    onClick={() => setIsExtraContributionModalOpen(true)}
+                    style={{
+                      ...styles.actionCardButton,
+                      ...styles.buttonPrimary,
+                      backgroundColor: "#8b5cf6",
+                    }}
+                  >
+                    <i className="fa-solid fa-money-bill-trend-up"></i>{" "}
+                    Adicionar Aporte Extra
+                  </button>
+                </div>
               </div>
             )}
             {/* --- FIM DO NOVO CARD --- */}
@@ -1851,6 +1921,21 @@ function ContractDetailPage() {
         onUpdate={handleUpdateAttachment}
         onDelete={handleDeleteAttachment}
         isLoading={isAttachmentLoading}
+      />
+
+      <ModalAlterarTaxa
+        isOpen={isRateModalOpen}
+        onClose={() => setIsRateModalOpen(false)}
+        onConfirm={handleUpdateGainPercentage}
+        currentRate={contract.gainPercentage}
+        isLoading={isProcessingAdminAction}
+      />
+
+      <ModalAdicionarAporte
+        isOpen={isExtraContributionModalOpen}
+        onClose={() => setIsExtraContributionModalOpen(false)}
+        onConfirm={handleAddExtraContribution}
+        isLoading={isProcessingAdminAction}
       />
     </>
   );

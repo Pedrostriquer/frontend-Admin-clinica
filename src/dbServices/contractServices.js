@@ -443,6 +443,32 @@ const contractServices = {
       throw error.response?.data || error;
     }
   },
+
+  updateGainPercentage: async (contractId, newPercentage) => {
+    try {
+      const response = await api.patch(
+        `contract/${contractId}/update-gain-percentage`,
+        { newPercentage }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar porcentagem de ganho:", error);
+      throw error.response?.data || error;
+    }
+  },
+
+  addExtraContribution: async (contractId, amount) => {
+    try {
+      const response = await api.post(
+        `contract/${contractId}/extra-contribution`,
+        { amount }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao adicionar aporte extra:", error);
+      throw error.response?.data || error;
+    }
+  },
 };
 
 export default contractServices;
