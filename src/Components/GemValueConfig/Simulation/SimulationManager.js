@@ -1,93 +1,216 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    DollarSign, Calendar, Check, BarChart3, 
-    Save, Eye, Calculator, Smartphone, MessageCircle 
+import {
+  DollarSign,
+  Calendar,
+  Check,
+  BarChart3,
+  Save,
+  Eye,
+  Calculator,
+  Smartphone,
+  MessageCircle,
+  TrendingUp,
 } from 'lucide-react';
 import gemValueService from '../../../dbServices/gemValueService';
-import { useNotification } from '../../../Context/NotificationContext';
 import './SimulationManager.css';
 
 const SimulationManager = () => {
-    const { addNotification } = useNotification();
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState({});
-    const [cardLabels, setCardLabels] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [data, setData] = useState({});
+  const [originalData, setOriginalData] = useState({});
+  const [cardLabels, setCardLabels] = useState({});
+  const [originalCardLabels, setOriginalCardLabels] = useState({});
+  const [percentages, setPercentages] = useState({});
+  const [originalPercentages, setOriginalPercentages] = useState({});
+  const [isDirty, setIsDirty] = useState(false);
 
-    const sessionKeys = ['sim_section_title', 'sim_section_desc', 'sim_card_content'];
+  const sessionKeys = [
+    'sim_section_title',
+    'sim_section_desc',
+    'sim_card_content',
+    'sim_percentage_savings',
+    'sim_percentage_cdi',
+    'sim_percentage_gemcapital_with_gem',
+    'sim_percentage_gemcapital_without_gem',
+  ];
 
-    useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
-    const loadData = async () => {
-        try {
-            setLoading(true);
-            const allTexts = await gemValueService.getAllTexts();
-            const filtered = allTexts.filter(item => sessionKeys.includes(item.sessionName));
-            
-            const dataMap = {};
-            filtered.forEach(item => { dataMap[item.sessionName] = item; });
-            setData(dataMap);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const allTexts = await gemValueService.getAllTexts();
+      const filtered = allTexts.filter((item) =>
+        sessionKeys.includes(item.sessionName)
+      );
 
-            // Parse do conteúdo agrupado do card (key :: value | ...)
-            const rawContent = dataMap['sim_card_content']?.textContent || "";
-            const labels = rawContent.split('|').reduce((acc, item) => {
-                const [key, value] = item.split('::');
-                if (key && value) acc[key.trim()] = value.trim();
-                return acc;
-            }, {});
-            setCardLabels(labels);
-        } catch (error) {
-            addNotification('Erro ao carregar Simulação', 'error');
-        } finally {
-            setLoading(false);
+      const dataMap = {};
+      filtered.forEach((item) => {
+        dataMap[item.sessionName] = item;
+      });
+      setData(dataMap);
+      setOriginalData(JSON.parse(JSON.stringify(dataMap)));
+
+      // Parse do conteúdo agrupado do card (key :: value | ...)
+      const rawContent = dataMap['sim_card_content']?.textContent || '';
+      const labels = rawContent.split('|').reduce((acc, item) => {
+        const [key, value] = item.split('::');
+        if (key && value) acc[key.trim()] = value.trim();
+        return acc;
+      }, {});
+      setCardLabels(labels);
+      setOriginalCardLabels(JSON.parse(JSON.stringify(labels)));
+
+      // Parse das porcentagens
+      const percentMap = {
+        savings:
+          parseFloat(dataMap['sim_percentage_savings']?.textContent) || 6.17,
+        cdi: parseFloat(dataMap['sim_percentage_cdi']?.textContent) || 13.75,
+        gemcapital_with_gem:
+          parseFloat(
+            dataMap['sim_percentage_gemcapital_with_gem']?.textContent
+          ) || 24.0,
+        gemcapital_without_gem:
+          parseFloat(
+            dataMap['sim_percentage_gemcapital_without_gem']?.textContent
+          ) || 28.8,
+      };
+      setPercentages(percentMap);
+      setOriginalPercentages(JSON.parse(JSON.stringify(percentMap)));
+      setIsDirty(false);
+    } catch (error) {
+      alert('❌ Erro ao carregar Simulador');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTextChange = (key, value) => {
+    setData((prev) => ({
+      ...prev,
+      [key]: { ...prev[key], textContent: value },
+    }));
+    setIsDirty(true);
+  };
+
+  const handleLabelChange = (key, value) => {
+    setCardLabels((prev) => ({ ...prev, [key]: value }));
+    setIsDirty(true);
+  };
+
+  const handlePercentageChange = (key, value) => {
+    setPercentages((prev) => ({
+      ...prev,
+      [key]: value === '' ? '' : parseFloat(value),
+    }));
+    setIsDirty(true);
+  };
+
+  const saveAll = async () => {
+    try {
+      setIsSaving(true);
+      const promises = sessionKeys.map(async (key) => {
+        let content = data[key]?.textContent || '';
+
+        if (key === 'sim_card_content') {
+          content = Object.entries(cardLabels)
+            .map(([k, v]) => `${k} :: ${v}`)
+            .join(' | ');
         }
-    };
 
-    const handleTextChange = (key, value) => {
-        setData(prev => ({ ...prev, [key]: { ...prev[key], textContent: value } }));
-    };
-
-    const handleLabelChange = (key, value) => {
-        setCardLabels(prev => ({ ...prev, [key]: value }));
-    };
-
-    const saveAll = async () => {
-        try {
-            const promises = sessionKeys.map(key => {
-                let content = data[key].textContent;
-                if (key === 'sim_card_content') {
-                    // Remonta a string do dicionário
-                    content = Object.entries(cardLabels)
-                        .map(([k, v]) => `${k} :: ${v}`)
-                        .join(' | ');
-                }
-                return gemValueService.updateText(data[key].id, key, content);
-            });
-            await Promise.all(promises);
-            addNotification('Simulador atualizado com sucesso!', 'success');
-        } catch (error) {
-            addNotification('Erro ao salvar', 'error');
+        if (key === 'sim_percentage_savings') {
+          content = String(percentages.savings);
         }
-    };
+        if (key === 'sim_percentage_cdi') {
+          content = String(percentages.cdi);
+        }
+        if (key === 'sim_percentage_gemcapital_with_gem') {
+          content = String(percentages.gemcapital_with_gem);
+        }
+        if (key === 'sim_percentage_gemcapital_without_gem') {
+          content = String(percentages.gemcapital_without_gem);
+        }
 
-    if (loading) return <div className="admin-loading">Carregando Simulador...</div>;
+        if (!content || content.trim() === '') {
+          return Promise.resolve();
+        }
 
-    // Helper para o Preview
-    const titleParts = (data['sim_section_title']?.textContent || "").split('|');
+        if (data[key]?.id) {
+          return gemValueService.updateText(data[key].id, key, content);
+        }
 
-    return (
-        <div className="sim-editor-container">
-            <header className="editor-top-bar">
-                <div className="editor-info">
-                    <Calculator size={20} className="text-blue-500" />
-                    <div>
-                        <h2>Editor Visual: Simulador de Estratégia</h2>
-                        <p>Edite os textos da seção e os rótulos internos do card de cálculo.</p>
-                    </div>
-                </div>
-                <button className="btn-primary-save" onClick={saveAll}>
-                    <Save size={18} /> Publicar no Site
-                </button>
-            </header>
+        try {
+          const newRecord = await gemValueService.createText(key, content);
+          setData((prev) => ({ ...prev, [key]: newRecord }));
+          return newRecord;
+        } catch (createError) {
+          await loadData();
+          const updatedData = await gemValueService.getAllTexts();
+          const existingRecord = updatedData.find(
+            (item) => item.sessionName === key
+          );
+          if (existingRecord) {
+            return gemValueService.updateText(
+              existingRecord.id,
+              key,
+              content
+            );
+          }
+          throw createError;
+        }
+      });
+
+      await Promise.all(promises);
+      alert('✅ Simulador atualizado com sucesso!');
+      setIsDirty(false);
+      setTimeout(() => loadData(), 500);
+    } catch (error) {
+      alert('❌ Erro ao salvar alterações');
+      console.error('Erro detalhado:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (loading) return <div className="admin-loading">Carregando Simulador...</div>;
+
+  // Helper para o Preview
+  const titleParts = (data['sim_section_title']?.textContent || '').split('|');
+
+  return (
+    <div className="sim-editor-container">
+      <header className="editor-top-bar">
+        <div className="editor-info">
+          <Calculator size={20} className="text-blue-500" />
+          <div>
+            <h2>Editor Visual: Simulador de Estratégia</h2>
+            <p>
+              Edite os textos, rótulos e as porcentagens do gráfico de
+              comparativo.
+            </p>
+          </div>
+        </div>
+        {isDirty && (
+          <button
+            className="btn-primary-save"
+            onClick={saveAll}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <span className="spinner"></span> Salvando...
+              </>
+            ) : (
+              <>
+                <Save size={18} /> Publicar Alterações
+              </>
+            )}
+          </button>
+        )}
+      </header>
 
             <div className="sim-editor-layout">
                 {/* COLUNA ESQUERDA: CAMPOS DE EDIÇÃO */}
@@ -143,25 +266,94 @@ const SimulationManager = () => {
                         </div>
                     </div>
 
-                    <div className="admin-section-label" style={{marginTop: '30px'}}>Configuração WhatsApp</div>
-                    <div className="sim-whatsapp-box">
-                        <div className="admin-field-box">
-                            <label>Número (55...)</label>
-                            <div className="wp-row">
-                                <Smartphone size={16} />
-                                <input value={cardLabels.whatsapp_number || ""} onChange={(e) => handleLabelChange('whatsapp_number', e.target.value)} />
-                            </div>
-                        </div>
-                        <div className="admin-field-box">
-                            <label>Mensagem Padrão</label>
-                            <textarea 
-                                value={cardLabels.whatsapp_message || ""} 
-                                onChange={(e) => handleLabelChange('whatsapp_message', e.target.value)}
-                                rows={4}
-                            />
-                        </div>
-                    </div>
-                </aside>
+          <div className="admin-section-label" style={{ marginTop: '30px' }}>
+            Configuração WhatsApp
+          </div>
+          <div className="sim-whatsapp-box">
+            <div className="admin-field-box">
+              <label>Número (55...)</label>
+              <div className="wp-row">
+                <Smartphone size={16} />
+                <input
+                  value={cardLabels.whatsapp_number || ''}
+                  onChange={(e) =>
+                    handleLabelChange('whatsapp_number', e.target.value)
+                  }
+                />
+              </div>
+            </div>
+            <div className="admin-field-box">
+              <label>Mensagem Padrão</label>
+              <textarea
+                value={cardLabels.whatsapp_message || ''}
+                onChange={(e) =>
+                  handleLabelChange('whatsapp_message', e.target.value)
+                }
+                rows={4}
+              />
+            </div>
+          </div>
+
+          <div
+            className="admin-section-label"
+            style={{ marginTop: '30px' }}
+          >
+            <TrendingUp size={16} /> Percentuais do Gráfico
+          </div>
+          <div className="sim-percentage-grid">
+            <div className="admin-field-box">
+              <label>Poupança (%)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={percentages.savings || ''}
+                onChange={(e) =>
+                  handlePercentageChange('savings', e.target.value)
+                }
+                placeholder="6.17"
+              />
+            </div>
+            <div className="admin-field-box">
+              <label>CDI (%)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={percentages.cdi || ''}
+                onChange={(e) =>
+                  handlePercentageChange('cdi', e.target.value)
+                }
+                placeholder="13.75"
+              />
+            </div>
+            <div className="admin-field-box">
+              <label>GemCapital c/ Gema (%)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={percentages.gemcapital_with_gem || ''}
+                onChange={(e) =>
+                  handlePercentageChange('gemcapital_with_gem', e.target.value)
+                }
+                placeholder="24.0"
+              />
+            </div>
+            <div className="admin-field-box">
+              <label>GemCapital s/ Gema (%)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={percentages.gemcapital_without_gem || ''}
+                onChange={(e) =>
+                  handlePercentageChange(
+                    'gemcapital_without_gem',
+                    e.target.value
+                  )
+                }
+                placeholder="28.8"
+              />
+            </div>
+          </div>
+        </aside>
 
                 {/* COLUNA DIREITA: LIVE PREVIEW (FIEL AO SITE) */}
                 <main className="sim-visual-preview">

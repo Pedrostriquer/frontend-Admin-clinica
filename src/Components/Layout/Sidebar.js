@@ -184,24 +184,19 @@ const gemvalueMenu = [
     path: "/gemvalue/why-physical",
   },
   {
-    name: "Por que Diamantes",
-    icon: "fa-solid fa-gem",
-    path: "/gemvalue/why-diamonds",
+    name: "Autoridade",
+    icon: "fa-solid fa-award",
+    path: "/gemvalue/authority",
   },
   {
     name: "Como Funciona",
     icon: "fa-solid fa-gears",
-    path: "/gemvalue/how-it-works",
+    path: "/gemvalue/passos-gemcapital",
   },
   {
-    name: "Parâmetros",
+    name: "Transparência",
     icon: "fa-solid fa-list-check",
     path: "/gemvalue/parameters",
-  },
-  {
-    name: "Autoridade",
-    icon: "fa-solid fa-award",
-    path: "/gemvalue/authority",
   },
   {
     name: "Público-Alvo",

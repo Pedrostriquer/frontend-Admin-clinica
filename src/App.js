@@ -304,8 +304,9 @@ const AppContent = () => {
               path="gemvalue/why-diamonds"
               element={<WhyDiamondsManager />}
             />
+          
             <Route
-              path="gemvalue/how-it-works"
+              path="gemvalue/passos-gemcapital"
               element={<HowItWorksManager />}
             />
             <Route path="gemvalue/parameters" element={<ParametersManager />} />

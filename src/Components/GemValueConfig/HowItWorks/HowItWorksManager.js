@@ -1,26 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Gem, FileSignature, ShieldCheck, Vault, TrendingUp, 
-  Gavel, MessageCircle, Check, Save, Eye, Smartphone 
+import {
+  Gem, FileSignature, ShieldCheck, Vault, TrendingUp,
+  Gavel, Check, Save, Eye
 } from 'lucide-react';
 import gemValueService from '../../../dbServices/gemValueService';
-import { useNotification } from '../../../Context/NotificationContext';
 import './HowItWorksManager.css';
 
 const HowItWorksManager = () => {
-    const { addNotification } = useNotification();
     const [loading, setLoading] = useState(true);
-    const [data, setData] = useState({});
+    const [isSaving, setIsSaving] = useState(false);
     const [steps, setSteps] = useState([]);
+    const [originalSteps, setOriginalSteps] = useState([]);
+    const [isDirty, setIsDirty] = useState(false);
 
-    const sessionKeys = [
-        'how_it_works_tag', 'how_it_works_title', 'how_it_works_title_highlight',
-        'how_it_works_steps_list', 'how_it_works_cta_text', 
-        'how_it_works_whatsapp_number', 'how_it_works_whatsapp_message'
+    const sessionKeys = ['how_it_works_steps_list'];
+
+    const staticTitles = [
+        "SELEÇÃO DA GEMA",
+        "CONTRATO DE COMPRA E VENDA",
+        "A GEMA PASSA A SER SUA",
+        "VOCÊ ESCOLHE ONDE GUARDAR",
+        "ACOMPANHE A VALORIZAÇÃO",
+        "VOCÊ DECIDE O QUE FAZER"
     ];
 
     const staticIcons = [
-        <Gem size={24} />, <FileSignature size={24} />, <ShieldCheck size={24} />, 
+        <Gem size={24} />, <FileSignature size={24} />, <ShieldCheck size={24} />,
         <Vault size={24} />, <TrendingUp size={24} />, <Gavel size={24} />
     ];
 
@@ -30,56 +35,68 @@ const HowItWorksManager = () => {
         try {
             setLoading(true);
             const allTexts = await gemValueService.getAllTexts();
-            const filtered = allTexts.filter(item => sessionKeys.includes(item.sessionName));
-            
-            const dataMap = {};
-            filtered.forEach(item => { dataMap[item.sessionName] = item; });
-            setData(dataMap);
+            const filtered = allTexts.find(item => item.sessionName === 'how_it_works_steps_list');
 
-            const rawSteps = dataMap['how_it_works_steps_list']?.textContent || "";
-            const parsedSteps = rawSteps.split('|').map((item, index) => {
-                const [title, desc] = item.split('::');
-                return { 
+            const rawSteps = filtered?.textContent || "";
+            const parsedSteps = rawSteps
+                ? rawSteps.split('|').map((item, index) => {
+                    const [, desc] = item.split('::');
+                    return {
+                        id: String(index + 1).padStart(2, '0'),
+                        title: staticTitles[index] || "",
+                        desc: desc?.trim() || ""
+                    };
+                })
+                : staticTitles.map((title, index) => ({
                     id: String(index + 1).padStart(2, '0'),
-                    title: title?.trim() || "", 
-                    desc: desc?.trim() || "" 
-                };
-            });
+                    title: title,
+                    desc: ""
+                }));
+
             setSteps(parsedSteps);
+            setOriginalSteps([...parsedSteps]);
         } catch (error) {
-            addNotification('Erro ao carregar Como Funciona', 'error');
+            alert('❌ Erro ao carregar Como Funciona');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleTextChange = (key, value) => {
-        setData(prev => ({ ...prev, [key]: { ...prev[key], textContent: value } }));
+    const handleStepChange = (index, value) => {
+        const newSteps = [...steps];
+        newSteps[index].desc = value;
+        setSteps(newSteps);
+        setIsDirty(true);
     };
 
-    const handleStepChange = (index, field, value) => {
-        const newSteps = [...steps];
-        newSteps[index][field] = value;
-        setSteps(newSteps);
-    };
+    const hasChanges = () => isDirty;
 
     const saveAll = async () => {
         try {
-            const promises = sessionKeys.map(key => {
-                let content = data[key].textContent;
-                if (key === 'how_it_works_steps_list') {
-                    content = steps.map(s => `${s.title} :: ${s.desc}`).join(' | ');
-                }
-                return gemValueService.updateText(data[key].id, key, content);
-            });
-            await Promise.all(promises);
-            addNotification('Fluxo operacional atualizado!', 'success');
+            setIsSaving(true);
+            const content = steps.map(s => `${s.title} :: ${s.desc}`).join(' | ');
+
+            const record = await gemValueService.getAllTexts();
+            const existing = record.find(item => item.sessionName === 'how_it_works_steps_list');
+
+            if (existing?.id) {
+                await gemValueService.updateText(existing.id, 'how_it_works_steps_list', content);
+            } else {
+                await gemValueService.createText('how_it_works_steps_list', content);
+            }
+
+            alert('✅ Como Funciona atualizado com sucesso!');
+            setIsDirty(false);
+            setTimeout(() => loadData(), 500);
         } catch (error) {
-            addNotification('Erro ao salvar alterações', 'error');
+            alert('❌ Erro ao salvar alterações');
+            console.error('Erro detalhado:', error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    if (loading) return <div className="admin-loading">Configurando Fluxo de Processos...</div>;
+    if (loading) return <div className="admin-loading">Carregando Como Funciona...</div>;
 
     return (
         <div className="how-editor-container">
@@ -88,18 +105,32 @@ const HowItWorksManager = () => {
                     <Eye size={20} className="text-blue-500" />
                     <div>
                         <h2>Editor Visual: Como Funciona</h2>
-                        <p>Gerencie as etapas do processo GemCash e a chamada para ação.</p>
+                        <p>Edite apenas as descrições dos passos.</p>
                     </div>
                 </div>
-                <button className="btn-primary-save" onClick={saveAll}>
-                    <Save size={18} /> Publicar no Site
-                </button>
+                {hasChanges() && (
+                    <button
+                        className="btn-primary-save"
+                        onClick={saveAll}
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <>
+                                <span className="spinner"></span> Salvando...
+                            </>
+                        ) : (
+                            <>
+                                <Save size={18} /> Publicar Alterações
+                            </>
+                        )}
+                    </button>
+                )}
             </header>
 
             <div className="how-editor-layout">
-                {/* COLUNA ESQUERDA: EDITOR DE PASSOS */}
-                <aside className="how-steps-editor">
-                    <div className="admin-section-label">Etapas do Processo (Cards)</div>
+                {/* EDITOR DE PASSOS */}
+                <main className="how-steps-editor">
+                    <div className="admin-section-label">Descrições dos Passos</div>
                     <div className="how-steps-stack">
                         {steps.map((step, index) => (
                             <div key={index} className="admin-process-card">
@@ -109,85 +140,20 @@ const HowItWorksManager = () => {
                                     </div>
                                     <span className="admin-process-id">{step.id}</span>
                                 </div>
-                                <input 
-                                    className="admin-process-input-title"
-                                    value={step.title}
-                                    onChange={(e) => handleStepChange(index, 'title', e.target.value)}
-                                    placeholder="Título da Etapa"
-                                />
-                                <textarea 
+                                <div className="admin-process-label">{step.title}</div>
+                                <textarea
                                     className="admin-process-input-desc"
                                     value={step.desc}
-                                    onChange={(e) => handleStepChange(index, 'desc', e.target.value)}
-                                    placeholder="Descrição detalhada do processo..."
+                                    onChange={(e) => handleStepChange(index, e.target.value)}
+                                    placeholder="Descrição do passo..."
                                     rows={3}
                                 />
                             </div>
                         ))}
                     </div>
-                </aside>
-
-                {/* COLUNA DIREITA: CONTEÚDO E PREVIEW */}
-                <main className="how-content-main">
-                    <div className="admin-section-label">Cabeçalho da Seção</div>
-                    <div className="admin-field-box">
-                        <label>Tag</label>
-                        <input 
-                            className="how-input-tag"
-                            value={data['how_it_works_tag']?.textContent}
-                            onChange={(e) => handleTextChange('how_it_works_tag', e.target.value)}
-                        />
-                    </div>
-                    <div className="admin-field-box">
-                        <label>Título</label>
-                        <input 
-                            className="how-input-h2"
-                            value={data['how_it_works_title']?.textContent}
-                            onChange={(e) => handleTextChange('how_it_works_title', e.target.value)}
-                        />
-                    </div>
-                    <div className="admin-field-box">
-                        <label>Destaque do Título (Gradiente)</label>
-                        <input 
-                            className="how-input-highlight"
-                            value={data['how_it_works_title_highlight']?.textContent}
-                            onChange={(e) => handleTextChange('how_it_works_title_highlight', e.target.value)}
-                        />
-                    </div>
-
-                    <div className="admin-section-label" style={{marginTop: '40px'}}>Botão de Ação (CTA)</div>
-                    <div className="how-cta-editor-box">
-                        <div className="admin-field-box">
-                            <label>Texto do Botão</label>
-                            <div className="how-btn-preview-sim">
-                                <MessageCircle size={18} />
-                                <input 
-                                    value={data['how_it_works_cta_text']?.textContent}
-                                    onChange={(e) => handleTextChange('how_it_works_cta_text', e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="how-whatsapp-settings">
-                            <div className="admin-field-box">
-                                <label>Número WhatsApp</label>
-                                <div className="wp-input-row">
-                                    <Smartphone size={16} />
-                                    <input 
-                                        value={data['how_it_works_whatsapp_number']?.textContent}
-                                        onChange={(e) => handleTextChange('how_it_works_whatsapp_number', e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="admin-field-box">
-                                <label>Mensagem Automática</label>
-                                <textarea 
-                                    value={data['how_it_works_whatsapp_message']?.textContent}
-                                    onChange={(e) => handleTextChange('how_it_works_whatsapp_message', e.target.value)}
-                                    rows={3}
-                                />
-                            </div>
-                        </div>
+                    <div className="admin-info-note" style={{ marginTop: '24px' }}>
+                        <Eye size={16} />
+                        <span>Apenas o texto de cada passo é editável. Títulos, ícones e ordem são fixos.</span>
                     </div>
                 </main>
             </div>

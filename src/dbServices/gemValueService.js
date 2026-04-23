@@ -12,6 +12,20 @@ const gemValueService = {
         }
     },
 
+    // Cria um novo texto editável
+    createText: async (sessionName, textContent) => {
+        try {
+            const response = await api.post('EditableText', {
+                sessionName,
+                textContent
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Erro ao criar a sessão ${sessionName}:`, error);
+            throw error;
+        }
+    },
+
     // Atualiza um texto por ID
     updateText: async (id, sessionName, textContent) => {
         try {
