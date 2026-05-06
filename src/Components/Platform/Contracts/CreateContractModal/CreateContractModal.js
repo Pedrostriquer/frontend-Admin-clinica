@@ -68,6 +68,7 @@ const StepClientSelection = ({ clientSearchTerm, setClientSearchTerm, searchClie
 const StepContractConfiguration = ({
   selectedClient, minPurchaseValue, investValue, setInvestValue, formattedValue, duration, setDuration, availableMonths, withGem, setWithGem,
   isRetroactive, setIsRetroactive, retroactiveDate, setRetroactiveDate, isCustom, setIsCustom, customMonths, setCustomMonths, customGain, setCustomGain,
+  hasCustomClientPaid, setHasCustomClientPaid, clientPaidValue, setClientPaidValue, formattedClientPaid,
   simulationResult, handleSimulateClick, handleCreateContract, isSimulating, isCreating, handleBack,
 }) => {
   const isValueInvalid = investValue < minPurchaseValue;
@@ -136,6 +137,31 @@ const StepContractConfiguration = ({
         )}
       </div>
 
+      <div style={styles.customConfigBox}>
+        <label style={{ ...styles.checkboxContainer, border: "none", padding: 0 }} className="checkbox-hover">
+          <input type="checkbox" checked={hasCustomClientPaid} onChange={(e) => setHasCustomClientPaid(e.target.checked)} style={styles.checkbox} />
+          <span style={{ ...styles.checkboxLabel, fontWeight: "600" }}>Cliente pagou um valor diferente do aporte?</span>
+        </label>
+        {hasCustomClientPaid && (
+          <div style={{ marginTop: 15 }}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Valor pago pelo cliente</label>
+              <div style={styles.currencyWrapper}>
+                <span style={styles.currencySymbol}>R$</span>
+                <input className="custom-input" type="text" value={formattedClientPaid} onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, "");
+                  let numericValue = Number(value) / 100;
+                  setClientPaidValue(numericValue);
+                }} style={styles.inputCurrency} />
+              </div>
+              <p style={{ fontSize: 12, color: colors.secondary, marginTop: 4 }}>
+                Use este campo apenas se o cliente pagou um valor diferente do aporte do contrato.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {simulationResult && !isCustom && (
         <div style={styles.simulationBox}>
           <div style={styles.simRow}><span>Valorização Mensal:</span><span style={{ color: colors.textMain, fontWeight: "600" }}>{simulationResult.monthlyPercentage.toFixed(2)}%</span></div>
@@ -178,6 +204,8 @@ export default function CreateContractModal({ onClose }) {
   const [isCustom, setIsCustom] = useState(false);
   const [customMonths, setCustomMonths] = useState("");
   const [customGain, setCustomGain] = useState("");
+  const [hasCustomClientPaid, setHasCustomClientPaid] = useState(false);
+  const [clientPaidValue, setClientPaidValue] = useState(0);
   const minPurchaseValue = 100;
 
   const fetchMonthsAndSettings = useCallback(async (authToken) => {
@@ -267,6 +295,7 @@ export default function CreateContractModal({ onClose }) {
         isCustom: isCustom,
         customMonths: isCustom ? Number(customMonths) : null,
         customGainPercentage: isCustom ? Number(customGain) : null,
+        totalAmountClientPaid: hasCustomClientPaid ? clientPaidValue : null,
       };
       const response = await contractServices.createContractByAdmin(contractData);
       toast.success(`Contrato #${response.id} criado!`);
@@ -280,6 +309,7 @@ export default function CreateContractModal({ onClose }) {
   };
 
   const formattedValue = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2 }).format(investValue);
+  const formattedClientPaid = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2 }).format(clientPaidValue);
 
   return (
     <>
@@ -310,6 +340,7 @@ export default function CreateContractModal({ onClose }) {
               selectedClient={selectedClient} minPurchaseValue={minPurchaseValue} investValue={investValue} setInvestValue={setInvestValue} formattedValue={formattedValue} duration={duration} setDuration={setDuration} availableMonths={availableMonths} withGem={withGem} setWithGem={setWithGem}
               isRetroactive={isRetroactive} setIsRetroactive={setIsRetroactive} retroactiveDate={retroactiveDate} setRetroactiveDate={setRetroactiveDate}
               isCustom={isCustom} setIsCustom={setIsCustom} customMonths={customMonths} setCustomMonths={setCustomMonths} customGain={customGain} setCustomGain={setCustomGain}
+              hasCustomClientPaid={hasCustomClientPaid} setHasCustomClientPaid={setHasCustomClientPaid} clientPaidValue={clientPaidValue} setClientPaidValue={setClientPaidValue} formattedClientPaid={formattedClientPaid}
               simulationResult={simulationResult} handleSimulateClick={handleSimulateClick} handleCreateContract={handleCreateContract} isSimulating={isSimulating} isCreating={isCreating} handleBack={() => { setStep("selection"); setSimulationResult(null); }}
             />
           )}

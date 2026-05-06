@@ -11,6 +11,21 @@ const platformServices = {
       throw error;
     }
   },
+
+  getRevenueHistory: async ({ period = "6m", startDate, endDate } = {}) => {
+    try {
+      const params = { period };
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+      const response = await api.get("platformadminconfig/revenue-history", {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching revenue history:", error);
+      throw error;
+    }
+  },
   updateSidebarItemState: async (itemName, avaliable) => {
     try {
       const response = await api.patch(

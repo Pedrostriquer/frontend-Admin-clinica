@@ -351,6 +351,10 @@ function ContractDetailPage() {
   const [isExtending, setIsExtending] = useState(false);
   const [timelinePage, setTimelinePage] = useState(1);
   const eventsPerPage = 4;
+  const [extrasPage, setExtrasPage] = useState(1);
+  const extrasPerPage = 5;
+  const [reinvestPage, setReinvestPage] = useState(1);
+  const reinvestPerPage = 5;
 
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const [isExtraContributionModalOpen, setIsExtraContributionModalOpen] =
@@ -606,6 +610,17 @@ function ContractDetailPage() {
     }
   };
 
+  const handleReinvestAmountChange = (e) => {
+    let v = e.target.value
+      .replace(/\./g, ",")
+      .replace(/[^\d,]/g, "");
+    const i = v.indexOf(",");
+    if (i !== -1) {
+      v = v.slice(0, i + 1) + v.slice(i + 1).replace(/,/g, "");
+    }
+    setReinvestAmount(v);
+  };
+
   const handleReinvest = async () => {
     // 1. Validação básica de entrada
     if (!reinvestAmount || parseFloat(reinvestAmount.replace(",", ".")) <= 0) {
@@ -639,8 +654,11 @@ function ContractDetailPage() {
       await fetchContract(); // Recarrega os dados do contrato
     } catch (err) {
       console.error(err);
+      const data = err.response?.data;
       const msg =
-        err.response?.data?.message || "Erro ao processar reinvestimento.";
+        (typeof data === "string" ? data : data?.message) ||
+        err.message ||
+        "Erro ao processar reinvestimento.";
       alert(msg);
     } finally {
       setIsSaving(false);
@@ -875,8 +893,29 @@ function ContractDetailPage() {
       </div>
     );
 
-  const progressPercentage =
-    (contract.totalIncome / (contract.finalAmount - contract.amount)) * 100;
+  const { progressPercentage, daysElapsed, daysTotal } = (() => {
+    if (!contract.activationDate || !contract.endContractDate) {
+      return { progressPercentage: 0, daysElapsed: 0, daysTotal: 0 };
+    }
+    const start = new Date(contract.activationDate).getTime();
+    const end = new Date(contract.endContractDate).getTime();
+    const now = Date.now();
+    if (end <= start) {
+      return { progressPercentage: 0, daysElapsed: 0, daysTotal: 0 };
+    }
+    const MS_PER_DAY = 86400000;
+    const total = Math.round((end - start) / MS_PER_DAY);
+    const elapsed = Math.max(
+      0,
+      Math.min(total, Math.round((now - start) / MS_PER_DAY))
+    );
+    const pct = (elapsed / total) * 100;
+    return {
+      progressPercentage: pct,
+      daysElapsed: elapsed,
+      daysTotal: total,
+    };
+  })();
 
   // --- JSX de Retorno ---
 
@@ -1070,30 +1109,225 @@ function ContractDetailPage() {
 
         <div style={styles.detailGrid}>
           <div style={styles.mainContent}>
-            <div style={styles.kpiGrid}>
-              <div style={styles.kpiCard}>
-                <h2 style={styles.kpiCardTitle}>
-                  <i className="fa-solid fa-piggy-bank"></i> Valor Investido
-                </h2>
-                <p style={styles.kpiCardValue}>
-                  {formatCurrency(contract.amount)}
-                </p>
+            <div
+              style={{
+                ...styles.kpiGrid,
+                gridTemplateColumns: "2fr 1fr",
+              }}
+            >
+              {/* CARD PRINCIPAL: Valor Atual com detalhamento */}
+              <div
+                style={{
+                  ...styles.kpiCard,
+                  background:
+                    "linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)",
+                  border: "1px solid #bfdbfe",
+                  boxShadow: "0 4px 12px rgba(59, 130, 246, 0.08)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}
+              >
+                <div>
+                  <h2 style={styles.kpiCardTitle}>
+                    <i
+                      className="fa-solid fa-piggy-bank"
+                      style={{ color: "#3b82f6" }}
+                    ></i>{" "}
+                    Valor Atual
+                  </h2>
+                  <p
+                    style={{
+                      ...styles.kpiCardValue,
+                      fontSize: "2.5rem",
+                      color: "#1e3a8a",
+                    }}
+                  >
+                    {formatCurrency(contract.amount)}
+                  </p>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "#64748b",
+                      display: "block",
+                      marginTop: "2px",
+                    }}
+                  >
+                    Valor do contrato + reinvestimentos
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: "10px",
+                    paddingTop: "16px",
+                    borderTop: "1px solid #e0f2fe",
+                  }}
+                >
+                  <div
+                    style={{
+                      background: "rgba(255,255,255,0.7)",
+                      borderRadius: "8px",
+                      padding: "10px 12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#64748b",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-flag-checkered"
+                        style={{ marginRight: "5px", color: "#3b82f6" }}
+                      ></i>
+                      Valor Inicial
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "#1e293b",
+                      }}
+                    >
+                      {formatCurrency(contract.initialAmount)}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      background: "rgba(255,255,255,0.7)",
+                      borderRadius: "8px",
+                      padding: "10px 12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#64748b",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-hand-holding-dollar"
+                        style={{ marginRight: "5px", color: "#22c55e" }}
+                      ></i>
+                      Total Aportado pelo Cliente
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "#1e293b",
+                      }}
+                    >
+                      {formatCurrency(contract.totalAmountClientPaid)}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      background: "rgba(255,255,255,0.7)",
+                      borderRadius: "8px",
+                      padding: "10px 12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#64748b",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-money-bill-trend-up"
+                        style={{ marginRight: "5px", color: "#8b5cf6" }}
+                      ></i>
+                      Aportes Extras
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "#1e293b",
+                      }}
+                    >
+                      {formatCurrency(contract.totalExtraAmountInvested)}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      background: "rgba(255,255,255,0.7)",
+                      borderRadius: "8px",
+                      padding: "10px 12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#64748b",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      <i
+                        className="fa-solid fa-recycle"
+                        style={{ marginRight: "5px", color: "#f59e0b" }}
+                      ></i>
+                      Total Reinvestido
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "#1e293b",
+                      }}
+                    >
+                      {formatCurrency(contract.totalAmountReinvested)}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div style={styles.kpiCard}>
-                <h2 style={styles.kpiCardTitle}>
-                  <i className="fa-solid fa-arrow-trend-up"></i> Lucro Atual
-                </h2>
-                <p style={styles.kpiCardValue}>
-                  {formatCurrency(contract.currentIncome)}
-                </p>
-              </div>
-              <div style={styles.kpiCard}>
-                <h2 style={styles.kpiCardTitle}>
-                  <i className="fa-solid fa-trophy"></i> Valor Teto
-                </h2>
-                <p style={styles.kpiCardValue}>
-                  {formatCurrency(contract.finalAmount)}
-                </p>
+
+              {/* COLUNA SECUNDÁRIA: Lucro + Teto */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "24px",
+                }}
+              >
+                <div style={{ ...styles.kpiCard, flex: 1 }}>
+                  <h2 style={styles.kpiCardTitle}>
+                    <i className="fa-solid fa-arrow-trend-up"></i> Lucro Atual
+                  </h2>
+                  <p style={styles.kpiCardValue}>
+                    {formatCurrency(contract.currentIncome)}
+                  </p>
+                </div>
+                <div style={{ ...styles.kpiCard, flex: 1 }}>
+                  <h2 style={styles.kpiCardTitle}>
+                    <i className="fa-solid fa-trophy"></i> Valor Teto
+                  </h2>
+                  <p style={styles.kpiCardValue}>
+                    {formatCurrency(contract.finalAmount)}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -1142,9 +1376,551 @@ function ContractDetailPage() {
                 ></div>
               </div>
               <div style={styles.progressLabels}>
-                <span>{formatCurrency(contract.totalIncome)}</span>
-                <span>{progressPercentage.toFixed(1)}%</span>
+                <span>
+                  {daysElapsed} de {daysTotal} dias
+                </span>
+                <span>
+                  {progressPercentage.toFixed(1)}% do tempo do contrato
+                </span>
               </div>
+            </div>
+
+            <div style={styles.infoCard}>
+              <h3 style={styles.infoCardTitle}>
+                <i className="fa-solid fa-money-bill-trend-up"></i> Aportes
+                Extras
+              </h3>
+              {contract.extraInvestments &&
+              contract.extraInvestments.length > 0 ? (
+                <>
+                  <div style={{ overflowX: "auto", marginTop: "16px" }}>
+                    <table
+                      style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <thead>
+                        <tr style={{ background: "#f8fafc" }}>
+                          <th
+                            style={{
+                              textAlign: "left",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Data
+                          </th>
+                          <th
+                            style={{
+                              textAlign: "right",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Valor
+                          </th>
+                          <th
+                            style={{
+                              textAlign: "right",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Aporte (antes → depois)
+                          </th>
+                          <th
+                            style={{
+                              textAlign: "right",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Teto (antes → depois)
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contract.extraInvestments
+                          .slice()
+                          .sort(
+                            (a, b) =>
+                              new Date(b.dateCreated) -
+                              new Date(a.dateCreated)
+                          )
+                          .slice(
+                            (extrasPage - 1) * extrasPerPage,
+                            extrasPage * extrasPerPage
+                          )
+                          .map((extra) => (
+                            <tr
+                              key={extra.id}
+                              style={{
+                                borderBottom: "1px solid #f1f5f9",
+                              }}
+                            >
+                              <td
+                                style={{
+                                  padding: "12px",
+                                  color: "#475569",
+                                }}
+                              >
+                                {new Date(extra.dateCreated).toLocaleDateString(
+                                  "pt-BR",
+                                  {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </td>
+                              <td
+                                style={{
+                                  padding: "12px",
+                                  textAlign: "right",
+                                  fontWeight: 700,
+                                  color: "#8b5cf6",
+                                }}
+                              >
+                                {formatCurrency(extra.amount)}
+                              </td>
+                              <td
+                                style={{
+                                  padding: "12px",
+                                  textAlign: "right",
+                                  color: "#475569",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                {formatCurrency(extra.previousAmount)}
+                                {" → "}
+                                <strong style={{ color: "#1e293b" }}>
+                                  {formatCurrency(extra.newAmount)}
+                                </strong>
+                              </td>
+                              <td
+                                style={{
+                                  padding: "12px",
+                                  textAlign: "right",
+                                  color: "#475569",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                {formatCurrency(extra.previousFinalAmount)}
+                                {" → "}
+                                <strong style={{ color: "#1e293b" }}>
+                                  {formatCurrency(extra.newFinalAmount)}
+                                </strong>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {contract.extraInvestments.length > extrasPerPage && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "15px",
+                        marginTop: "16px",
+                        paddingTop: "12px",
+                        borderTop: "1px solid #e2e8f0",
+                      }}
+                    >
+                      <button
+                        onClick={() =>
+                          setExtrasPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={extrasPage === 1}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: extrasPage === 1 ? "default" : "pointer",
+                          color: extrasPage === 1 ? "#cbd5e1" : "#3b82f6",
+                          fontSize: "18px",
+                        }}
+                      >
+                        <i className="fa-solid fa-chevron-left"></i>
+                      </button>
+
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#64748b",
+                        }}
+                      >
+                        Página {extrasPage} de{" "}
+                        {Math.ceil(
+                          contract.extraInvestments.length / extrasPerPage
+                        )}
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          setExtrasPage((prev) =>
+                            Math.min(
+                              prev + 1,
+                              Math.ceil(
+                                contract.extraInvestments.length / extrasPerPage
+                              )
+                            )
+                          )
+                        }
+                        disabled={
+                          extrasPage >=
+                          Math.ceil(
+                            contract.extraInvestments.length / extrasPerPage
+                          )
+                        }
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor:
+                            extrasPage >=
+                            Math.ceil(
+                              contract.extraInvestments.length / extrasPerPage
+                            )
+                              ? "default"
+                              : "pointer",
+                          color:
+                            extrasPage >=
+                            Math.ceil(
+                              contract.extraInvestments.length / extrasPerPage
+                            )
+                              ? "#cbd5e1"
+                              : "#3b82f6",
+                          fontSize: "18px",
+                        }}
+                      >
+                        <i className="fa-solid fa-chevron-right"></i>
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    color: "#94a3b8",
+                    fontSize: "13px",
+                    border: "1px dashed #e2e8f0",
+                    borderRadius: "12px",
+                    marginTop: "16px",
+                  }}
+                >
+                  Nenhum aporte extra registrado neste contrato.
+                </div>
+              )}
+            </div>
+
+            <div style={styles.infoCard}>
+              <h3 style={styles.infoCardTitle}>
+                <i className="fa-solid fa-recycle"></i> Reinvestimentos
+              </h3>
+              {contract.reinvestments && contract.reinvestments.length > 0 ? (
+                <>
+                  <div style={{ overflowX: "auto", marginTop: "16px" }}>
+                    <table
+                      style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <thead>
+                        <tr style={{ background: "#f8fafc" }}>
+                          <th
+                            style={{
+                              textAlign: "left",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Data
+                          </th>
+                          <th
+                            style={{
+                              textAlign: "left",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Tipo
+                          </th>
+                          <th
+                            style={{
+                              textAlign: "right",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Valor
+                          </th>
+                          <th
+                            style={{
+                              textAlign: "right",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Aporte (antes → depois)
+                          </th>
+                          <th
+                            style={{
+                              textAlign: "right",
+                              padding: "10px 12px",
+                              color: "#64748b",
+                              fontWeight: 600,
+                              fontSize: "11px",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            Teto (antes → depois)
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contract.reinvestments
+                          .slice()
+                          .sort(
+                            (a, b) =>
+                              new Date(b.dateCreated) -
+                              new Date(a.dateCreated)
+                          )
+                          .slice(
+                            (reinvestPage - 1) * reinvestPerPage,
+                            reinvestPage * reinvestPerPage
+                          )
+                          .map((r) => {
+                            const isAuto =
+                              r.type === 1 || r.type === "Automatic";
+                            const newAmount =
+                              (r.lastAmount || 0) + (r.amountReinvested || 0);
+                            return (
+                              <tr
+                                key={r.id}
+                                style={{ borderBottom: "1px solid #f1f5f9" }}
+                              >
+                                <td
+                                  style={{ padding: "12px", color: "#475569" }}
+                                >
+                                  {new Date(
+                                    r.dateCreated
+                                  ).toLocaleDateString("pt-BR", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  })}
+                                </td>
+                                <td style={{ padding: "12px" }}>
+                                  <span
+                                    style={{
+                                      padding: "3px 10px",
+                                      borderRadius: "12px",
+                                      fontSize: "11px",
+                                      fontWeight: 600,
+                                      textTransform: "uppercase",
+                                      letterSpacing: "0.3px",
+                                      backgroundColor: isAuto
+                                        ? "#fef3c7"
+                                        : "#dbeafe",
+                                      color: isAuto ? "#b45309" : "#1e40af",
+                                    }}
+                                  >
+                                    {isAuto ? "Automático" : "Manual"}
+                                  </span>
+                                </td>
+                                <td
+                                  style={{
+                                    padding: "12px",
+                                    textAlign: "right",
+                                    fontWeight: 700,
+                                    color: "#f59e0b",
+                                  }}
+                                >
+                                  {formatCurrency(r.amountReinvested)}
+                                </td>
+                                <td
+                                  style={{
+                                    padding: "12px",
+                                    textAlign: "right",
+                                    color: "#475569",
+                                    fontSize: "12px",
+                                  }}
+                                >
+                                  {formatCurrency(r.lastAmount)}
+                                  {" → "}
+                                  <strong style={{ color: "#1e293b" }}>
+                                    {formatCurrency(newAmount)}
+                                  </strong>
+                                </td>
+                                <td
+                                  style={{
+                                    padding: "12px",
+                                    textAlign: "right",
+                                    color: "#475569",
+                                    fontSize: "12px",
+                                  }}
+                                >
+                                  {formatCurrency(r.lastFinalAmount)}
+                                  {" → "}
+                                  <strong style={{ color: "#1e293b" }}>
+                                    {formatCurrency(r.newFinalAmount)}
+                                  </strong>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {contract.reinvestments.length > reinvestPerPage && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "15px",
+                        marginTop: "16px",
+                        paddingTop: "12px",
+                        borderTop: "1px solid #e2e8f0",
+                      }}
+                    >
+                      <button
+                        onClick={() =>
+                          setReinvestPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={reinvestPage === 1}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: reinvestPage === 1 ? "default" : "pointer",
+                          color: reinvestPage === 1 ? "#cbd5e1" : "#3b82f6",
+                          fontSize: "18px",
+                        }}
+                      >
+                        <i className="fa-solid fa-chevron-left"></i>
+                      </button>
+
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#64748b",
+                        }}
+                      >
+                        Página {reinvestPage} de{" "}
+                        {Math.ceil(
+                          contract.reinvestments.length / reinvestPerPage
+                        )}
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          setReinvestPage((prev) =>
+                            Math.min(
+                              prev + 1,
+                              Math.ceil(
+                                contract.reinvestments.length / reinvestPerPage
+                              )
+                            )
+                          )
+                        }
+                        disabled={
+                          reinvestPage >=
+                          Math.ceil(
+                            contract.reinvestments.length / reinvestPerPage
+                          )
+                        }
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor:
+                            reinvestPage >=
+                            Math.ceil(
+                              contract.reinvestments.length / reinvestPerPage
+                            )
+                              ? "default"
+                              : "pointer",
+                          color:
+                            reinvestPage >=
+                            Math.ceil(
+                              contract.reinvestments.length / reinvestPerPage
+                            )
+                              ? "#cbd5e1"
+                              : "#3b82f6",
+                          fontSize: "18px",
+                        }}
+                      >
+                        <i className="fa-solid fa-chevron-right"></i>
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    color: "#94a3b8",
+                    fontSize: "13px",
+                    border: "1px dashed #e2e8f0",
+                    borderRadius: "12px",
+                    marginTop: "16px",
+                  }}
+                >
+                  Nenhum reinvestimento registrado neste contrato.
+                </div>
+              )}
             </div>
 
             <div style={styles.infoCard}>
@@ -1766,7 +2542,7 @@ function ContractDetailPage() {
                 <input
                   type="text"
                   value={reinvestAmount}
-                  onChange={(e) => setReinvestAmount(e.target.value)}
+                  onChange={handleReinvestAmountChange}
                   style={styles.actionCardInput}
                   placeholder="R$ 0,00"
                 />

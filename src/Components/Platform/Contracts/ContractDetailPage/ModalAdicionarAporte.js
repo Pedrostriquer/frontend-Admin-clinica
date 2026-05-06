@@ -6,6 +6,17 @@ const ModalAdicionarAporte = ({ isOpen, onClose, onConfirm, isLoading }) => {
 
   if (!isOpen) return null;
 
+  const handleAmountChange = (e) => {
+    let v = e.target.value
+      .replace(/\./g, ",")
+      .replace(/[^\d,]/g, "");
+    const i = v.indexOf(",");
+    if (i !== -1) {
+      v = v.slice(0, i + 1) + v.slice(i + 1).replace(/,/g, "");
+    }
+    setAmount(v);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const value = parseFloat(amount.replace(",", "."));
@@ -31,7 +42,7 @@ const ModalAdicionarAporte = ({ isOpen, onClose, onConfirm, isLoading }) => {
               type="text"
               placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={handleAmountChange}
               style={styles.actionCardInput}
               disabled={isLoading}
               required
