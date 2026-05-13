@@ -15,6 +15,7 @@ import AddAttachmentModal from "./AddAttachmentModal";
 import ViewAttachmentModal from "./ViewAttachmentModal";
 import ModalAlterarTaxa from "./ModalAlterarTaxa";
 import ModalAdicionarAporte from "./ModalAdicionarAporte";
+import ContractVisibilityModal from "./ContractVisibilityModal";
 
 const formatCurrency = (v) =>
   (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -345,6 +346,9 @@ function ContractDetailPage() {
   // Estados dos Toggles
   const [isTogglingReinvestment, setIsTogglingReinvestment] = useState(false);
   const [isTogglingAutoReinvest, setIsTogglingAutoReinvest] = useState(false);
+  const [isVisibilityModalOpen, setIsVisibilityModalOpen] = useState(false);
+  const [pendingVisibility, setPendingVisibility] = useState(null);
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
   const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
   const [isReleasing, setIsReleasing] = useState(false);
@@ -737,6 +741,44 @@ function ContractDetailPage() {
       alert("Erro ao alterar a permissão de reinvestimento.");
     } finally {
       setIsTogglingReinvestment(false);
+      stopLoading();
+    }
+  };
+
+  const handleOpenVisibilityModal = () => {
+    if (isTogglingVisibility) return;
+    setPendingVisibility(!contract.isVisibleToClient);
+    setIsVisibilityModalOpen(true);
+  };
+
+  const handleCloseVisibilityModal = () => {
+    if (isTogglingVisibility) return;
+    setIsVisibilityModalOpen(false);
+    setPendingVisibility(null);
+  };
+
+  const handleConfirmVisibilityChange = async () => {
+    if (pendingVisibility === null) return;
+    setIsTogglingVisibility(true);
+    try {
+      startLoading();
+      const updatedContract = await contractServices.setContractVisibility(
+        contractId,
+        pendingVisibility
+      );
+      const updated = updatedContract?.data || updatedContract;
+      setContract((prev) => ({
+        ...prev,
+        ...updated,
+        isVisibleToClient:
+          updated?.isVisibleToClient ?? pendingVisibility,
+      }));
+      setIsVisibilityModalOpen(false);
+      setPendingVisibility(null);
+    } catch (err) {
+      alert("Erro ao alterar a visibilidade do contrato.");
+    } finally {
+      setIsTogglingVisibility(false);
       stopLoading();
     }
   };
@@ -2636,6 +2678,64 @@ function ContractDetailPage() {
                   </span>
                 </label>
               </div>
+
+            </div>
+
+            <div style={styles.actionCard}>
+              <h3 style={styles.actionCardTitle}>
+                <i
+                  className={`fa-solid ${
+                    contract.isVisibleToClient !== false
+                      ? "fa-eye"
+                      : "fa-eye-slash"
+                  }`}
+                ></i>{" "}
+                Visibilidade
+              </h3>
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "#64748b",
+                  marginTop: "-4px",
+                  marginBottom: "14px",
+                  lineHeight: 1.5,
+                }}
+              >
+                {contract.isVisibleToClient !== false
+                  ? "O cliente está vendo este contrato no sistema dele."
+                  : "Este contrato está oculto para o cliente. Ele continua valorizando normalmente."}
+              </p>
+              <div style={styles.toggleSwitchContainer}>
+                <span style={styles.toggleLabel}>Visível para o cliente</span>
+                <label style={styles.toggleSwitch}>
+                  <input
+                    type="checkbox"
+                    checked={contract.isVisibleToClient !== false}
+                    onChange={handleOpenVisibilityModal}
+                    disabled={isTogglingVisibility}
+                    style={styles.toggleSwitchInput}
+                  />
+                  <span
+                    style={{
+                      ...styles.toggleSlider,
+                      ...(contract.isVisibleToClient !== false &&
+                        styles.toggleSwitchInputChecked),
+                    }}
+                  >
+                    {isTogglingVisibility ? (
+                      <div style={styles.toggleSpinner} />
+                    ) : (
+                      <span
+                        style={{
+                          ...styles.toggleSliderBefore,
+                          ...(contract.isVisibleToClient !== false &&
+                            styles.toggleSwitchInputCheckedBefore),
+                        }}
+                      ></span>
+                    )}
+                  </span>
+                </label>
+              </div>
             </div>
 
             {contract.status !== 3 && contract.status !== 4 && (
@@ -2712,6 +2812,14 @@ function ContractDetailPage() {
         onClose={() => setIsExtraContributionModalOpen(false)}
         onConfirm={handleAddExtraContribution}
         isLoading={isProcessingAdminAction}
+      />
+
+      <ContractVisibilityModal
+        isOpen={isVisibilityModalOpen}
+        onClose={handleCloseVisibilityModal}
+        onConfirm={handleConfirmVisibilityChange}
+        willBeVisible={pendingVisibility === true}
+        isSaving={isTogglingVisibility}
       />
     </>
   );

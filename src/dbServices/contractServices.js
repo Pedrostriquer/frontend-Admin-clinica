@@ -25,6 +25,19 @@ const contractServices = {
     }
   },
 
+  setContractVisibility: async (contractId, isVisibleToClient) => {
+    try {
+      const response = await api.patch(
+        `contract/${contractId}/visibility`,
+        { isVisibleToClient }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao alterar visibilidade do contrato:", error);
+      throw error.response?.data || error;
+    }
+  },
+
   extendContract: async (contractId, extraMonths) => {
     try {
       const response = await api.post(`contract/${contractId}/extend`, {
