@@ -2,9 +2,14 @@ import api from "./api/api";
 
 const extractDataServices = {
   // ============ CLIENTES ============
-  downloadClientsFile: async (data, format = "csv") => {
+  downloadClientsFile: async (filters = {}, format = "csv") => {
     try {
-      const response = await api.post(`export/clients/${format}`, data, {
+      const response = await api.get(`export/clients/${format}`, {
+        params: {
+          searchFilter: filters.searchTerm || undefined,
+          startDate: filters.startDate || undefined,
+          endDate: filters.endDate || undefined,
+        },
         responseType: "blob",
       });
       return response;

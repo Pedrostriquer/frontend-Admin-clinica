@@ -82,6 +82,31 @@ const clientServices = {
     }
   },
 
+  getExtractData: async (
+    searchFilter,
+    startDate,
+    endDate,
+    pageNumber = 1,
+    pageSize = 10
+  ) => {
+    try {
+      const normalizedFilter = normalizeSearchString(searchFilter);
+      const response = await api.get("client/extract-data", {
+        params: {
+          searchFilter: normalizedFilter || undefined,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          pageNumber,
+          pageSize,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+
   editClient: async (id, updates) => {
     try {
       const response = await api.patch(`client/${id}`, updates, {
